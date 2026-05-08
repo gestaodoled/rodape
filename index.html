@@ -25,7 +25,7 @@ body{
     font-size:28px;
     line-height:50px;
     padding-left:100%;
-    animation:scroll 45s linear infinite;
+    animation:scroll 90s linear infinite;
 }
 
 .label{
@@ -70,28 +70,14 @@ body{
 <div id="clock"></div>
 
 <div id="ticker">
-
-    <span class="label">CLIMA</span>
-    São Paulo 22°C ☀
-
-    <span class="sep">|</span>
-
-    <span class="label">ESPORTE</span>
-    Palmeiras vence por 3x1
-
-    <span class="sep">|</span>
-
-    <span class="label">NOTÍCIAS</span>
-    Mercado financeiro fecha em alta hoje
-
-    <span class="sep">|</span>
-
-    <span class="label">TRÂNSITO</span>
-    Marginal Tietê com lentidão
-
+Carregando notícias...
 </div>
 
 <script>
+
+/* =========================
+   RELÓGIO
+========================= */
 
 function updateClock(){
 
@@ -107,6 +93,55 @@ function updateClock(){
 setInterval(updateClock,1000);
 
 updateClock();
+
+
+/* =========================
+   NOTÍCIAS RSS
+========================= */
+
+async function loadNews(){
+
+    try{
+
+        const rssUrl =
+        "https://g1.globo.com/rss/g1/";
+
+        const api =
+        "https://api.rss2json.com/v1/api.json?rss_url=" +
+        encodeURIComponent(rssUrl);
+
+        const response = await fetch(api);
+
+        const data = await response.json();
+
+        let html = "";
+
+        data.items.slice(0,10).forEach(item => {
+
+            html +=
+            '<span class="label">NOTÍCIAS</span> ' +
+            item.title +
+            '<span class="sep">|</span>';
+
+        });
+
+        document.getElementById("ticker").innerHTML =
+        html;
+
+    }catch(error){
+
+        document.getElementById("ticker").innerHTML =
+        "Erro ao carregar notícias.";
+
+    }
+
+}
+
+loadNews();
+
+/* Atualiza notícias a cada 10 minutos */
+
+setInterval(loadNews,600000);
 
 </script>
 
