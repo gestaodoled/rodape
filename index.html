@@ -40,7 +40,7 @@ body{
 
 #clock{
     position:absolute;
-    left:160px;
+    left:150px;
     top:0;
     width:80px;
     height:30px;
@@ -58,9 +58,9 @@ body{
 
 #ticker{
     position:absolute;
-    left:250px;
+    left:240px;
     top:0;
-    width:900px;
+    width:910px;
     height:30px;
     overflow:hidden;
     white-space:nowrap;
@@ -69,13 +69,13 @@ body{
     line-height:30px;
 }
 
-/* CONTEÚDO ANIMADO */
+/* TEXTO ANIMADO */
 
 #ticker-content{
     display:inline-block;
     white-space:nowrap;
-    padding-left:0;
-    animation:scroll 220s linear infinite;
+    padding-left:100%;
+    animation:scroll 180s linear infinite;
 }
 
 .label{
@@ -88,16 +88,16 @@ body{
     padding:0 20px;
 }
 
-/* ANIMAÇÃO CONTÍNUA */
+/* ANIMAÇÃO */
 
 @keyframes scroll{
 
     from{
-        transform:translateX(100%);
+        transform:translateX(0);
     }
 
     to{
-        transform:translateX(-100%);
+        transform:translateX(-50%);
     }
 
 }
@@ -108,7 +108,7 @@ body{
 
 <body>
 
-<!-- LOGO -->
+<!-- BLOCO -->
 
 <div id="left-box">
     LUMIX NEWS
@@ -151,7 +151,7 @@ updateClock();
 
 
 /* =========================
-   RSS NOTÍCIAS
+   RSS
 ========================= */
 
 async function loadNews(){
@@ -171,7 +171,7 @@ async function loadNews(){
 
         let news = "";
 
-        data.items.slice(0,15).forEach(item => {
+        data.items.slice(0,10).forEach(item => {
 
             news +=
             '<span class="label">NOTÍCIAS</span> ' +
@@ -180,7 +180,7 @@ async function loadNews(){
 
         });
 
-        /* DUPLICA PARA LOOP SUAVE */
+        /* DUPLICA TEXTO */
 
         document.getElementById("ticker-content").innerHTML =
         news + news;
@@ -195,8 +195,6 @@ async function loadNews(){
 }
 
 loadNews();
-
-/* Atualiza a cada 10 minutos */
 
 setInterval(loadNews,600000);
 
