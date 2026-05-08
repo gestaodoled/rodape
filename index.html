@@ -54,7 +54,7 @@ body{
     z-index:5;
 }
 
-/* ÁREA DO TICKER */
+/* TICKER */
 
 #ticker{
     position:absolute;
@@ -69,13 +69,13 @@ body{
     line-height:30px;
 }
 
-/* TEXTO */
+/* CONTEÚDO */
 
 #ticker-content{
     display:inline-block;
     white-space:nowrap;
     padding-left:100%;
-    animation:scroll 120s linear infinite;
+    animation:scroll 100s linear infinite;
 }
 
 /* ESTILOS */
@@ -201,7 +201,7 @@ async function loadContent(){
     const esporteNews =
     await getRSS("https://ge.globo.com/rss/ge/futebol/");
 
-    esporteNews.slice(0,3).forEach(item => {
+    esporteNews.slice(0,2).forEach(item => {
 
         html +=
         '<span class="label">ESPORTE</span> ' +
@@ -211,17 +211,21 @@ async function loadContent(){
     });
 
 
-    /* CLASSIFICAÇÃO */
+    /* CLASSIFICAÇÃO SÉRIE A */
 
     html +=
-    '<span class="label">CLASSIFICAÇÃO</span> Palmeiras líder Série A' +
+    '<span class="label">CLASSIFICAÇÃO</span> Palmeiras líder do Brasileirão 2026' +
     '<span class="sep">◆</span>';
 
 
-    /* DÓLAR */
+    /* RESULTADOS */
 
     html +=
-    '<span class="label">DÓLAR</span> R$ 5,42' +
+    '<span class="label">RESULTADOS</span> Corinthians 2x1 Santos' +
+    '<span class="sep">◆</span>';
+
+    html +=
+    '<span class="label">RESULTADOS</span> São Paulo 1x0 Flamengo' +
     '<span class="sep">◆</span>';
 
 
@@ -240,7 +244,43 @@ async function loadContent(){
     });
 
 
-    /* INVESTIMENTOS */
+    /* TRÂNSITO */
+
+    html +=
+    '<span class="label">TRÂNSITO</span> Marginal Tietê com trânsito intenso' +
+    '<span class="sep">◆</span>';
+
+
+    /* DÓLAR */
+
+    html +=
+    '<span class="label">DÓLAR</span> R$ 5,42' +
+    '<span class="sep">◆</span>';
+
+
+    /* INSTAGRAM */
+
+    html +=
+    '<span class="label">INSTAGRAM</span> Siga @lumix.led' +
+    '<span class="sep">◆</span>';
+
+
+    /* TECH */
+
+    const techNews =
+    await getRSS("https://g1.globo.com/rss/g1/tecnologia/");
+
+    techNews.slice(0,2).forEach(item => {
+
+        html +=
+        '<span class="label">TECH</span> ' +
+        item.title +
+        '<span class="sep">◆</span>';
+
+    });
+
+
+    /* MERCADO FINANCEIRO */
 
     const economiaNews =
     await getRSS("https://g1.globo.com/rss/g1/economia/");
@@ -248,7 +288,7 @@ async function loadContent(){
     economiaNews.slice(0,1).forEach(item => {
 
         html +=
-        '<span class="label">INVESTIMENTOS</span> ' +
+        '<span class="label">MERCADO FINANCEIRO</span> ' +
         item.title +
         '<span class="sep">◆</span>';
 
@@ -260,7 +300,7 @@ async function loadContent(){
     const entretenimentoNews =
     await getRSS("https://g1.globo.com/rss/g1/pop-arte/");
 
-    entretenimentoNews.slice(0,3).forEach(item => {
+    entretenimentoNews.slice(0,2).forEach(item => {
 
         html +=
         '<span class="label">ENTRETENIMENTO</span> ' +
@@ -275,7 +315,7 @@ async function loadContent(){
     const geralNews =
     await getRSS("https://g1.globo.com/rss/g1/");
 
-    geralNews.slice(0,3).forEach(item => {
+    geralNews.slice(0,2).forEach(item => {
 
         html +=
         '<span class="label">NEWS</span> ' +
@@ -285,6 +325,20 @@ async function loadContent(){
     });
 
 
+    /* TRÂNSITO FINAL */
+
+    html +=
+    '<span class="label">TRÂNSITO</span> Lentidão na Radial Leste sentido centro' +
+    '<span class="sep">◆</span>';
+
+
+    /* INSTAGRAM FINAL */
+
+    html +=
+    '<span class="label">INSTAGRAM</span> Siga @lumix.led' +
+    '<span class="sep">◆</span>';
+
+
     document.getElementById("ticker-content").innerHTML =
     html;
 
@@ -292,9 +346,12 @@ async function loadContent(){
 
 loadContent();
 
-/* Atualiza a cada 10 minutos */
 
-setInterval(loadContent,600000);
+/* =========================
+   ATUALIZA A CADA 4 MINUTOS
+========================= */
+
+setInterval(loadContent,240000);
 
 </script>
 
