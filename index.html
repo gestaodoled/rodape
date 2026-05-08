@@ -196,12 +196,30 @@ async function loadContent(){
     '<span class="sep">◆</span>';
 
 
-    /* ESPORTES - GLOBO ESPORTE */
+    /* ESPORTES - GE + ESPN */
 
-    const brasileiraoNews =
+    const geNews =
     await getRSS("https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/");
 
-    brasileiraoNews.slice(0,2).forEach(item => {
+    const espnNews =
+    await getRSS("https://www.espn.com.br/rss/futebol.xml");
+
+
+    /* GLOBO ESPORTE */
+
+    geNews.slice(0,1).forEach(item => {
+
+        html +=
+        '<span class="label">ESPORTE</span> ' +
+        item.title +
+        '<span class="sep">◆</span>';
+
+    });
+
+
+    /* ESPN */
+
+    espnNews.slice(0,1).forEach(item => {
 
         html +=
         '<span class="label">ESPORTE</span> ' +
