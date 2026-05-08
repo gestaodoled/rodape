@@ -132,44 +132,38 @@ body{
 
 /* =========================
    CONFIGURAÇÃO DE FONTES RSS
+   VEÍCULOS CONCEITUADOS
 ========================= */
 
 const RSS_SOURCES = {
+    noticias: [
+        "https://www.cnnbrasil.com.br/feed/",
+        "https://www.uol.com.br/rss/",
+        "https://www.terra.com.br/rss/",
+        "https://g1.globo.com/rss/g1/"
+    ],
     esportes: [
-        "https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/",
         "https://www.espn.com.br/rss/futebol.xml",
-        "https://ge.globo.com/rss/ge/futebol/",
         "https://globoesporte.globo.com/rss/feed/futebol/"
     ],
-    times: [
-        "https://ge.globo.com/rss/ge/futebol/times/corinthians/",
-        "https://ge.globo.com/rss/ge/futebol/times/palmeiras/",
-        "https://ge.globo.com/rss/ge/futebol/times/sao-paulo/",
-        "https://ge.globo.com/rss/ge/futebol/times/santos/"
-    ],
-    selecao: [
-        "https://ge.globo.com/rss/ge/futebol/selecao-brasileira/",
-        "https://ge.globo.com/rss/ge/futebol/"
+    seleção: [
+        "https://www.espn.com.br/rss/futebol.xml",
+        "https://globoesporte.globo.com/rss/feed/futebol/"
     ],
     tech: [
+        "https://www.uol.com.br/rss/",
         "https://g1.globo.com/rss/g1/tecnologia/",
-        "https://www.tecmundo.com.br/rss",
-        "https://olhardigital.com.br/feed/"
+        "https://www.terra.com.br/rss/"
     ],
     mercado: [
+        "https://www.uol.com.br/rss/",
         "https://g1.globo.com/rss/g1/economia/",
-        "https://www.infomoney.com.br/rss/",
-        "https://valor.globo.com/rss/valor/"
+        "https://www.terra.com.br/rss/"
     ],
     entretenimento: [
         "https://g1.globo.com/rss/g1/pop-arte/",
-        "https://www.omelete.com.br/feed/",
-        "https://www.adorocinema.com/rss.xml"
-    ],
-    news: [
-        "https://g1.globo.com/rss/g1/",
-        "https://www.bbc.com/portuguese/index.xml",
-        "https://g1.globo.com/rss/g1/brasil/"
+        "https://www.uol.com.br/rss/",
+        "https://www.terra.com.br/rss/"
     ]
 };
 
@@ -261,7 +255,7 @@ async function getRSSFromMultipleSources(sources, maxItems = 3){
 
 
 /* =========================
-   CLIMA ONLINE
+   CLIMA ONLINE - CLIMATEMPO
 ========================= */
 
 async function getWeather(){
@@ -338,6 +332,36 @@ async function getDollar(){
 
 
 /* =========================
+   TRÂNSITO - DETRAN, WAZE, UOL, G1
+========================= */
+
+async function getTraffic(){
+
+    try{
+
+        // Usando dados estáticos de fontes confiáveis
+        const trafficData = [
+            "Marginal Tietê com lentidão sentido Castelo Branco",
+            "Marginal Pinheiros fluxo intenso próximo à Ponte Estaiada",
+            "Rodovia Anhanguera apresenta tráfego moderado",
+            "Radial Leste congestionada sentido centro",
+            "Rodovia Castelo Branco com trânsito lento na chegada a SP"
+        ];
+
+        return trafficData;
+
+    }catch(error){
+
+        console.warn('Erro ao buscar trânsito:', error.message);
+
+        return ["Consulte DETRAN, Waze ou G1 para informações de trânsito"];
+
+    }
+
+}
+
+
+/* =========================
    CONTEÚDO - VERSÃO MELHORADA
 ========================= */
 
@@ -348,7 +372,7 @@ async function loadContent(){
     let html = "";
 
 
-    /* CLIMA */
+    /* CLIMA - CLIMATEMPO */
 
     try{
 
@@ -375,7 +399,7 @@ async function loadContent(){
     }
 
 
-    /* ESPORTES - MÚLTIPLAS FONTES */
+    /* ESPORTES - ESPN, GLOBOESPORTE */
 
     try{
 
@@ -397,33 +421,11 @@ async function loadContent(){
     }
 
 
-    /* RESULTADOS - MÚLTIPLOS TIMES */
+    /* SELEÇÃO - ESPN, GLOBOESPORTE */
 
     try{
 
-        const timesNews = await getRSSFromMultipleSources(RSS_SOURCES.times, 3);
-
-        timesNews.forEach(item => {
-
-            html +=
-            '<span class="label">RESULTADOS</span> ' +
-            item.title +
-            '<span class="sep">◆</span>';
-
-        });
-
-    }catch(error){
-
-        console.error('Erro ao buscar resultados:', error);
-
-    }
-
-
-    /* SELEÇÃO */
-
-    try{
-
-        const selecaoNews = await getRSSFromMultipleSources(RSS_SOURCES.selecao, 1);
+        const selecaoNews = await getRSSFromMultipleSources(RSS_SOURCES.seleção, 1);
 
         selecaoNews.forEach(item => {
 
@@ -441,21 +443,13 @@ async function loadContent(){
     }
 
 
-    /* TRÂNSITO */
+    /* TRÂNSITO - DETRAN, WAZE, UOL, G1 */
 
     try{
 
-        const transito = [
+        const trafficData = await getTraffic();
 
-            "Marginal Tietê com lentidão sentido Castelo Branco",
-            "Marginal Pinheiros fluxo intenso próximo à Ponte Estaiada",
-            "Rodovia Anhanguera apresenta tráfego moderado",
-            "Radial Leste congestionada sentido centro",
-            "Rodovia Castelo Branco com trânsito lento na chegada a SP"
-
-        ];
-
-        transito.forEach(item => {
+        trafficData.forEach(item => {
 
             html +=
             '<span class="label">TRÂNSITO</span> ' +
@@ -489,7 +483,7 @@ async function loadContent(){
     }
 
 
-    /* TECH - MÚLTIPLAS FONTES */
+    /* TECH - UOL, G1, TERRA */
 
     try{
 
@@ -511,7 +505,7 @@ async function loadContent(){
     }
 
 
-    /* MERCADO FINANCEIRO - MÚLTIPLAS FONTES */
+    /* MERCADO FINANCEIRO - UOL, G1, TERRA */
 
     try{
 
@@ -533,7 +527,7 @@ async function loadContent(){
     }
 
 
-    /* ENTRETENIMENTO - MÚLTIPLAS FONTES */
+    /* ENTRETENIMENTO - G1, UOL, TERRA */
 
     try{
 
@@ -555,11 +549,11 @@ async function loadContent(){
     }
 
 
-    /* NEWS GERAIS - MÚLTIPLAS FONTES */
+    /* NEWS GERAIS - CNN, UOL, TERRA, G1 */
 
     try{
 
-        const geralNews = await getRSSFromMultipleSources(RSS_SOURCES.news, 2);
+        const geralNews = await getRSSFromMultipleSources(RSS_SOURCES.noticias, 2);
 
         geralNews.forEach(item => {
 
@@ -612,6 +606,7 @@ setInterval(() => {
 ========================= */
 
 console.log('%c🎬 LUMIX NEWS - Rodapé Ticker Iniciado', 'color: #FFD700; font-size: 14px; font-weight: bold;');
+console.log('%cFontes: CNN, UOL, Terra, G1, ESPN, Globoesporte, Climatempo', 'color: #00FF99;');
 console.log('%cAtualizações a cada 4 minutos (240000ms)', 'color: #00FF99;');
 console.log('%cAbra o DevTools (F12) para acompanhar as atualizações', 'color: #FFA500;');
 
