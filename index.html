@@ -18,12 +18,24 @@ body{
     font-family:Verdana,sans-serif;
 }
 
+/* ÁREA DAS NOTÍCIAS */
+
 #ticker{
     position:absolute;
+    left:0;
+    width:900px;
+    height:50px;
+    overflow:hidden;
     white-space:nowrap;
     color:#FFFFFF;
     font-size:28px;
     line-height:50px;
+}
+
+/* CONTEÚDO ANIMADO */
+
+#ticker-content{
+    display:inline-block;
     padding-left:100%;
     animation:scroll 90s linear infinite;
 }
@@ -38,20 +50,24 @@ body{
     padding:0 20px;
 }
 
+/* RELÓGIO FIXO */
+
 #clock{
     position:absolute;
     right:15px;
     top:0;
+    width:180px;
+    text-align:right;
     color:#00FFAA;
     font-size:24px;
     line-height:50px;
     font-weight:bold;
-    z-index:2;
     background:#000000;
-    padding-left:20px;
+    z-index:2;
 }
 
 @keyframes scroll{
+
     from{
         transform:translateX(0);
     }
@@ -59,6 +75,7 @@ body{
     to{
         transform:translateX(-100%);
     }
+
 }
 
 </style>
@@ -67,10 +84,18 @@ body{
 
 <body>
 
+<!-- RELÓGIO -->
+
 <div id="clock"></div>
 
+<!-- NOTÍCIAS -->
+
 <div id="ticker">
-Carregando notícias...
+
+    <div id="ticker-content">
+        Carregando notícias...
+    </div>
+
 </div>
 
 <script>
@@ -125,12 +150,12 @@ async function loadNews(){
 
         });
 
-        document.getElementById("ticker").innerHTML =
+        document.getElementById("ticker-content").innerHTML =
         html;
 
     }catch(error){
 
-        document.getElementById("ticker").innerHTML =
+        document.getElementById("ticker-content").innerHTML =
         "Erro ao carregar notícias.";
 
     }
