@@ -54,7 +54,7 @@ body{
     z-index:5;
 }
 
-/* ÁREA DAS NOTÍCIAS */
+/* ÁREA DO TICKER */
 
 #ticker{
     position:absolute;
@@ -69,16 +69,16 @@ body{
     line-height:30px;
 }
 
-/* TEXTO ANIMADO */
+/* TEXTO */
 
 #ticker-content{
     display:inline-block;
     white-space:nowrap;
     padding-left:100%;
-    animation:scroll 90s linear infinite;
+    animation:scroll 120s linear infinite;
 }
 
-/* CORES */
+/* ESTILOS */
 
 .label{
     color:#FFD700;
@@ -87,7 +87,7 @@ body{
 
 .sep{
     color:#777;
-    padding:0 18px;
+    padding:0 15px;
 }
 
 /* ANIMAÇÃO */
@@ -110,17 +110,11 @@ body{
 
 <body>
 
-<!-- BLOCO -->
-
 <div id="left-box">
     LUMIX NEWS
 </div>
 
-<!-- RELÓGIO -->
-
 <div id="clock"></div>
-
-<!-- TICKER -->
 
 <div id="ticker">
 
@@ -153,112 +147,154 @@ updateClock();
 
 
 /* =========================
-   CONTEÚDO
+   RSS
 ========================= */
 
-async function loadContent(){
+async function getRSS(rssUrl){
 
     try{
 
-        let html = "";
+        const api =
+        "https://api.rss2json.com/v1/api.json?rss_url=" +
+        encodeURIComponent(rssUrl);
 
-        /* CLIMA */
+        const response = await fetch(api);
 
-        html +=
-        '<span class="label">CLIMA</span> São Paulo 18°C ☀' +
-        '<span class="sep">◆</span>';
+        const data = await response.json();
 
-        html +=
-        '<span class="label">PREVISÃO</span> Máx 24° Mín 17°' +
-        '<span class="sep">◆</span>';
-
-
-        /* ESPORTES */
-
-        html +=
-        '<span class="label">ESPORTE</span> Palmeiras líder Série A' +
-        '<span class="sep">◆</span>';
-
-        html +=
-        '<span class="label">ESPORTE</span> Corinthians vence clássico' +
-        '<span class="sep">◆</span>';
-
-        html +=
-        '<span class="label">ESPORTE</span> São Paulo anuncia reforço' +
-        '<span class="sep">◆</span>';
-
-
-        /* CLASSIFICAÇÃO */
-
-        html +=
-        '<span class="label">CLASSIFICAÇÃO</span> Corinthians 6º' +
-        '<span class="sep">◆</span>';
-
-
-        /* DÓLAR */
-
-        html +=
-        '<span class="label">DÓLAR</span> R$ 5,42' +
-        '<span class="sep">◆</span>';
-
-
-        /* SELEÇÃO */
-
-        html +=
-        '<span class="label">SELEÇÃO</span> Dorival convoca elenco' +
-        '<span class="sep">◆</span>';
-
-
-        /* INVESTIMENTOS */
-
-        html +=
-        '<span class="label">INVESTIMENTOS</span> Ibovespa sobe 0,8%' +
-        '<span class="sep">◆</span>';
-
-
-        /* ENTRETENIMENTO */
-
-        html +=
-        '<span class="label">ENTRETENIMENTO</span> Novo filme lidera bilheteria' +
-        '<span class="sep">◆</span>';
-
-        html +=
-        '<span class="label">ENTRETENIMENTO</span> Festival reúne milhares em SP' +
-        '<span class="sep">◆</span>';
-
-        html +=
-        '<span class="label">ENTRETENIMENTO</span> Série bate recorde de audiência' +
-        '<span class="sep">◆</span>';
-
-
-        /* NEWS */
-
-        html +=
-        '<span class="label">NEWS</span> Mercado fecha em alta nesta terça' +
-        '<span class="sep">◆</span>';
-
-        html +=
-        '<span class="label">NEWS</span> Tecnologia impulsiona investimentos' +
-        '<span class="sep">◆</span>';
-
-        html +=
-        '<span class="label">NEWS</span> São Paulo registra queda na temperatura' +
-        '<span class="sep">◆</span>';
-
-
-        document.getElementById("ticker-content").innerHTML =
-        html;
+        return data.items || [];
 
     }catch(error){
 
-        document.getElementById("ticker-content").innerHTML =
-        "Erro ao carregar informações.";
+        return [];
 
     }
 
 }
 
+
+/* =========================
+   CONTEÚDO
+========================= */
+
+async function loadContent(){
+
+    let html = "";
+
+
+    /* CLIMA */
+
+    html +=
+    '<span class="label">CLIMA</span> São Paulo 18°C ☀' +
+    '<span class="sep">◆</span>';
+
+
+    /* PREVISÃO */
+
+    html +=
+    '<span class="label">PREVISÃO</span> Máx 24° Mín 17°' +
+    '<span class="sep">◆</span>';
+
+
+    /* ESPORTES */
+
+    const esporteNews =
+    await getRSS("https://ge.globo.com/rss/ge/futebol/");
+
+    esporteNews.slice(0,3).forEach(item => {
+
+        html +=
+        '<span class="label">ESPORTE</span> ' +
+        item.title +
+        '<span class="sep">◆</span>';
+
+    });
+
+
+    /* CLASSIFICAÇÃO */
+
+    html +=
+    '<span class="label">CLASSIFICAÇÃO</span> Palmeiras líder Série A' +
+    '<span class="sep">◆</span>';
+
+
+    /* DÓLAR */
+
+    html +=
+    '<span class="label">DÓLAR</span> R$ 5,42' +
+    '<span class="sep">◆</span>';
+
+
+    /* SELEÇÃO */
+
+    const selecaoNews =
+    await getRSS("https://ge.globo.com/rss/ge/futebol/selecao-brasileira/");
+
+    selecaoNews.slice(0,1).forEach(item => {
+
+        html +=
+        '<span class="label">SELEÇÃO</span> ' +
+        item.title +
+        '<span class="sep">◆</span>';
+
+    });
+
+
+    /* INVESTIMENTOS */
+
+    const economiaNews =
+    await getRSS("https://g1.globo.com/rss/g1/economia/");
+
+    economiaNews.slice(0,1).forEach(item => {
+
+        html +=
+        '<span class="label">INVESTIMENTOS</span> ' +
+        item.title +
+        '<span class="sep">◆</span>';
+
+    });
+
+
+    /* ENTRETENIMENTO */
+
+    const entretenimentoNews =
+    await getRSS("https://g1.globo.com/rss/g1/pop-arte/");
+
+    entretenimentoNews.slice(0,3).forEach(item => {
+
+        html +=
+        '<span class="label">ENTRETENIMENTO</span> ' +
+        item.title +
+        '<span class="sep">◆</span>';
+
+    });
+
+
+    /* NEWS */
+
+    const geralNews =
+    await getRSS("https://g1.globo.com/rss/g1/");
+
+    geralNews.slice(0,3).forEach(item => {
+
+        html +=
+        '<span class="label">NEWS</span> ' +
+        item.title +
+        '<span class="sep">◆</span>';
+
+    });
+
+
+    document.getElementById("ticker-content").innerHTML =
+    html;
+
+}
+
 loadContent();
+
+/* Atualiza a cada 10 minutos */
+
+setInterval(loadContent,600000);
 
 </script>
 
