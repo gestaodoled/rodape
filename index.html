@@ -196,12 +196,12 @@ async function loadContent(){
     '<span class="sep">◆</span>';
 
 
-    /* ESPORTES */
+    /* ESPORTES - GLOBO ESPORTE */
 
-    const esporteNews =
-    await getRSS("https://ge.globo.com/rss/ge/futebol/");
+    const brasileiraoNews =
+    await getRSS("https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/");
 
-    esporteNews.slice(0,2).forEach(item => {
+    brasileiraoNews.slice(0,2).forEach(item => {
 
         html +=
         '<span class="label">ESPORTE</span> ' +
@@ -211,22 +211,39 @@ async function loadContent(){
     });
 
 
-    /* CLASSIFICAÇÃO SÉRIE A */
+    /* CLASSIFICAÇÃO */
 
     html +=
-    '<span class="label">CLASSIFICAÇÃO</span> Palmeiras líder do Brasileirão 2026' +
+    '<span class="label">CLASSIFICAÇÃO</span> Palmeiras líder Brasileirão Série A 2026' +
     '<span class="sep">◆</span>';
 
 
     /* RESULTADOS */
 
-    html +=
-    '<span class="label">RESULTADOS</span> Corinthians 2x1 Santos' +
-    '<span class="sep">◆</span>';
+    const corinthiansNews =
+    await getRSS("https://ge.globo.com/rss/ge/futebol/times/corinthians/");
 
-    html +=
-    '<span class="label">RESULTADOS</span> São Paulo 1x0 Flamengo' +
-    '<span class="sep">◆</span>';
+    corinthiansNews.slice(0,1).forEach(item => {
+
+        html +=
+        '<span class="label">RESULTADOS</span> ' +
+        item.title +
+        '<span class="sep">◆</span>';
+
+    });
+
+
+    const palmeirasNews =
+    await getRSS("https://ge.globo.com/rss/ge/futebol/times/palmeiras/");
+
+    palmeirasNews.slice(0,1).forEach(item => {
+
+        html +=
+        '<span class="label">RESULTADOS</span> ' +
+        item.title +
+        '<span class="sep">◆</span>';
+
+    });
 
 
     /* SELEÇÃO */
