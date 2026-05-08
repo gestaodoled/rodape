@@ -1,6 +1,3 @@
-# Rodapé LED Dinâmico — São Paulo
-
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -77,10 +74,11 @@ body{
 #ticker-content{
     display:inline-block;
     white-space:nowrap;
-    padding-left:0;
-    min-width:max-content;
-    animation:scroll 120s linear infinite;
+    padding-left:100%;
+    animation:scroll 90s linear infinite;
 }
+
+/* CORES */
 
 .label{
     color:#FFD700;
@@ -92,20 +90,12 @@ body{
     padding:0 18px;
 }
 
-.temp{
-    color:#00D9FF;
-    font-weight:bold;
-}
-
-.esporte{
-    color:#00FF99;
-    font-weight:bold;
-}
+/* ANIMAÇÃO */
 
 @keyframes scroll{
 
     from{
-        transform:translateX(800px);
+        transform:translateX(0);
     }
 
     to{
@@ -120,16 +110,24 @@ body{
 
 <body>
 
+<!-- BLOCO -->
+
 <div id="left-box">
     LUMIX NEWS
 </div>
 
+<!-- RELÓGIO -->
+
 <div id="clock"></div>
 
+<!-- TICKER -->
+
 <div id="ticker">
+
     <div id="ticker-content">
         Carregando informações...
     </div>
+
 </div>
 
 <script>
@@ -155,75 +153,106 @@ updateClock();
 
 
 /* =========================
-   CONTEÚDO DINÂMICO
+   CONTEÚDO
 ========================= */
 
 async function loadContent(){
 
     try{
 
-        /* RSS G1 */
-
-        const rssUrl =
-        "https://g1.globo.com/rss/g1/";
-
-        const api =
-        "https://api.rss2json.com/v1/api.json?rss_url=" +
-        encodeURIComponent(rssUrl);
-
-        const response = await fetch(api);
-
-        const data = await response.json();
-
         let html = "";
 
-        /* TEMPO FIXO */
+        /* CLIMA */
 
         html +=
-        '<span class="label">CLIMA SP</span> ' +
-        '<span class="temp">18°C ☁</span>' +
+        '<span class="label">CLIMA</span> São Paulo 18°C ☀' +
         '<span class="sep">◆</span>';
 
         html +=
-        '<span class="label">PREVISÃO</span> ' +
-        'Máx 24°C / Mín 16°C' +
+        '<span class="label">PREVISÃO</span> Máx 24° Mín 17°' +
         '<span class="sep">◆</span>';
 
 
         /* ESPORTES */
 
         html +=
-        '<span class="label">BRASILEIRÃO</span> ' +
-        '<span class="esporte">Palmeiras</span> 1º' +
+        '<span class="label">ESPORTE</span> Palmeiras líder Série A' +
         '<span class="sep">◆</span>';
 
         html +=
-        '<span class="label">SERIE A</span> ' +
-        'Corinthians 6º | São Paulo 8º | Santos 12º' +
+        '<span class="label">ESPORTE</span> Corinthians vence clássico' +
+        '<span class="sep">◆</span>';
+
+        html +=
+        '<span class="label">ESPORTE</span> São Paulo anuncia reforço' +
         '<span class="sep">◆</span>';
 
 
-        /* NOTÍCIAS */
+        /* CLASSIFICAÇÃO */
 
-        data.items.slice(0,15).forEach(item => {
-
-            html +=
-            '<span class="label">NEWS</span> ' +
-            item.title +
-            '<span class="sep">◆</span>';
-
-        });
+        html +=
+        '<span class="label">CLASSIFICAÇÃO</span> Corinthians 6º' +
+        '<span class="sep">◆</span>';
 
 
-        /* DUPLICAÇÃO PARA LOOP */
+        /* DÓLAR */
+
+        html +=
+        '<span class="label">DÓLAR</span> R$ 5,42' +
+        '<span class="sep">◆</span>';
+
+
+        /* SELEÇÃO */
+
+        html +=
+        '<span class="label">SELEÇÃO</span> Dorival convoca elenco' +
+        '<span class="sep">◆</span>';
+
+
+        /* INVESTIMENTOS */
+
+        html +=
+        '<span class="label">INVESTIMENTOS</span> Ibovespa sobe 0,8%' +
+        '<span class="sep">◆</span>';
+
+
+        /* ENTRETENIMENTO */
+
+        html +=
+        '<span class="label">ENTRETENIMENTO</span> Novo filme lidera bilheteria' +
+        '<span class="sep">◆</span>';
+
+        html +=
+        '<span class="label">ENTRETENIMENTO</span> Festival reúne milhares em SP' +
+        '<span class="sep">◆</span>';
+
+        html +=
+        '<span class="label">ENTRETENIMENTO</span> Série bate recorde de audiência' +
+        '<span class="sep">◆</span>';
+
+
+        /* NEWS */
+
+        html +=
+        '<span class="label">NEWS</span> Mercado fecha em alta nesta terça' +
+        '<span class="sep">◆</span>';
+
+        html +=
+        '<span class="label">NEWS</span> Tecnologia impulsiona investimentos' +
+        '<span class="sep">◆</span>';
+
+        html +=
+        '<span class="label">NEWS</span> São Paulo registra queda na temperatura' +
+        '<span class="sep">◆</span>';
+
 
         document.getElementById("ticker-content").innerHTML =
-            html + html;
+        html;
 
     }catch(error){
 
         document.getElementById("ticker-content").innerHTML =
-            "Erro ao carregar informações.";
+        "Erro ao carregar informações.";
 
     }
 
@@ -231,12 +260,7 @@ async function loadContent(){
 
 loadContent();
 
-/* Atualiza a cada 10 minutos */
-
-setInterval(loadContent,600000);
-
 </script>
 
 </body>
 </html>
-```
