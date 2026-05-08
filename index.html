@@ -77,8 +77,9 @@ body{
 #ticker-content{
     display:inline-block;
     white-space:nowrap;
-    padding-left:100%;
-    animation:scroll 180s linear infinite;
+    padding-left:0;
+    min-width:max-content;
+    animation:scroll 120s linear infinite;
 }
 
 .label{
@@ -104,7 +105,7 @@ body{
 @keyframes scroll{
 
     from{
-        transform:translateX(100%);
+        transform:translateX(800px);
     }
 
     to{
