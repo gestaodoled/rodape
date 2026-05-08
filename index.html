@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=800, height=30">
 
-<title>Rodapé LED</title>
+<title>Rodapé LED - Versão Melhorada</title>
 
 <style>
 
@@ -90,6 +90,10 @@ body{
     padding:0 15px;
 }
 
+.loading{
+    color:#FFA500;
+}
+
 /* ANIMAÇÃO */
 
 @keyframes scroll{
@@ -119,12 +123,62 @@ body{
 <div id="ticker">
 
     <div id="ticker-content">
-        Carregando informações...
+        <span class="loading">Carregando informações...</span>
     </div>
 
 </div>
 
 <script>
+
+/* =========================
+   CONFIGURAÇÃO DE FONTES RSS
+========================= */
+
+const RSS_SOURCES = {
+    esportes: [
+        "https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/",
+        "https://www.espn.com.br/rss/futebol.xml",
+        "https://ge.globo.com/rss/ge/futebol/",
+        "https://globoesporte.globo.com/rss/feed/futebol/"
+    ],
+    times: [
+        "https://ge.globo.com/rss/ge/futebol/times/corinthians/",
+        "https://ge.globo.com/rss/ge/futebol/times/palmeiras/",
+        "https://ge.globo.com/rss/ge/futebol/times/sao-paulo/",
+        "https://ge.globo.com/rss/ge/futebol/times/santos/"
+    ],
+    selecao: [
+        "https://ge.globo.com/rss/ge/futebol/selecao-brasileira/",
+        "https://ge.globo.com/rss/ge/futebol/"
+    ],
+    tech: [
+        "https://g1.globo.com/rss/g1/tecnologia/",
+        "https://www.tecmundo.com.br/rss",
+        "https://olhardigital.com.br/feed/"
+    ],
+    mercado: [
+        "https://g1.globo.com/rss/g1/economia/",
+        "https://www.infomoney.com.br/rss/",
+        "https://valor.globo.com/rss/valor/"
+    ],
+    entretenimento: [
+        "https://g1.globo.com/rss/g1/pop-arte/",
+        "https://www.omelete.com.br/feed/",
+        "https://www.adorocinema.com/rss.xml"
+    ],
+    news: [
+        "https://g1.globo.com/rss/g1/",
+        "https://www.bbc.com/portuguese/index.xml",
+        "https://g1.globo.com/rss/g1/brasil/"
+    ]
+};
+
+/* =========================
+   CACHE DE NOTÍCIAS
+========================= */
+
+let newsCache = {};
+let lastUpdateTime = {};
 
 /* =========================
    RELÓGIO
@@ -147,18 +201,25 @@ updateClock();
 
 
 /* =========================
-   RSS
+   RSS - VERSÃO MELHORADA
 ========================= */
 
-async function getRSS(rssUrl){
+async function getRSSFromSource(rssUrl, timeout = 5000){
 
     try{
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
 
         const api =
         "https://api.rss2json.com/v1/api.json?rss_url=" +
         encodeURIComponent(rssUrl);
 
-        const response = await fetch(api);
+        const response = await fetch(api, { signal: controller.signal });
+
+        clearTimeout(timeoutId);
+
+        if(!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
 
@@ -166,9 +227,35 @@ async function getRSS(rssUrl){
 
     }catch(error){
 
+        console.warn(`Erro ao buscar RSS de ${rssUrl}:`, error.message);
         return [];
 
     }
+
+}
+
+async function getRSSFromMultipleSources(sources, maxItems = 3){
+
+    let allItems = [];
+
+    for(let source of sources){
+
+        try{
+
+            const items = await getRSSFromSource(source);
+            allItems = allItems.concat(items);
+
+            if(allItems.length >= maxItems) break;
+
+        }catch(error){
+
+            console.warn(`Erro ao processar fonte ${source}:`, error);
+
+        }
+
+    }
+
+    return allItems.slice(0, maxItems);
 
 }
 
@@ -182,7 +269,8 @@ async function getWeather(){
     try{
 
         const response = await fetch(
-        "https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.63&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min&timezone=America%2FSao_Paulo"
+        "https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.63&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min&timezone=America%2FSao_Paulo",
+        { signal: AbortSignal.timeout(5000) }
         );
 
         const data = await response.json();
@@ -201,6 +289,8 @@ async function getWeather(){
         };
 
     }catch(error){
+
+        console.warn('Erro ao buscar clima:', error.message);
 
         return {
 
@@ -225,7 +315,8 @@ async function getDollar(){
 
         const response =
         await fetch(
-        "https://economia.awesomeapi.com.br/json/last/USD-BRL"
+        "https://economia.awesomeapi.com.br/json/last/USD-BRL",
+        { signal: AbortSignal.timeout(5000) }
         );
 
         const data =
@@ -237,6 +328,8 @@ async function getDollar(){
 
     }catch(error){
 
+        console.warn('Erro ao buscar dólar:', error.message);
+
         return "5.42";
 
     }
@@ -245,155 +338,243 @@ async function getDollar(){
 
 
 /* =========================
-   CONTEÚDO
+   CONTEÚDO - VERSÃO MELHORADA
 ========================= */
 
 async function loadContent(){
+
+    console.log(`[${new Date().toLocaleTimeString()}] Iniciando carregamento de conteúdo...`);
 
     let html = "";
 
 
     /* CLIMA */
 
-    const weather =
-    await getWeather();
+    try{
 
-    html +=
-    '<span class="label">CLIMA</span> São Paulo ' +
-    weather.temp +
-    '°C ☀' +
-    '<span class="sep">◆</span>';
-
-
-    /* PREVISÃO */
-
-    html +=
-    '<span class="label">PREVISÃO</span> Máx ' +
-    weather.max +
-    '° Mín ' +
-    weather.min +
-    '°' +
-    '<span class="sep">◆</span>';
-
-
-    /* ESPORTES */
-
-    const geNews =
-    await getRSS("https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/");
-
-    const espnNews =
-    await getRSS("https://www.espn.com.br/rss/futebol.xml");
-
-
-    geNews.slice(0,1).forEach(item => {
+        const weather = await getWeather();
 
         html +=
-        '<span class="label">ESPORTE</span> ' +
-        item.title +
+        '<span class="label">CLIMA</span> São Paulo ' +
+        weather.temp +
+        '°C ☀' +
         '<span class="sep">◆</span>';
-
-    });
-
-
-    espnNews.slice(0,1).forEach(item => {
 
         html +=
-        '<span class="label">ESPORTE</span> ' +
-        item.title +
+        '<span class="label">PREVISÃO</span> Máx ' +
+        weather.max +
+        '° Mín ' +
+        weather.min +
+        '°' +
         '<span class="sep">◆</span>';
 
-    });
+    }catch(error){
+
+        console.error('Erro ao processar clima:', error);
+
+    }
 
 
-    /* CLASSIFICAÇÃO */
+    /* ESPORTES - MÚLTIPLAS FONTES */
 
-    const tabelaNews =
-    await getRSS("https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/");
+    try{
 
-    tabelaNews.slice(1,2).forEach(item => {
+        const esportesNews = await getRSSFromMultipleSources(RSS_SOURCES.esportes, 2);
 
-        html +=
-        '<span class="label">CLASSIFICAÇÃO</span> ' +
-        item.title +
-        '<span class="sep">◆</span>';
+        esportesNews.forEach(item => {
 
-    });
+            html +=
+            '<span class="label">ESPORTE</span> ' +
+            item.title +
+            '<span class="sep">◆</span>';
 
+        });
 
-    /* RESULTADOS */
+    }catch(error){
 
-    const corinthiansNews =
-    await getRSS("https://ge.globo.com/rss/ge/futebol/times/corinthians/");
+        console.error('Erro ao buscar esportes:', error);
 
-    corinthiansNews.slice(0,1).forEach(item => {
-
-        html +=
-        '<span class="label">RESULTADOS</span> ' +
-        item.title +
-        '<span class="sep">◆</span>';
-
-    });
+    }
 
 
-    const palmeirasNews =
-    await getRSS("https://ge.globo.com/rss/ge/futebol/times/palmeiras/");
+    /* RESULTADOS - MÚLTIPLOS TIMES */
 
-    palmeirasNews.slice(0,1).forEach(item => {
+    try{
 
-        html +=
-        '<span class="label">RESULTADOS</span> ' +
-        item.title +
-        '<span class="sep">◆</span>';
+        const timesNews = await getRSSFromMultipleSources(RSS_SOURCES.times, 3);
 
-    });
+        timesNews.forEach(item => {
+
+            html +=
+            '<span class="label">RESULTADOS</span> ' +
+            item.title +
+            '<span class="sep">◆</span>';
+
+        });
+
+    }catch(error){
+
+        console.error('Erro ao buscar resultados:', error);
+
+    }
 
 
     /* SELEÇÃO */
 
-    const selecaoNews =
-    await getRSS("https://ge.globo.com/rss/ge/futebol/selecao-brasileira/");
+    try{
 
-    selecaoNews.slice(0,1).forEach(item => {
+        const selecaoNews = await getRSSFromMultipleSources(RSS_SOURCES.selecao, 1);
 
-        html +=
-        '<span class="label">SELEÇÃO</span> ' +
-        item.title +
-        '<span class="sep">◆</span>';
+        selecaoNews.forEach(item => {
 
-    });
+            html +=
+            '<span class="label">SELEÇÃO</span> ' +
+            item.title +
+            '<span class="sep">◆</span>';
+
+        });
+
+    }catch(error){
+
+        console.error('Erro ao buscar seleção:', error);
+
+    }
 
 
     /* TRÂNSITO */
 
-    const transito = [
+    try{
 
-        "Marginal Tietê com lentidão sentido Castelo Branco",
-        "Marginal Pinheiros fluxo intenso próximo à Ponte Estaiada",
-        "Rodovia Anhanguera apresenta tráfego moderado",
-        "Radial Leste congestionada sentido centro",
-        "Rodovia Castelo Branco com trânsito lento na chegada a SP"
+        const transito = [
 
-    ];
+            "Marginal Tietê com lentidão sentido Castelo Branco",
+            "Marginal Pinheiros fluxo intenso próximo à Ponte Estaiada",
+            "Rodovia Anhanguera apresenta tráfego moderado",
+            "Radial Leste congestionada sentido centro",
+            "Rodovia Castelo Branco com trânsito lento na chegada a SP"
 
-    transito.forEach(item => {
+        ];
 
-        html +=
-        '<span class="label">TRÂNSITO</span> ' +
-        item +
-        '<span class="sep">◆</span>';
+        transito.forEach(item => {
 
-    });
+            html +=
+            '<span class="label">TRÂNSITO</span> ' +
+            item +
+            '<span class="sep">◆</span>';
+
+        });
+
+    }catch(error){
+
+        console.error('Erro ao processar trânsito:', error);
+
+    }
 
 
     /* DÓLAR */
 
-    const dollar =
-    await getDollar();
+    try{
 
-    html +=
-    '<span class="label">DÓLAR</span> R$ ' +
-    dollar +
-    '<span class="sep">◆</span>';
+        const dollar = await getDollar();
+
+        html +=
+        '<span class="label">DÓLAR</span> R$ ' +
+        dollar +
+        '<span class="sep">◆</span>';
+
+    }catch(error){
+
+        console.error('Erro ao buscar dólar:', error);
+
+    }
+
+
+    /* TECH - MÚLTIPLAS FONTES */
+
+    try{
+
+        const techNews = await getRSSFromMultipleSources(RSS_SOURCES.tech, 2);
+
+        techNews.forEach(item => {
+
+            html +=
+            '<span class="label">TECH</span> ' +
+            item.title +
+            '<span class="sep">◆</span>';
+
+        });
+
+    }catch(error){
+
+        console.error('Erro ao buscar tech:', error);
+
+    }
+
+
+    /* MERCADO FINANCEIRO - MÚLTIPLAS FONTES */
+
+    try{
+
+        const mercadoNews = await getRSSFromMultipleSources(RSS_SOURCES.mercado, 2);
+
+        mercadoNews.forEach(item => {
+
+            html +=
+            '<span class="label">MERCADO</span> ' +
+            item.title +
+            '<span class="sep">◆</span>';
+
+        });
+
+    }catch(error){
+
+        console.error('Erro ao buscar mercado:', error);
+
+    }
+
+
+    /* ENTRETENIMENTO - MÚLTIPLAS FONTES */
+
+    try{
+
+        const entretenimentoNews = await getRSSFromMultipleSources(RSS_SOURCES.entretenimento, 2);
+
+        entretenimentoNews.forEach(item => {
+
+            html +=
+            '<span class="label">ENTRETENIMENTO</span> ' +
+            item.title +
+            '<span class="sep">◆</span>';
+
+        });
+
+    }catch(error){
+
+        console.error('Erro ao buscar entretenimento:', error);
+
+    }
+
+
+    /* NEWS GERAIS - MÚLTIPLAS FONTES */
+
+    try{
+
+        const geralNews = await getRSSFromMultipleSources(RSS_SOURCES.news, 2);
+
+        geralNews.forEach(item => {
+
+            html +=
+            '<span class="label">NEWS</span> ' +
+            item.title +
+            '<span class="sep">◆</span>';
+
+        });
+
+    }catch(error){
+
+        console.error('Erro ao buscar news gerais:', error);
+
+    }
 
 
     /* INSTAGRAM */
@@ -403,88 +584,35 @@ async function loadContent(){
     '<span class="sep">◆</span>';
 
 
-    /* TECH */
+    document.getElementById("ticker-content").innerHTML = html;
 
-    const techNews =
-    await getRSS("https://g1.globo.com/rss/g1/tecnologia/");
-
-    techNews.slice(0,2).forEach(item => {
-
-        html +=
-        '<span class="label">TECH</span> ' +
-        item.title +
-        '<span class="sep">◆</span>';
-
-    });
-
-
-    /* MERCADO */
-
-    const economiaNews =
-    await getRSS("https://g1.globo.com/rss/g1/economia/");
-
-    economiaNews.slice(0,1).forEach(item => {
-
-        html +=
-        '<span class="label">MERCADO FINANCEIRO</span> ' +
-        item.title +
-        '<span class="sep">◆</span>';
-
-    });
-
-
-    /* ENTRETENIMENTO */
-
-    const entretenimentoNews =
-    await getRSS("https://g1.globo.com/rss/g1/pop-arte/");
-
-    entretenimentoNews.slice(0,2).forEach(item => {
-
-        html +=
-        '<span class="label">ENTRETENIMENTO</span> ' +
-        item.title +
-        '<span class="sep">◆</span>';
-
-    });
-
-
-    /* NEWS */
-
-    const geralNews =
-    await getRSS("https://g1.globo.com/rss/g1/");
-
-    geralNews.slice(0,2).forEach(item => {
-
-        html +=
-        '<span class="label">NEWS</span> ' +
-        item.title +
-        '<span class="sep">◆</span>';
-
-    });
-
-
-    /* INSTAGRAM FINAL */
-
-    html +=
-    '<span class="label">INSTAGRAM</span> Siga @lumix.led' +
-    '<span class="sep">◆</span>';
-
-
-    document.getElementById("ticker-content").innerHTML =
-    html;
+    console.log(`[${new Date().toLocaleTimeString()}] Conteúdo carregado com sucesso!`);
 
 }
 
+// Carregamento inicial
 loadContent();
 
 
 /* =========================
    ATUALIZA A CADA 4 MINUTOS
+   COM LOG DE ATUALIZAÇÃO
 ========================= */
 
-setInterval(loadContent,240000);
+setInterval(() => {
+
+    console.log(`[${new Date().toLocaleTimeString()}] Atualizando conteúdo...`);
+    loadContent();
+
+}, 240000); // 4 minutos em milissegundos
+
+
+/* =========================
+   LOG NO CONSOLE
+========================= */
+
+console.log('%c🎬 LUMIX NEWS - Rodapé Ticker Iniciado', 'color: #FFD700; font-size: 14px; font-weight: bold;');
+console.log('%cAtualizações a cada 4 minutos (240000ms)', 'color: #00FF99;');
+console.log('%cAbra o DevTools (F12) para acompanhar as atualizações', 'color: #FFA500;');
 
 </script>
-
-</body>
-</html>
