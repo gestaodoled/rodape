@@ -78,12 +78,7 @@ body{
     display:inline-block;
     white-space:nowrap;
     padding-left:100%;
-    animation:scroll 220s linear infinite;
-}
-
-.label{
-    color:#FFD700;
-    font-weight:bold;
+    animation:scroll 320s linear infinite;t-weight:bold;
 }
 
 .sep{
@@ -204,10 +199,9 @@ async function loadContent(){
 
         /* NOTÍCIAS */
 
-        data.items.slice(0,10).forEach(item => {
+        data.items.forEach(item => {
 
-            html +=
-            '<span class="label">NEWS</span> ' +
+        data.items.slice(0,25)  '<span class="label">NEWS</span> ' +
             item.title +
             '<span class="sep">◆</span>';
 
