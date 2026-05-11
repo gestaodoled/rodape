@@ -80,7 +80,7 @@ body{
     animation-name:scroll;
     animation-timing-function:linear;
     animation-iteration-count:infinite;
-    animation-duration:140s;
+    animation-duration:170s;
 }
 
 /* ESTILOS */
@@ -162,10 +162,12 @@ updateClock();
 
 
 /* =========================
-   CORRIGE ENCODING RSS
+   LIMPEZA TEXTO RSS
 ========================= */
 
 function cleanText(text){
+
+    if(!text) return "";
 
     const txt =
     document.createElement("textarea");
@@ -174,28 +176,11 @@ function cleanText(text){
 
     let result = txt.value;
 
-    try{
-
-        result = decodeURIComponent(
-            escape(result)
-        );
-
-    }catch(e){}
-
     result = result
-    .replace(/Ã¡/g,"á")
-    .replace(/Ã¢/g,"â")
-    .replace(/Ã£/g,"ã")
-    .replace(/Ã©/g,"é")
-    .replace(/Ãª/g,"ê")
-    .replace(/Ã­/g,"í")
-    .replace(/Ã³/g,"ó")
-    .replace(/Ã´/g,"ô")
-    .replace(/Ãµ/g,"õ")
-    .replace(/Ãº/g,"ú")
-    .replace(/Ã§/g,"ç")
     .replace(/Â/g,"")
-    .replace(/�/g,"");
+    .replace(/�/g,"")
+    .replace(/[\n\r]/g," ")
+    .trim();
 
     return result;
 
@@ -342,7 +327,7 @@ async function getWeather(){
 
 
 /* =========================
-   DÓLAR ONLINE
+   DÓLAR
 ========================= */
 
 async function getDollar(){
@@ -351,19 +336,40 @@ async function getDollar(){
 
         const response =
         await fetch(
-        "https://economia.awesomeapi.com.br/json/last/USD-BRL"
+        "https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,BTC-BRL"
         );
 
         const data =
         await response.json();
 
-        return parseFloat(
-        data.USDBRL.bid
-        ).toFixed(2);
+        return {
+
+            usd:
+            parseFloat(
+            data.USDBRL.bid
+            ).toFixed(2),
+
+            eur:
+            parseFloat(
+            data.EURBRL.bid
+            ).toFixed(2),
+
+            btc:
+            Math.round(
+            data.BTCBRL.bid
+            )
+
+        };
 
     }catch(error){
 
-        return "5.42";
+        return {
+
+            usd:"5.42",
+            eur:"6.14",
+            btc:"580000"
+
+        };
 
     }
 
@@ -371,7 +377,7 @@ async function getDollar(){
 
 
 /* =========================
-   FILTRO DE PALAVRAS
+   FILTRO DE SEGURANÇA
 ========================= */
 
 function safeNews(items){
@@ -380,11 +386,10 @@ function safeNews(items){
 
         "morre",
         "morte",
-        "tragédia",
-        "tragico",
-        "assassin",
         "crime",
-        "guerra"
+        "assassin",
+        "guerra",
+        "tragédia"
 
     ];
 
@@ -404,37 +409,27 @@ function safeNews(items){
 
 
 /* =========================
-   AJUSTA VELOCIDADE
+   PEGA 1 ITEM ALEATÓRIO
 ========================= */
 
-function updateSpeed(textLength){
+function pickOne(items){
 
-    let seconds = 100;
+    if(!items || items.length === 0){
 
-    if(textLength > 6000){
-
-        seconds = 180;
-
-    }else if(textLength > 4000){
-
-        seconds = 150;
-
-    }else if(textLength > 2500){
-
-        seconds = 130;
+        return null;
 
     }
 
-    document.getElementById(
-    "ticker-content"
-    ).style.animationDuration =
-    seconds + "s";
+    return items[
+    Math.floor(
+    Math.random() * items.length
+    )];
 
 }
 
 
 /* =========================
-   CARREGAR CONTEÚDO
+   CARREGA CONTEÚDO
 ========================= */
 
 async function loadContent(){
@@ -467,107 +462,6 @@ async function loadContent(){
     '<span class="sep">◆</span>';
 
 
-    /* ESPORTES */
-
-    let esportes = [
-
-        ...(await getRSS(
-        "https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/"
-        )).slice(0,3),
-
-        ...(await getRSS(
-        "https://rss.uol.com.br/feed/esporte.xml"
-        )).slice(0,3)
-
-    ];
-
-    esportes =
-    safeNews(
-    removeDuplicates(
-    shuffle(esportes)
-    ));
-
-    esportes.slice(0,4).forEach(item => {
-
-        html +=
-        '<span class="label">ESPORTE</span> ' +
-        cleanText(item.title) +
-        '<span class="sep">◆</span>';
-
-    });
-
-
-    /* ECONOMIA */
-
-    let economia = [
-
-        ...(await getRSS(
-        "https://g1.globo.com/rss/g1/economia/"
-        )).slice(0,3),
-
-        ...(await getRSS(
-        "https://rss.uol.com.br/feed/economia.xml"
-        )).slice(0,3)
-
-    ];
-
-    economia =
-    safeNews(
-    removeDuplicates(
-    shuffle(economia)
-    ));
-
-    economia.slice(0,3).forEach(item => {
-
-        html +=
-        '<span class="label">MERCADO</span> ' +
-        cleanText(item.title) +
-        '<span class="sep">◆</span>';
-
-    });
-
-
-    /* DÓLAR */
-
-    const dollar =
-    await getDollar();
-
-    html +=
-    '<span class="label">DÓLAR</span> R$ ' +
-    dollar +
-    '<span class="sep">◆</span>';
-
-
-    /* TECH */
-
-    let tech = [
-
-        ...(await getRSS(
-        "https://g1.globo.com/rss/g1/tecnologia/"
-        )).slice(0,3),
-
-        ...(await getRSS(
-        "https://feeds.feedburner.com/tecnoblog"
-        )).slice(0,3)
-
-    ];
-
-    tech =
-    safeNews(
-    removeDuplicates(
-    shuffle(tech)
-    ));
-
-    tech.slice(0,3).forEach(item => {
-
-        html +=
-        '<span class="label">TECH</span> ' +
-        cleanText(item.title) +
-        '<span class="sep">◆</span>';
-
-    });
-
-
     /* TRÂNSITO */
 
     let transito =
@@ -588,95 +482,269 @@ async function loadContent(){
                t.includes("marginal") ||
                t.includes("lentidão") ||
                t.includes("lentidao") ||
-               t.includes("congestionamento") ||
-               t.includes("interdit") ||
-               t.includes("via") ||
-               t.includes("bloque") ||
-               t.includes("obras") ||
-               t.includes("chuva") ||
-               t.includes("engarrafamento") ||
-               t.includes("faixa");
+               t.includes("congestionamento");
 
     });
 
-    transito =
-    safeNews(
-    removeDuplicates(
-    shuffle(transito)
-    ));
+    let transitoItem =
+    pickOne(
+    safeNews(transito)
+    );
 
-    transito.slice(0,3).forEach(item => {
+    if(transitoItem){
 
         html +=
         '<span class="label">TRÂNSITO</span> ' +
-        cleanText(item.title) +
+        cleanText(transitoItem.title) +
         '<span class="sep">◆</span>';
 
-    });
+    }
+
+
+    /* RODOVIAS */
+
+    html +=
+    '<span class="label">RODOVIAS</span> Sistema Anchieta-Imigrantes com fluxo normal' +
+    '<span class="sep">◆</span>';
+
+
+    /* ESPORTES */
+
+    let esporte =
+    await getRSS(
+    "https://ge.globo.com/rss/ge/futebol/"
+    );
+
+    esporte =
+    safeNews(
+    removeDuplicates(
+    esporte
+    ));
+
+    let esporteItem =
+    pickOne(esporte);
+
+    if(esporteItem){
+
+        html +=
+        '<span class="label">ESPORTE</span> ' +
+        cleanText(esporteItem.title) +
+        '<span class="sep">◆</span>';
+
+    }
+
+
+    /* RESULTADOS */
+
+    html +=
+    '<span class="label">RESULTADOS</span> Confira os últimos jogos do Brasileirão Série A' +
+    '<span class="sep">◆</span>';
+
+
+    /* SELEÇÃO */
+
+    html +=
+    '<span class="label">SELEÇÃO</span> Dorival acompanha atletas da Série A' +
+    '<span class="sep">◆</span>';
+
+
+    /* CLASSIFICAÇÃO */
+
+    html +=
+    '<span class="label">CLASSIFICAÇÃO</span> Brasileirão Série A em disputa acirrada' +
+    '<span class="sep">◆</span>';
+
+
+    /* COTAÇÕES */
+
+    const money =
+    await getDollar();
+
+    html +=
+    '<span class="label">DÓLAR</span> R$ ' +
+    money.usd +
+    '<span class="sep">◆</span>';
+
+    html +=
+    '<span class="label">EURO</span> R$ ' +
+    money.eur +
+    '<span class="sep">◆</span>';
+
+    html +=
+    '<span class="label">BITCOIN</span> R$ ' +
+    money.btc +
+    '<span class="sep">◆</span>';
+
+
+    /* MERCADO */
+
+    let economia =
+    await getRSS(
+    "https://g1.globo.com/rss/g1/economia/"
+    );
+
+    let economiaItem =
+    pickOne(
+    safeNews(economia)
+    );
+
+    if(economiaItem){
+
+        html +=
+        '<span class="label">MERCADO</span> ' +
+        cleanText(economiaItem.title) +
+        '<span class="sep">◆</span>';
+
+    }
+
+
+    /* TECH */
+
+    let tech =
+    await getRSS(
+    "https://g1.globo.com/rss/g1/tecnologia/"
+    );
+
+    let techItem =
+    pickOne(
+    safeNews(tech)
+    );
+
+    if(techItem){
+
+        html +=
+        '<span class="label">TECH</span> ' +
+        cleanText(techItem.title) +
+        '<span class="sep">◆</span>';
+
+    }
+
+
+    /* TRENDING */
+
+    html +=
+    '<span class="label">TRENDING</span> Inteligência Artificial segue em alta' +
+    '<span class="sep">◆</span>';
+
+
+    /* EVENTOS */
+
+    html +=
+    '<span class="label">EVENTOS</span> Agenda cultural movimenta São Paulo' +
+    '<span class="sep">◆</span>';
+
+
+    /* AEROPORTOS */
+
+    html +=
+    '<span class="label">AEROPORTOS</span> Congonhas opera normalmente' +
+    '<span class="sep">◆</span>';
+
+
+    /* MEGA-SENA */
+
+    html +=
+    '<span class="label">MEGA-SENA</span> Prêmio estimado acima de R$ 40 milhões' +
+    '<span class="sep">◆</span>';
+
+
+    /* SAÚDE */
+
+    html +=
+    '<span class="label">SAÚDE</span> Campanhas de vacinação seguem em SP' +
+    '<span class="sep">◆</span>';
+
+
+    /* ALERTA */
+
+    html +=
+    '<span class="label">ALERTA</span> Possibilidade de chuva isolada em São Paulo' +
+    '<span class="sep">◆</span>';
 
 
     /* ENTRETENIMENTO */
 
-    let entretenimento = [
+    let entretenimento =
+    await getRSS(
+    "https://g1.globo.com/rss/g1/pop-arte/"
+    );
 
-        ...(await getRSS(
-        "https://g1.globo.com/rss/g1/pop-arte/"
-        )).slice(0,3),
+    let entretenimentoItem =
+    pickOne(
+    safeNews(entretenimento)
+    );
 
-        ...(await getRSS(
-        "https://rss.uol.com.br/feed/splash.xml"
-        )).slice(0,3)
-
-    ];
-
-    entretenimento =
-    safeNews(
-    removeDuplicates(
-    shuffle(entretenimento)
-    ));
-
-    entretenimento.slice(0,3).forEach(item => {
+    if(entretenimentoItem){
 
         html +=
         '<span class="label">ENTRETENIMENTO</span> ' +
-        cleanText(item.title) +
+        cleanText(entretenimentoItem.title) +
         '<span class="sep">◆</span>';
 
-    });
+    }
 
 
     /* NEWS */
 
-    let geral = [
+    let geral =
+    await getRSS(
+    "https://g1.globo.com/rss/g1/"
+    );
 
-        ...(await getRSS(
-        "https://g1.globo.com/rss/g1/"
-        )).slice(0,3),
+    let geralItem =
+    pickOne(
+    safeNews(geral)
+    );
 
-        ...(await getRSS(
-        "https://www.cnnbrasil.com.br/feed/"
-        )).slice(0,3),
-
-        ...(await getRSS(
-        "https://rss.uol.com.br/feed/noticias.xml"
-        )).slice(0,3)
-
-    ];
-
-    geral =
-    safeNews(
-    removeDuplicates(
-    shuffle(geral)
-    ));
-
-    geral.slice(0,4).forEach(item => {
+    if(geralItem){
 
         html +=
         '<span class="label">NEWS</span> ' +
-        cleanText(item.title) +
+        cleanText(geralItem.title) +
         '<span class="sep">◆</span>';
 
-    });
+    }
+
+
+    /* MOTIVAÇÃO */
+
+    const frases = [
+
+        "Grandes resultados exigem constância",
+        "Persistência gera resultados",
+        "Disciplina vence talento",
+        "Foco no objetivo",
+        "A evolução acontece todos os dias"
+
+    ];
+
+    html +=
+    '<span class="label">MOTIVAÇÃO</span> ' +
+    frases[
+    Math.floor(
+    Math.random() * frases.length
+    )] +
+    '<span class="sep">◆</span>';
+
+
+    /* LUMIX */
+
+    const lumix = [
+
+        "Impacto visual que vende",
+        "Especialistas em painéis de LED",
+        "Tecnologia visual de alto impacto",
+        "Seu projeto merece destaque"
+
+    ];
+
+    html +=
+    '<span class="label">LUMIX LED</span> ' +
+    lumix[
+    Math.floor(
+    Math.random() * lumix.length
+    )] +
+    '<span class="sep">◆</span>';
 
 
     /* INSTAGRAM */
@@ -686,16 +754,11 @@ async function loadContent(){
     '<span class="sep">◆</span>';
 
 
-    /* ATUALIZA HTML */
+    /* RENDER */
 
     document.getElementById(
     "ticker-content"
     ).innerHTML = html;
-
-
-    /* AJUSTA VELOCIDADE */
-
-    updateSpeed(html.length);
 
 }
 
@@ -721,11 +784,6 @@ ticker.addEventListener(
 async function(){
 
     cycleCount++;
-
-    console.log(
-    "Ciclo:",
-    cycleCount
-    );
 
     if(cycleCount >= 2){
 
