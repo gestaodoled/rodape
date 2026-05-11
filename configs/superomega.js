@@ -13,8 +13,9 @@ const CONFIG = {
 
     latitude:-23.50,
     longitude:-47.45,
+
     trafficRSS:
-"https://g1.globo.com/sp/sorocaba-jundiai/rss/g1/"
+    "https://g1.globo.com/sp/sorocaba-jundiai/rss/g1/",
 
     instagram:"@lumix.led",
 
@@ -24,26 +25,8 @@ const CONFIG = {
         "esporte",
         "clima",
         "previsao",
-        "transito",
-        "rodovias",
-        "resultados",
-        "selecao",
-        "classificacao",
-        "dolar",
-        "euro",
-        "bitcoin",
-        "mercado",
-        "tech",
-        "trending",
-        "eventos",
-        "aeroportos",
-        "megasena",
-        "saude",
-        "alerta",
-        "entretenimento",
         "news",
-        "motivacao",
-        "lumix",
+        "dolar",
         "instagram"
 
     ]
