@@ -144,7 +144,9 @@ params.get("config") || "default";
 document.write(
 '<script src="configs/' +
 configName +
-'.js"><\/script>'
+'.js?v=' +
+new Date().getTime() +
+'"><\/script>'
 );
 
 </script>
@@ -308,7 +310,7 @@ async function getWeather(){
 
         const response =
         await fetch(
-        "https://api.open-meteo.com/v1/forecast?latitude=-23.55&longitude=-46.63&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min&timezone=America%2FSao_Paulo"
+        `https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.latitude}&longitude=${CONFIG.longitude}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min&timezone=America%2FSao_Paulo`
         );
 
         const data =
@@ -343,7 +345,7 @@ async function getWeather(){
 
 
 /* =========================================
-   DÓLAR
+   COTAÇÕES
 ========================================= */
 
 async function getMoney(){
@@ -387,7 +389,7 @@ async function getMoney(){
 
 
 /* =========================================
-   PEGA ITEM ALEATÓRIO
+   ITEM ALEATÓRIO
 ========================================= */
 
 function pickOne(items){
@@ -407,7 +409,7 @@ function pickOne(items){
 
 
 /* =========================================
-   CONTEÚDO
+   LOAD CONTENT
 ========================================= */
 
 async function loadContent(){
@@ -415,112 +417,170 @@ async function loadContent(){
     let html = "";
 
 
-    /* CLIMA */
+    for(let block of CONFIG.enabledBlocks){
 
-    if(CONFIG.enabledBlocks.includes("clima")){
+        /* CLIMA */
 
-        const weather =
-        await getWeather();
+        if(block === "clima"){
 
-        html +=
-        '<span class="clima">CLIMA</span> ' +
-        CONFIG.city + ' ' +
-        weather.temp +
-        '°C' +
-        '<span class="sep">◆</span>';
-
-    }
-
-
-    /* PREVISÃO */
-
-    if(CONFIG.enabledBlocks.includes("previsao")){
-
-        const weather =
-        await getWeather();
-
-        html +=
-        '<span class="previsao">PREVISÃO</span> Máx ' +
-        weather.max +
-        '° Mín ' +
-        weather.min +
-        '°' +
-        '<span class="sep">◆</span>';
-
-    }
-
-
-    /* ESPORTE */
-
-    if(CONFIG.enabledBlocks.includes("esporte")){
-
-        let esporte =
-        await getRSS(
-        "https://ge.globo.com/rss/ge/futebol/"
-        );
-
-        let item =
-        pickOne(esporte);
-
-        if(item){
+            const weather =
+            await getWeather();
 
             html +=
-            '<span class="esporte">ESPORTE</span> ' +
-            cleanText(item.title) +
+            '<span class="clima">CLIMA</span> ' +
+            CONFIG.city + ' ' +
+            weather.temp +
+            '°C' +
             '<span class="sep">◆</span>';
 
         }
 
-    }
 
+        /* PREVISÃO */
 
-    /* NEWS */
+        if(block === "previsao"){
 
-    if(CONFIG.enabledBlocks.includes("news")){
-
-        let geral =
-        await getRSS(
-        "https://g1.globo.com/rss/g1/"
-        );
-
-        let item =
-        pickOne(geral);
-
-        if(item){
+            const weather =
+            await getWeather();
 
             html +=
-            '<span class="news">NEWS</span> ' +
-            cleanText(item.title) +
+            '<span class="previsao">PREVISÃO</span> Máx ' +
+            weather.max +
+            '° Mín ' +
+            weather.min +
+            '°' +
             '<span class="sep">◆</span>';
 
         }
 
-    }
+
+        /* TRÂNSITO */
+
+        if(block === "transito"){
+
+            let transito =
+            await getRSS(
+            CONFIG.trafficRSS
+            );
+
+            let item =
+            pickOne(transito);
+
+            if(item){
+
+                html +=
+                '<span class="transito">TRÂNSITO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
 
 
-    /* DÓLAR */
+        /* ESPORTE */
 
-    if(CONFIG.enabledBlocks.includes("dolar")){
+        if(block === "esporte"){
 
-        const money =
-        await getMoney();
+            let esporte =
+            await getRSS(
+            "https://ge.globo.com/rss/ge/futebol/"
+            );
 
-        html +=
-        '<span class="dolar">DÓLAR</span> R$ ' +
-        money.usd +
-        '<span class="sep">◆</span>';
+            let item =
+            pickOne(esporte);
 
-    }
+            if(item){
+
+                html +=
+                '<span class="esporte">ESPORTE</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
 
 
-    /* INSTAGRAM */
+        /* NEWS */
 
-    if(CONFIG.enabledBlocks.includes("instagram")){
+        if(block === "news"){
 
-        html +=
-        '<span class="instagram">INSTAGRAM</span> ' +
-        CONFIG.instagram +
-        '<span class="sep">◆</span>';
+            let geral =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/"
+            );
+
+            let item =
+            pickOne(geral);
+
+            if(item){
+
+                html +=
+                '<span class="news">NEWS</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* DÓLAR */
+
+        if(block === "dolar"){
+
+            const money =
+            await getMoney();
+
+            html +=
+            '<span class="dolar">DÓLAR</span> R$ ' +
+            money.usd +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* EURO */
+
+        if(block === "euro"){
+
+            const money =
+            await getMoney();
+
+            html +=
+            '<span class="euro">EURO</span> R$ ' +
+            money.eur +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* BITCOIN */
+
+        if(block === "bitcoin"){
+
+            const money =
+            await getMoney();
+
+            html +=
+            '<span class="bitcoin">BITCOIN</span> R$ ' +
+            money.btc +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* INSTAGRAM */
+
+        if(block === "instagram"){
+
+            html +=
+            '<span class="instagram">INSTAGRAM</span> ' +
+            CONFIG.instagram +
+            '<span class="sep">◆</span>';
+
+        }
 
     }
 
@@ -563,6 +623,17 @@ async function(){
     }
 
 });
+
+
+/* =========================================
+   RELOAD AUTOMÁTICO
+========================================= */
+
+setInterval(() => {
+
+    location.reload();
+
+}, 1800000);
 
 </script>
 
