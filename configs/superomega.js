@@ -21,12 +21,29 @@ const CONFIG = {
 
     enabledBlocks:[
 
-        "transito",
-        "esporte",
         "clima",
         "previsao",
-        "news",
+        "transito",
+        "rodovias",
+        "esporte",
+        "resultados",
+        "selecao",
+        "classificacao",
         "dolar",
+        "euro",
+        "bitcoin",
+        "mercado",
+        "tech",
+        "trending",
+        "eventos",
+        "aeroportos",
+        "megasena",
+        "saude",
+        "alerta",
+        "entretenimento",
+        "news",
+        "motivacao",
+        "lumix",
         "instagram"
 
     ]
