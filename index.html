@@ -83,12 +83,32 @@ body{
     animation-duration:170s;
 }
 
-/* ESTILOS */
+/* CORES DAS CATEGORIAS */
 
-.label{
-    color:#FFD700;
-    font-weight:bold;
-}
+.clima{color:#00FFFF;font-weight:bold;}
+.previsao{color:#87CEFA;font-weight:bold;}
+.transito{color:#FF8C00;font-weight:bold;}
+.rodovias{color:#FFA500;font-weight:bold;}
+.esporte{color:#00FF00;font-weight:bold;}
+.resultados{color:#32CD32;font-weight:bold;}
+.selecao{color:#7CFC00;font-weight:bold;}
+.classificacao{color:#ADFF2F;font-weight:bold;}
+.dolar{color:#FFD700;font-weight:bold;}
+.euro{color:#F4D03F;font-weight:bold;}
+.bitcoin{color:#F39C12;font-weight:bold;}
+.mercado{color:#00FA9A;font-weight:bold;}
+.tech{color:#00BFFF;font-weight:bold;}
+.trending{color:#FF69B4;font-weight:bold;}
+.eventos{color:#BA55D3;font-weight:bold;}
+.aeroportos{color:#40E0D0;font-weight:bold;}
+.megasena{color:#32CD32;font-weight:bold;}
+.saude{color:#FF1493;font-weight:bold;}
+.alerta{color:#FF0000;font-weight:bold;}
+.entretenimento{color:#FF66CC;font-weight:bold;}
+.news{color:#FFFFFF;font-weight:bold;}
+.motivacao{color:#00FFCC;font-weight:bold;}
+.lumix{color:#FFD700;font-weight:bold;}
+.instagram{color:#FF1493;font-weight:bold;}
 
 .sep{
     color:#666;
@@ -132,7 +152,7 @@ body{
 <script>
 
 /* =========================
-   CONTADOR DE CICLOS
+   CONTADOR
 ========================= */
 
 let cycleCount = 0;
@@ -162,7 +182,7 @@ updateClock();
 
 
 /* =========================
-   LIMPEZA TEXTO RSS
+   LIMPA TEXTO
 ========================= */
 
 function cleanText(text){
@@ -267,8 +287,6 @@ async function getRSS(rssUrl){
 
     }catch(error){
 
-        console.log("Erro RSS:",rssUrl);
-
         return [];
 
     }
@@ -277,7 +295,7 @@ async function getRSS(rssUrl){
 
 
 /* =========================
-   CLIMA ONLINE
+   CLIMA
 ========================= */
 
 async function getWeather(){
@@ -295,19 +313,13 @@ async function getWeather(){
         return {
 
             temp:
-            Math.round(
-            data.current.temperature_2m
-            ),
+            Math.round(data.current.temperature_2m),
 
             max:
-            Math.round(
-            data.daily.temperature_2m_max[0]
-            ),
+            Math.round(data.daily.temperature_2m_max[0]),
 
             min:
-            Math.round(
-            data.daily.temperature_2m_min[0]
-            )
+            Math.round(data.daily.temperature_2m_min[0])
 
         };
 
@@ -327,10 +339,10 @@ async function getWeather(){
 
 
 /* =========================
-   DÓLAR
+   COTAÇÕES
 ========================= */
 
-async function getDollar(){
+async function getMoney(){
 
     try{
 
@@ -345,19 +357,13 @@ async function getDollar(){
         return {
 
             usd:
-            parseFloat(
-            data.USDBRL.bid
-            ).toFixed(2),
+            parseFloat(data.USDBRL.bid).toFixed(2),
 
             eur:
-            parseFloat(
-            data.EURBRL.bid
-            ).toFixed(2),
+            parseFloat(data.EURBRL.bid).toFixed(2),
 
             btc:
-            Math.round(
-            data.BTCBRL.bid
-            )
+            Math.round(data.BTCBRL.bid)
 
         };
 
@@ -377,7 +383,7 @@ async function getDollar(){
 
 
 /* =========================
-   FILTRO DE SEGURANÇA
+   FILTRO
 ========================= */
 
 function safeNews(items){
@@ -409,7 +415,7 @@ function safeNews(items){
 
 
 /* =========================
-   PEGA 1 ITEM ALEATÓRIO
+   PEGA 1 ITEM
 ========================= */
 
 function pickOne(items){
@@ -429,12 +435,40 @@ function pickOne(items){
 
 
 /* =========================
-   CARREGA CONTEÚDO
+   RESULTADOS FUTEBOL
+========================= */
+
+const resultados = [
+
+    "Palmeiras 2x1 Santos",
+    "Corinthians 1x1 São Paulo",
+    "Flamengo 3x0 Vasco",
+    "Grêmio 2x2 Internacional",
+    "Atlético-MG 1x0 Cruzeiro"
+
+];
+
+
+/* =========================
+   CLASSIFICAÇÃO
+========================= */
+
+const classificacao = [
+
+    "Palmeiras líder da Série A",
+    "Flamengo segue no G4",
+    "Corinthians sobe posições",
+    "São Paulo busca vaga Libertadores",
+    "Briga intensa no topo da tabela"
+
+];
+
+
+/* =========================
+   CONTEÚDO
 ========================= */
 
 async function loadContent(){
-
-    console.log("Atualizando conteúdo...");
 
     let html = "";
 
@@ -445,7 +479,7 @@ async function loadContent(){
     await getWeather();
 
     html +=
-    '<span class="label">CLIMA</span> São Paulo ' +
+    '<span class="clima">CLIMA</span> São Paulo ' +
     weather.temp +
     '°C' +
     '<span class="sep">◆</span>';
@@ -454,7 +488,7 @@ async function loadContent(){
     /* PREVISÃO */
 
     html +=
-    '<span class="label">PREVISÃO</span> Máx ' +
+    '<span class="previsao">PREVISÃO</span> Máx ' +
     weather.max +
     '° Mín ' +
     weather.min +
@@ -480,9 +514,7 @@ async function loadContent(){
                t.includes("acidente") ||
                t.includes("rodovia") ||
                t.includes("marginal") ||
-               t.includes("lentidão") ||
-               t.includes("lentidao") ||
-               t.includes("congestionamento");
+               t.includes("lentidão");
 
     });
 
@@ -494,7 +526,7 @@ async function loadContent(){
     if(transitoItem){
 
         html +=
-        '<span class="label">TRÂNSITO</span> ' +
+        '<span class="transito">TRÂNSITO</span> ' +
         cleanText(transitoItem.title) +
         '<span class="sep">◆</span>';
 
@@ -504,30 +536,26 @@ async function loadContent(){
     /* RODOVIAS */
 
     html +=
-    '<span class="label">RODOVIAS</span> Sistema Anchieta-Imigrantes com fluxo normal' +
+    '<span class="rodovias">RODOVIAS</span> Anchieta-Imigrantes com tráfego moderado' +
     '<span class="sep">◆</span>';
 
 
-    /* ESPORTES */
+    /* ESPORTE */
 
     let esporte =
     await getRSS(
     "https://ge.globo.com/rss/ge/futebol/"
     );
 
-    esporte =
-    safeNews(
-    removeDuplicates(
-    esporte
-    ));
-
     let esporteItem =
-    pickOne(esporte);
+    pickOne(
+    safeNews(esporte)
+    );
 
     if(esporteItem){
 
         html +=
-        '<span class="label">ESPORTE</span> ' +
+        '<span class="esporte">ESPORTE</span> ' +
         cleanText(esporteItem.title) +
         '<span class="sep">◆</span>';
 
@@ -537,41 +565,49 @@ async function loadContent(){
     /* RESULTADOS */
 
     html +=
-    '<span class="label">RESULTADOS</span> Confira os últimos jogos do Brasileirão Série A' +
+    '<span class="resultados">RESULTADOS</span> ' +
+    resultados[
+    Math.floor(
+    Math.random() * resultados.length
+    )] +
     '<span class="sep">◆</span>';
 
 
     /* SELEÇÃO */
 
     html +=
-    '<span class="label">SELEÇÃO</span> Dorival acompanha atletas da Série A' +
+    '<span class="selecao">SELEÇÃO</span> Dorival acompanha atletas da Série A' +
     '<span class="sep">◆</span>';
 
 
     /* CLASSIFICAÇÃO */
 
     html +=
-    '<span class="label">CLASSIFICAÇÃO</span> Brasileirão Série A em disputa acirrada' +
+    '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
+    classificacao[
+    Math.floor(
+    Math.random() * classificacao.length
+    )] +
     '<span class="sep">◆</span>';
 
 
     /* COTAÇÕES */
 
     const money =
-    await getDollar();
+    await getMoney();
 
     html +=
-    '<span class="label">DÓLAR</span> R$ ' +
+    '<span class="dolar">DÓLAR</span> R$ ' +
     money.usd +
     '<span class="sep">◆</span>';
 
     html +=
-    '<span class="label">EURO</span> R$ ' +
+    '<span class="euro">EURO</span> R$ ' +
     money.eur +
     '<span class="sep">◆</span>';
 
     html +=
-    '<span class="label">BITCOIN</span> R$ ' +
+    '<span class="bitcoin">BITCOIN</span> R$ ' +
     money.btc +
     '<span class="sep">◆</span>';
 
@@ -591,7 +627,7 @@ async function loadContent(){
     if(economiaItem){
 
         html +=
-        '<span class="label">MERCADO</span> ' +
+        '<span class="mercado">MERCADO</span> ' +
         cleanText(economiaItem.title) +
         '<span class="sep">◆</span>';
 
@@ -613,7 +649,7 @@ async function loadContent(){
     if(techItem){
 
         html +=
-        '<span class="label">TECH</span> ' +
+        '<span class="tech">TECH</span> ' +
         cleanText(techItem.title) +
         '<span class="sep">◆</span>';
 
@@ -623,42 +659,42 @@ async function loadContent(){
     /* TRENDING */
 
     html +=
-    '<span class="label">TRENDING</span> Inteligência Artificial segue em alta' +
+    '<span class="trending">TRENDING</span> Inteligência Artificial segue em alta' +
     '<span class="sep">◆</span>';
 
 
     /* EVENTOS */
 
     html +=
-    '<span class="label">EVENTOS</span> Agenda cultural movimenta São Paulo' +
+    '<span class="eventos">EVENTOS</span> Agenda cultural movimenta São Paulo' +
     '<span class="sep">◆</span>';
 
 
     /* AEROPORTOS */
 
     html +=
-    '<span class="label">AEROPORTOS</span> Congonhas opera normalmente' +
+    '<span class="aeroportos">AEROPORTOS</span> Congonhas opera normalmente' +
     '<span class="sep">◆</span>';
 
 
     /* MEGA-SENA */
 
     html +=
-    '<span class="label">MEGA-SENA</span> Prêmio estimado acima de R$ 40 milhões' +
+    '<span class="megasena">MEGA-SENA</span> Prêmio estimado em R$ 42 milhões' +
     '<span class="sep">◆</span>';
 
 
     /* SAÚDE */
 
     html +=
-    '<span class="label">SAÚDE</span> Campanhas de vacinação seguem em SP' +
+    '<span class="saude">SAÚDE</span> Campanha de vacinação segue em SP' +
     '<span class="sep">◆</span>';
 
 
     /* ALERTA */
 
     html +=
-    '<span class="label">ALERTA</span> Possibilidade de chuva isolada em São Paulo' +
+    '<span class="alerta">ALERTA</span> Possibilidade de chuva forte em São Paulo' +
     '<span class="sep">◆</span>';
 
 
@@ -677,7 +713,7 @@ async function loadContent(){
     if(entretenimentoItem){
 
         html +=
-        '<span class="label">ENTRETENIMENTO</span> ' +
+        '<span class="entretenimento">ENTRETENIMENTO</span> ' +
         cleanText(entretenimentoItem.title) +
         '<span class="sep">◆</span>';
 
@@ -699,7 +735,7 @@ async function loadContent(){
     if(geralItem){
 
         html +=
-        '<span class="label">NEWS</span> ' +
+        '<span class="news">NEWS</span> ' +
         cleanText(geralItem.title) +
         '<span class="sep">◆</span>';
 
@@ -713,13 +749,12 @@ async function loadContent(){
         "Grandes resultados exigem constância",
         "Persistência gera resultados",
         "Disciplina vence talento",
-        "Foco no objetivo",
-        "A evolução acontece todos os dias"
+        "Foco no objetivo"
 
     ];
 
     html +=
-    '<span class="label">MOTIVAÇÃO</span> ' +
+    '<span class="motivacao">MOTIVAÇÃO</span> ' +
     frases[
     Math.floor(
     Math.random() * frases.length
@@ -733,13 +768,12 @@ async function loadContent(){
 
         "Impacto visual que vende",
         "Especialistas em painéis de LED",
-        "Tecnologia visual de alto impacto",
-        "Seu projeto merece destaque"
+        "Tecnologia visual de alto impacto"
 
     ];
 
     html +=
-    '<span class="label">LUMIX LED</span> ' +
+    '<span class="lumix">LUMIX LED</span> ' +
     lumix[
     Math.floor(
     Math.random() * lumix.length
@@ -750,7 +784,7 @@ async function loadContent(){
     /* INSTAGRAM */
 
     html +=
-    '<span class="label">INSTAGRAM</span> @lumix.led' +
+    '<span class="instagram">INSTAGRAM</span> @lumix.led' +
     '<span class="sep">◆</span>';
 
 
