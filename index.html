@@ -162,17 +162,42 @@ updateClock();
 
 
 /* =========================
-   DECODIFICA HTML ENTITIES
+   CORRIGE ENCODING RSS
 ========================= */
 
-function decodeHtml(text){
+function cleanText(text){
 
     const txt =
     document.createElement("textarea");
 
     txt.innerHTML = text;
 
-    return txt.value;
+    let result = txt.value;
+
+    try{
+
+        result = decodeURIComponent(
+            escape(result)
+        );
+
+    }catch(e){}
+
+    result = result
+    .replace(/Ã¡/g,"á")
+    .replace(/Ã¢/g,"â")
+    .replace(/Ã£/g,"ã")
+    .replace(/Ã©/g,"é")
+    .replace(/Ãª/g,"ê")
+    .replace(/Ã­/g,"í")
+    .replace(/Ã³/g,"ó")
+    .replace(/Ã´/g,"ô")
+    .replace(/Ãµ/g,"õ")
+    .replace(/Ãº/g,"ú")
+    .replace(/Ã§/g,"ç")
+    .replace(/Â/g,"")
+    .replace(/�/g,"");
+
+    return result;
 
 }
 
@@ -466,7 +491,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">ESPORTE</span> ' +
-        decodeHtml(item.title) +
+        cleanText(item.title) +
         '<span class="sep">◆</span>';
 
     });
@@ -496,7 +521,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">MERCADO</span> ' +
-        decodeHtml(item.title) +
+        cleanText(item.title) +
         '<span class="sep">◆</span>';
 
     });
@@ -537,7 +562,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">TECH</span> ' +
-        decodeHtml(item.title) +
+        cleanText(item.title) +
         '<span class="sep">◆</span>';
 
     });
@@ -574,7 +599,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">TRÂNSITO</span> ' +
-        decodeHtml(item.title) +
+        cleanText(item.title) +
         '<span class="sep">◆</span>';
 
     });
@@ -604,7 +629,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">ENTRETENIMENTO</span> ' +
-        decodeHtml(item.title) +
+        cleanText(item.title) +
         '<span class="sep">◆</span>';
 
     });
@@ -638,7 +663,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">NEWS</span> ' +
-        decodeHtml(item.title) +
+        cleanText(item.title) +
         '<span class="sep">◆</span>';
 
     });
