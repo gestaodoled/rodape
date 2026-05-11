@@ -162,6 +162,22 @@ updateClock();
 
 
 /* =========================
+   DECODIFICA HTML ENTITIES
+========================= */
+
+function decodeHtml(text){
+
+    const txt =
+    document.createElement("textarea");
+
+    txt.innerHTML = text;
+
+    return txt.value;
+
+}
+
+
+/* =========================
    REMOVE DUPLICADAS
 ========================= */
 
@@ -415,7 +431,6 @@ async function loadContent(){
     '<span class="sep">◆</span>';
 
 
-
     /* PREVISÃO */
 
     html +=
@@ -451,7 +466,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">ESPORTE</span> ' +
-        item.title +
+        decodeHtml(item.title) +
         '<span class="sep">◆</span>';
 
     });
@@ -481,7 +496,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">MERCADO</span> ' +
-        item.title +
+        decodeHtml(item.title) +
         '<span class="sep">◆</span>';
 
     });
@@ -522,7 +537,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">TECH</span> ' +
-        item.title +
+        decodeHtml(item.title) +
         '<span class="sep">◆</span>';
 
     });
@@ -559,7 +574,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">TRÂNSITO</span> ' +
-        item.title +
+        decodeHtml(item.title) +
         '<span class="sep">◆</span>';
 
     });
@@ -589,7 +604,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">ENTRETENIMENTO</span> ' +
-        item.title +
+        decodeHtml(item.title) +
         '<span class="sep">◆</span>';
 
     });
@@ -623,7 +638,7 @@ async function loadContent(){
 
         html +=
         '<span class="label">NEWS</span> ' +
-        item.title +
+        decodeHtml(item.title) +
         '<span class="sep">◆</span>';
 
     });
