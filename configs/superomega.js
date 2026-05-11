@@ -11,6 +11,9 @@ const CONFIG = {
 
     city:"Sorocaba",
 
+    latitude:-23.50,
+    longitude:-47.45,
+
     instagram:"@lumix.led",
 
     enabledBlocks:[
