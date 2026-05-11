@@ -13,6 +13,8 @@ const CONFIG = {
 
     latitude:-23.50,
     longitude:-47.45,
+    trafficRSS:
+"https://g1.globo.com/sp/sorocaba-jundiai/rss/g1/"
 
     instagram:"@lumix.led",
 
