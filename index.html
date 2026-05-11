@@ -2,7 +2,9 @@
 <html lang="pt-BR">
 
 <head>
+
 <meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=800, height=30">
 
 <title>LUMIX NEWS</title>
@@ -15,7 +17,7 @@ body{
     background:#000;
     width:800px;
     height:30px;
-    font-family:Verdana,sans-serif;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
 /* BLOCO ESQUERDO */
@@ -69,11 +71,16 @@ body{
     line-height:30px;
 }
 
+/* CONTEÚDO */
+
 #ticker-content{
     display:inline-block;
     white-space:nowrap;
     padding-left:100%;
-    animation:scroll 110s linear infinite;
+    animation-name:scroll;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
+    animation-duration:140s;
 }
 
 /* ESTILOS */
@@ -115,12 +122,21 @@ body{
 <div id="clock"></div>
 
 <div id="ticker">
+
     <div id="ticker-content">
         Carregando informações...
     </div>
+
 </div>
 
 <script>
+
+/* =========================
+   CONTADOR DE CICLOS
+========================= */
+
+let cycleCount = 0;
+
 
 /* =========================
    RELÓGIO
@@ -146,6 +162,48 @@ updateClock();
 
 
 /* =========================
+   REMOVE DUPLICADAS
+========================= */
+
+function removeDuplicates(arr){
+
+    const titles = new Set();
+
+    return arr.filter(item => {
+
+        if(!item.title) return false;
+
+        const title =
+        item.title.toLowerCase();
+
+        if(titles.has(title)){
+
+            return false;
+
+        }
+
+        titles.add(title);
+
+        return true;
+
+    });
+
+}
+
+
+/* =========================
+   EMBARALHAR
+========================= */
+
+function shuffle(array){
+
+    return array.sort(() =>
+    Math.random() - 0.5);
+
+}
+
+
+/* =========================
    URL SEM CACHE
 ========================= */
 
@@ -153,7 +211,7 @@ function noCache(url){
 
     return url +
     (url.includes('?') ? '&' : '?') +
-    '_nocache=' +
+    '_=' +
     new Date().getTime();
 
 }
@@ -272,13 +330,64 @@ async function getDollar(){
 
 
 /* =========================
-   EMBARALHAR ITENS
+   FILTRO DE PALAVRAS
 ========================= */
 
-function shuffle(array){
+function safeNews(items){
 
-    return array.sort(() =>
-    Math.random() - 0.5);
+    const blocked = [
+
+        "morre",
+        "morte",
+        "tragédia",
+        "tragico",
+        "assassin",
+        "crime",
+        "guerra"
+
+    ];
+
+    return items.filter(item => {
+
+        if(!item.title) return false;
+
+        const t =
+        item.title.toLowerCase();
+
+        return !blocked.some(word =>
+        t.includes(word));
+
+    });
+
+}
+
+
+/* =========================
+   AJUSTA VELOCIDADE
+========================= */
+
+function updateSpeed(textLength){
+
+    let seconds = 100;
+
+    if(textLength > 6000){
+
+        seconds = 180;
+
+    }else if(textLength > 4000){
+
+        seconds = 150;
+
+    }else if(textLength > 2500){
+
+        seconds = 130;
+
+    }
+
+    document.getElementById(
+    "ticker-content"
+    ).style.animationDuration =
+    seconds + "s";
 
 }
 
@@ -288,6 +397,8 @@ function shuffle(array){
 ========================= */
 
 async function loadContent(){
+
+    console.log("Atualizando conteúdo...");
 
     let html = "";
 
@@ -304,6 +415,7 @@ async function loadContent(){
     '<span class="sep">◆</span>';
 
 
+
     /* PREVISÃO */
 
     html +=
@@ -317,23 +429,25 @@ async function loadContent(){
 
     /* ESPORTES */
 
-    const geNews =
-    await getRSS(
-    "https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/"
-    );
+    let esportes = [
 
-    const uolEsporte =
-    await getRSS(
-    "https://rss.uol.com.br/feed/esporte.xml"
-    );
+        ...(await getRSS(
+        "https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/"
+        )).slice(0,3),
 
-    const esportes =
-    shuffle([
-        ...geNews.slice(0,2),
-        ...uolEsporte.slice(0,2)
-    ]);
+        ...(await getRSS(
+        "https://rss.uol.com.br/feed/esporte.xml"
+        )).slice(0,3)
 
-    esportes.forEach(item => {
+    ];
+
+    esportes =
+    safeNews(
+    removeDuplicates(
+    shuffle(esportes)
+    ));
+
+    esportes.slice(0,4).forEach(item => {
 
         html +=
         '<span class="label">ESPORTE</span> ' +
@@ -345,23 +459,25 @@ async function loadContent(){
 
     /* ECONOMIA */
 
-    const economiaG1 =
-    await getRSS(
-    "https://g1.globo.com/rss/g1/economia/"
-    );
+    let economia = [
 
-    const economiaUol =
-    await getRSS(
-    "https://rss.uol.com.br/feed/economia.xml"
-    );
+        ...(await getRSS(
+        "https://g1.globo.com/rss/g1/economia/"
+        )).slice(0,3),
 
-    const economia =
-    shuffle([
-        ...economiaG1.slice(0,2),
-        ...economiaUol.slice(0,2)
-    ]);
+        ...(await getRSS(
+        "https://rss.uol.com.br/feed/economia.xml"
+        )).slice(0,3)
 
-    economia.forEach(item => {
+    ];
+
+    economia =
+    safeNews(
+    removeDuplicates(
+    shuffle(economia)
+    ));
+
+    economia.slice(0,3).forEach(item => {
 
         html +=
         '<span class="label">MERCADO</span> ' +
@@ -382,25 +498,27 @@ async function loadContent(){
     '<span class="sep">◆</span>';
 
 
-    /* TECNOLOGIA */
+    /* TECH */
 
-    const tech1 =
-    await getRSS(
-    "https://g1.globo.com/rss/g1/tecnologia/"
-    );
+    let tech = [
 
-    const tech2 =
-    await getRSS(
-    "https://feeds.feedburner.com/tecnoblog"
-    );
+        ...(await getRSS(
+        "https://g1.globo.com/rss/g1/tecnologia/"
+        )).slice(0,3),
 
-    const tech =
-    shuffle([
-        ...tech1.slice(0,2),
-        ...tech2.slice(0,2)
-    ]);
+        ...(await getRSS(
+        "https://feeds.feedburner.com/tecnoblog"
+        )).slice(0,3)
 
-    tech.forEach(item => {
+    ];
+
+    tech =
+    safeNews(
+    removeDuplicates(
+    shuffle(tech)
+    ));
+
+    tech.slice(0,3).forEach(item => {
 
         html +=
         '<span class="label">TECH</span> ' +
@@ -410,15 +528,15 @@ async function loadContent(){
     });
 
 
-    /* TRÂNSITO REAL VIA NOTÍCIAS SP */
+    /* TRÂNSITO */
 
-    const spNews =
+    let transito =
     await getRSS(
     "https://g1.globo.com/rss/g1/sao-paulo/"
     );
 
-    const transito =
-    spNews.filter(item => {
+    transito =
+    transito.filter(item => {
 
         const t =
         item.title.toLowerCase();
@@ -430,6 +548,12 @@ async function loadContent(){
                t.includes("lentidão");
 
     });
+
+    transito =
+    safeNews(
+    removeDuplicates(
+    shuffle(transito)
+    ));
 
     transito.slice(0,3).forEach(item => {
 
@@ -443,23 +567,25 @@ async function loadContent(){
 
     /* ENTRETENIMENTO */
 
-    const entretenimento1 =
-    await getRSS(
-    "https://g1.globo.com/rss/g1/pop-arte/"
-    );
+    let entretenimento = [
 
-    const entretenimento2 =
-    await getRSS(
-    "https://rss.uol.com.br/feed/splash.xml"
-    );
+        ...(await getRSS(
+        "https://g1.globo.com/rss/g1/pop-arte/"
+        )).slice(0,3),
 
-    const entretenimento =
-    shuffle([
-        ...entretenimento1.slice(0,2),
-        ...entretenimento2.slice(0,2)
-    ]);
+        ...(await getRSS(
+        "https://rss.uol.com.br/feed/splash.xml"
+        )).slice(0,3)
 
-    entretenimento.forEach(item => {
+    ];
+
+    entretenimento =
+    safeNews(
+    removeDuplicates(
+    shuffle(entretenimento)
+    ));
+
+    entretenimento.slice(0,3).forEach(item => {
 
         html +=
         '<span class="label">ENTRETENIMENTO</span> ' +
@@ -469,31 +595,31 @@ async function loadContent(){
     });
 
 
-    /* NEWS GERAIS */
+    /* NEWS */
 
-    const g1 =
-    await getRSS(
-    "https://g1.globo.com/rss/g1/"
-    );
+    let geral = [
 
-    const cnn =
-    await getRSS(
-    "https://www.cnnbrasil.com.br/feed/"
-    );
+        ...(await getRSS(
+        "https://g1.globo.com/rss/g1/"
+        )).slice(0,3),
 
-    const uol =
-    await getRSS(
-    "https://rss.uol.com.br/feed/noticias.xml"
-    );
+        ...(await getRSS(
+        "https://www.cnnbrasil.com.br/feed/"
+        )).slice(0,3),
 
-    const geral =
-    shuffle([
-        ...g1.slice(0,2),
-        ...cnn.slice(0,2),
-        ...uol.slice(0,2)
-    ]);
+        ...(await getRSS(
+        "https://rss.uol.com.br/feed/noticias.xml"
+        )).slice(0,3)
 
-    geral.forEach(item => {
+    ];
+
+    geral =
+    safeNews(
+    removeDuplicates(
+    shuffle(geral)
+    ));
+
+    geral.slice(0,4).forEach(item => {
 
         html +=
         '<span class="label">NEWS</span> ' +
@@ -506,13 +632,20 @@ async function loadContent(){
     /* INSTAGRAM */
 
     html +=
-    '<span class="label">INSTAGRAM</span> Siga @lumix.led' +
+    '<span class="label">INSTAGRAM</span> @lumix.led' +
     '<span class="sep">◆</span>';
 
+
+    /* ATUALIZA HTML */
 
     document.getElementById(
     "ticker-content"
     ).innerHTML = html;
+
+
+    /* AJUSTA VELOCIDADE */
+
+    updateSpeed(html.length);
 
 }
 
@@ -525,14 +658,34 @@ loadContent();
 
 
 /* =========================
-   ATUALIZA A CADA 4 MIN
+   ATUALIZA APÓS 2 CICLOS
 ========================= */
 
-setInterval(() => {
+const ticker =
+document.getElementById(
+"ticker-content"
+);
 
-    loadContent();
+ticker.addEventListener(
+"animationiteration",
+async function(){
 
-},240000);
+    cycleCount++;
+
+    console.log(
+    "Ciclo:",
+    cycleCount
+    );
+
+    if(cycleCount >= 2){
+
+        cycleCount = 0;
+
+        await loadContent();
+
+    }
+
+});
 
 </script>
 
