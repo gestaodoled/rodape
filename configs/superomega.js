@@ -1,48 +1,43 @@
 const CONFIG = {
 
-    /* RESOLUÇÃO DO RODAPÉ */
-
     width:1140,
     height:64,
 
-    /* FONTE */
-
     fontSize:26,
-
-    /* VELOCIDADE */
 
     speed:170,
 
-    /* CIDADE */
+    title:"LUMIX NEWS",
 
     city:"São Paulo",
 
-    /* INSTAGRAM */
-
     instagram:"@lumix.led",
-
-    /* TÍTULO */
-
-    title:"LUMIX NEWS",
-
-    /* BLOCOS */
 
     enabledBlocks:[
 
         "clima",
         "previsao",
         "transito",
+        "rodovias",
         "esporte",
         "resultados",
-        "classificacao",
         "selecao",
+        "classificacao",
         "dolar",
         "euro",
         "bitcoin",
         "mercado",
         "tech",
+        "trending",
+        "eventos",
+        "aeroportos",
+        "megasena",
+        "saude",
+        "alerta",
         "entretenimento",
         "news",
+        "motivacao",
+        "lumix",
         "instagram"
 
     ]
