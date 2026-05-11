@@ -15,11 +15,12 @@ const CONFIG = {
 
     enabledBlocks:[
 
+        "transito",
+        "esporte",
         "clima",
         "previsao",
         "transito",
         "rodovias",
-        "esporte",
         "resultados",
         "selecao",
         "classificacao",
