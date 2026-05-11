@@ -5,7 +5,7 @@ const CONFIG = {
 
     fontSize:12,
 
-    speed:170,
+    speed:70,
 
     title:"LUMIX NEWS",
 
