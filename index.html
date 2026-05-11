@@ -582,10 +582,20 @@ async function loadContent(){
         item.title.toLowerCase();
 
         return t.includes("trânsito") ||
+               t.includes("transito") ||
                t.includes("acidente") ||
                t.includes("rodovia") ||
                t.includes("marginal") ||
-               t.includes("lentidão");
+               t.includes("lentidão") ||
+               t.includes("lentidao") ||
+               t.includes("congestionamento") ||
+               t.includes("interdit") ||
+               t.includes("via") ||
+               t.includes("bloque") ||
+               t.includes("obras") ||
+               t.includes("chuva") ||
+               t.includes("engarrafamento") ||
+               t.includes("faixa");
 
     });
 
