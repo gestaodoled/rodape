@@ -129,9 +129,7 @@ body{
 
 </div>
 
-<!-- =========================================
-     CARREGA CONFIG
-========================================= -->
+<!-- CONFIG -->
 
 <script>
 
@@ -151,15 +149,11 @@ new Date().getTime() +
 
 </script>
 
-<!-- =========================================
-     SISTEMA PRINCIPAL
-========================================= -->
+<!-- SISTEMA -->
 
 <script>
 
-/* =========================================
-   APLICA CONFIG
-========================================= */
+/* CONFIG VISUAL */
 
 document.body.style.width =
 CONFIG.width + "px";
@@ -216,16 +210,12 @@ document.getElementById("ticker-content").style.animationDuration =
 CONFIG.speed + "s";
 
 
-/* =========================================
-   CONTADOR
-========================================= */
+/* CONTADOR */
 
 let cycleCount = 0;
 
 
-/* =========================================
-   RELÓGIO
-========================================= */
+/* RELÓGIO */
 
 function updateClock(){
 
@@ -246,9 +236,7 @@ setInterval(updateClock,1000);
 updateClock();
 
 
-/* =========================================
-   LIMPA TEXTO
-========================================= */
+/* LIMPA TEXTO */
 
 function cleanText(text){
 
@@ -271,9 +259,7 @@ function cleanText(text){
 }
 
 
-/* =========================================
-   RSS
-========================================= */
+/* RSS */
 
 async function getRSS(rssUrl){
 
@@ -300,9 +286,7 @@ async function getRSS(rssUrl){
 }
 
 
-/* =========================================
-   CLIMA
-========================================= */
+/* CLIMA */
 
 async function getWeather(){
 
@@ -344,9 +328,7 @@ async function getWeather(){
 }
 
 
-/* =========================================
-   COTAÇÕES
-========================================= */
+/* COTAÇÕES */
 
 async function getMoney(){
 
@@ -388,9 +370,7 @@ async function getMoney(){
 }
 
 
-/* =========================================
-   ITEM ALEATÓRIO
-========================================= */
+/* ITEM ALEATÓRIO */
 
 function pickOne(items){
 
@@ -408,9 +388,7 @@ function pickOne(items){
 }
 
 
-/* =========================================
-   LOAD CONTENT
-========================================= */
+/* LOAD */
 
 async function loadContent(){
 
@@ -418,8 +396,6 @@ async function loadContent(){
 
 
     for(let block of CONFIG.enabledBlocks){
-
-        /* CLIMA */
 
         if(block === "clima"){
 
@@ -436,8 +412,6 @@ async function loadContent(){
         }
 
 
-        /* PREVISÃO */
-
         if(block === "previsao"){
 
             const weather =
@@ -453,8 +427,6 @@ async function loadContent(){
 
         }
 
-
-        /* TRÂNSITO */
 
         if(block === "transito"){
 
@@ -478,7 +450,14 @@ async function loadContent(){
         }
 
 
-        /* ESPORTE */
+        if(block === "rodovias"){
+
+            html +=
+            '<span class="rodovias">RODOVIAS</span> Fluxo moderado nas principais rodovias' +
+            '<span class="sep">◆</span>';
+
+        }
+
 
         if(block === "esporte"){
 
@@ -502,7 +481,269 @@ async function loadContent(){
         }
 
 
-        /* NEWS */
+        if(block === "resultados"){
+
+            let futebol =
+            await getRSS(
+            "https://ge.globo.com/rss/ge/futebol/"
+            );
+
+            let item =
+            pickOne(futebol);
+
+            if(item){
+
+                html +=
+                '<span class="resultados">RESULTADOS</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        if(block === "selecao"){
+
+            let selecao =
+            await getRSS(
+            "https://ge.globo.com/rss/ge/futebol/selecao-brasileira/"
+            );
+
+            let item =
+            pickOne(selecao);
+
+            if(item){
+
+                html +=
+                '<span class="selecao">SELEÇÃO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        if(block === "classificacao"){
+
+            let brasileirao =
+            await getRSS(
+            "https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/"
+            );
+
+            let item =
+            pickOne(brasileirao);
+
+            if(item){
+
+                html +=
+                '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        if(block === "dolar"){
+
+            const money =
+            await getMoney();
+
+            html +=
+            '<span class="dolar">DÓLAR</span> R$ ' +
+            money.usd +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        if(block === "euro"){
+
+            const money =
+            await getMoney();
+
+            html +=
+            '<span class="euro">EURO</span> R$ ' +
+            money.eur +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        if(block === "bitcoin"){
+
+            const money =
+            await getMoney();
+
+            html +=
+            '<span class="bitcoin">BITCOIN</span> R$ ' +
+            money.btc +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        if(block === "mercado"){
+
+            let mercado =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/economia/"
+            );
+
+            let item =
+            pickOne(mercado);
+
+            if(item){
+
+                html +=
+                '<span class="mercado">MERCADO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        if(block === "tech"){
+
+            let tech =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/tecnologia/"
+            );
+
+            let item =
+            pickOne(tech);
+
+            if(item){
+
+                html +=
+                '<span class="tech">TECH</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        if(block === "trending"){
+
+            let trends =
+            await getRSS(
+            "https://rss.uol.com.br/feed/tecnologia.xml"
+            );
+
+            let item =
+            pickOne(trends);
+
+            if(item){
+
+                html +=
+                '<span class="trending">TRENDING</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        if(block === "eventos"){
+
+            let eventos =
+            await getRSS(
+            CONFIG.trafficRSS
+            );
+
+            let item =
+            pickOne(eventos);
+
+            if(item){
+
+                html +=
+                '<span class="eventos">EVENTOS</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        if(block === "aeroportos"){
+
+            html +=
+            '<span class="aeroportos">AEROPORTOS</span> Operação normal nos principais aeroportos' +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        if(block === "megasena"){
+
+            html +=
+            '<span class="megasena">MEGA-SENA</span> Confira o prêmio acumulado do próximo sorteio' +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        if(block === "saude"){
+
+            let saude =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/bemestar/"
+            );
+
+            let item =
+            pickOne(saude);
+
+            if(item){
+
+                html +=
+                '<span class="saude">SAÚDE</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        if(block === "alerta"){
+
+            html +=
+            '<span class="alerta">ALERTA</span> Acompanhe condições climáticas e trânsito em tempo real' +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        if(block === "entretenimento"){
+
+            let entretenimento =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/pop-arte/"
+            );
+
+            let item =
+            pickOne(entretenimento);
+
+            if(item){
+
+                html +=
+                '<span class="entretenimento">ENTRETENIMENTO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
 
         if(block === "news"){
 
@@ -526,52 +767,48 @@ async function loadContent(){
         }
 
 
-        /* DÓLAR */
+        if(block === "motivacao"){
 
-        if(block === "dolar"){
+            const frases = [
 
-            const money =
-            await getMoney();
+                "Grandes resultados exigem constância",
+                "Persistência gera resultados",
+                "Disciplina vence talento",
+                "Foco no objetivo"
+
+            ];
 
             html +=
-            '<span class="dolar">DÓLAR</span> R$ ' +
-            money.usd +
+            '<span class="motivacao">MOTIVAÇÃO</span> ' +
+            frases[
+            Math.floor(
+            Math.random() * frases.length
+            )] +
             '<span class="sep">◆</span>';
 
         }
 
 
-        /* EURO */
+        if(block === "lumix"){
 
-        if(block === "euro"){
+            const lumix = [
 
-            const money =
-            await getMoney();
+                "Impacto visual que vende",
+                "Especialistas em painéis de LED",
+                "Tecnologia visual de alto impacto"
+
+            ];
 
             html +=
-            '<span class="euro">EURO</span> R$ ' +
-            money.eur +
+            '<span class="lumix">LUMIX LED</span> ' +
+            lumix[
+            Math.floor(
+            Math.random() * lumix.length
+            )] +
             '<span class="sep">◆</span>';
 
         }
 
-
-        /* BITCOIN */
-
-        if(block === "bitcoin"){
-
-            const money =
-            await getMoney();
-
-            html +=
-            '<span class="bitcoin">BITCOIN</span> R$ ' +
-            money.btc +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        /* INSTAGRAM */
 
         if(block === "instagram"){
 
@@ -592,16 +829,12 @@ async function loadContent(){
 }
 
 
-/* =========================================
-   INICIAR
-========================================= */
+/* INICIAR */
 
 loadContent();
 
 
-/* =========================================
-   ATUALIZA A CADA 2 CICLOS
-========================================= */
+/* ATUALIZA */
 
 const ticker =
 document.getElementById(
@@ -625,9 +858,7 @@ async function(){
 });
 
 
-/* =========================================
-   RELOAD AUTOMÁTICO
-========================================= */
+/* RELOAD */
 
 setInterval(() => {
 
