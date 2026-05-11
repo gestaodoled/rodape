@@ -5,8 +5,9 @@
 
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>LUMIX NEWS CONFIG</title>
+<title>LUMIX NEWS PRO</title>
 
 <style>
 
@@ -17,7 +18,7 @@ body{
     font-family:Arial, Helvetica, sans-serif;
 }
 
-/* ÁREA ESQUERDA */
+/* CONFIGURAÇÃO VISUAL */
 
 #left-box{
     position:absolute;
@@ -28,10 +29,8 @@ body{
     font-weight:bold;
     text-align:center;
     border-right:1px solid #FFF;
-    z-index:5;
+    z-index:10;
 }
-
-/* RELÓGIO */
 
 #clock{
     position:absolute;
@@ -41,10 +40,8 @@ body{
     font-weight:bold;
     text-align:center;
     border-right:1px solid #FFF;
-    z-index:5;
+    z-index:10;
 }
-
-/* TICKER */
 
 #ticker{
     position:absolute;
@@ -53,8 +50,6 @@ body{
     white-space:nowrap;
     color:#FFF;
 }
-
-/* CONTEÚDO */
 
 #ticker-content{
     display:inline-block;
@@ -70,26 +65,17 @@ body{
 .clima{color:#00FFFF;font-weight:bold;}
 .previsao{color:#87CEFA;font-weight:bold;}
 .transito{color:#FF8C00;font-weight:bold;}
-.rodovias{color:#FFA500;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
 .resultados{color:#32CD32;font-weight:bold;}
-.selecao{color:#7CFC00;font-weight:bold;}
 .classificacao{color:#ADFF2F;font-weight:bold;}
+.selecao{color:#7CFC00;font-weight:bold;}
 .dolar{color:#FFD700;font-weight:bold;}
 .euro{color:#F4D03F;font-weight:bold;}
 .bitcoin{color:#F39C12;font-weight:bold;}
-.mercado{color:#00FA9A;font-weight:bold;}
 .tech{color:#00BFFF;font-weight:bold;}
-.trending{color:#FF69B4;font-weight:bold;}
-.eventos{color:#BA55D3;font-weight:bold;}
-.aeroportos{color:#40E0D0;font-weight:bold;}
-.megasena{color:#32CD32;font-weight:bold;}
-.saude{color:#FF1493;font-weight:bold;}
-.alerta{color:#FF0000;font-weight:bold;}
+.mercado{color:#00FA9A;font-weight:bold;}
 .entretenimento{color:#FF66CC;font-weight:bold;}
 .news{color:#FFFFFF;font-weight:bold;}
-.motivacao{color:#00FFCC;font-weight:bold;}
-.lumix{color:#FFD700;font-weight:bold;}
 .instagram{color:#FF1493;font-weight:bold;}
 
 .sep{
@@ -126,71 +112,49 @@ body{
 <div id="ticker">
 
     <div id="ticker-content">
-        Carregando informações...
+        Carregando notícias...
     </div>
 
 </div>
 
 <script>
 
-/* =====================================
-   CONFIGURAÇÃO DO PAINEL
-===================================== */
+/* =========================================
+   CONFIG
+========================================= */
 
 const CONFIG = {
-
-    /* RESOLUÇÃO */
 
     width:800,
     height:30,
 
-    /* FONTES */
-
     fontSize:12,
 
-    /* VELOCIDADE */
-
-    speed:170,
-
-    /* CIDADE */
+    /* MAIS RÁPIDO */
+    speed:115,
 
     city:"São Paulo",
 
-    /* INSTAGRAM */
-
     instagram:"@lumix.led",
 
-    /* NOME */
-
     title:"LUMIX NEWS",
-
-    /* BLOCOS ATIVOS */
 
     enabledBlocks:[
 
         "clima",
         "previsao",
         "transito",
-        "rodovias",
         "esporte",
         "resultados",
-        "selecao",
         "classificacao",
+        "selecao",
         "dolar",
         "euro",
         "bitcoin",
         "mercado",
         "tech",
-        "trending",
-        "eventos",
-        "aeroportos",
-        "megasena",
-        "saude",
-        "alerta",
         "entretenimento",
         "news",
-        "motivacao",
-        "lumix",
         "instagram"
 
     ]
@@ -198,9 +162,9 @@ const CONFIG = {
 };
 
 
-/* =====================================
-   APLICA CONFIGURAÇÃO
-===================================== */
+/* =========================================
+   APLICA CONFIG
+========================================= */
 
 document.body.style.width =
 CONFIG.width + "px";
@@ -209,110 +173,66 @@ document.body.style.height =
 CONFIG.height + "px";
 
 
-document.getElementById(
-"left-box"
-).style.width = "120px";
+/* LEFT */
 
-document.getElementById(
-"left-box"
-).style.height =
-CONFIG.height + "px";
+const leftBox =
+document.getElementById("left-box");
 
-document.getElementById(
-"left-box"
-).style.lineHeight =
-CONFIG.height + "px";
-
-document.getElementById(
-"left-box"
-).style.fontSize =
-CONFIG.fontSize + "px";
-
-document.getElementById(
-"left-box"
-).innerHTML =
-CONFIG.title;
+leftBox.style.width = "120px";
+leftBox.style.height = CONFIG.height + "px";
+leftBox.style.lineHeight = CONFIG.height + "px";
+leftBox.style.fontSize = CONFIG.fontSize + "px";
+leftBox.innerHTML = CONFIG.title;
 
 
-/* RELÓGIO */
+/* CLOCK */
 
-document.getElementById(
-"clock"
-).style.left = "121px";
+const clock =
+document.getElementById("clock");
 
-document.getElementById(
-"clock"
-).style.width = "70px";
-
-document.getElementById(
-"clock"
-).style.height =
-CONFIG.height + "px";
-
-document.getElementById(
-"clock"
-).style.lineHeight =
-CONFIG.height + "px";
-
-document.getElementById(
-"clock"
-).style.fontSize =
-CONFIG.fontSize + "px";
+clock.style.left = "121px";
+clock.style.width = "70px";
+clock.style.height = CONFIG.height + "px";
+clock.style.lineHeight = CONFIG.height + "px";
+clock.style.fontSize = CONFIG.fontSize + "px";
 
 
 /* TICKER */
 
-document.getElementById(
-"ticker"
-).style.left = "192px";
+const ticker =
+document.getElementById("ticker");
 
-document.getElementById(
-"ticker"
-).style.width =
-(CONFIG.width - 192) + "px";
-
-document.getElementById(
-"ticker"
-).style.height =
-CONFIG.height + "px";
-
-document.getElementById(
-"ticker"
-).style.lineHeight =
-CONFIG.height + "px";
-
-document.getElementById(
-"ticker"
-).style.fontSize =
-CONFIG.fontSize + "px";
+ticker.style.left = "192px";
+ticker.style.width = (CONFIG.width - 192) + "px";
+ticker.style.height = CONFIG.height + "px";
+ticker.style.lineHeight = CONFIG.height + "px";
+ticker.style.fontSize = CONFIG.fontSize + "px";
 
 
-/* VELOCIDADE */
+/* ANIMAÇÃO */
 
-document.getElementById(
-"ticker-content"
-).style.animationDuration =
+const tickerContent =
+document.getElementById("ticker-content");
+
+tickerContent.style.animationDuration =
 CONFIG.speed + "s";
 
 
-/* =====================================
+/* =========================================
    RELÓGIO
-===================================== */
+========================================= */
 
 function updateClock(){
 
     const now = new Date();
 
-    const hours =
+    const h =
     String(now.getHours()).padStart(2,'0');
 
-    const minutes =
+    const m =
     String(now.getMinutes()).padStart(2,'0');
 
-    document.getElementById(
-    "clock"
-    ).innerHTML =
-    hours + ":" + minutes;
+    clock.innerHTML = h + ":" + m;
 }
 
 setInterval(updateClock,1000);
@@ -320,9 +240,9 @@ setInterval(updateClock,1000);
 updateClock();
 
 
-/* =====================================
+/* =========================================
    LIMPA TEXTO
-===================================== */
+========================================= */
 
 function cleanText(text){
 
@@ -336,22 +256,25 @@ function cleanText(text){
     return txt.value
     .replace(/Â/g,"")
     .replace(/�/g,"")
+    .replace(/[\n\r]/g," ")
     .trim();
 
 }
 
 
-/* =====================================
+/* =========================================
    RSS
-===================================== */
+========================================= */
 
-async function getRSS(rssUrl){
+async function getRSS(url){
 
     try{
 
         const api =
         "https://api.rss2json.com/v1/api.json?rss_url=" +
-        encodeURIComponent(rssUrl);
+        encodeURIComponent(
+        url + "?t=" + new Date().getTime()
+        );
 
         const response =
         await fetch(api);
@@ -370,9 +293,61 @@ async function getRSS(rssUrl){
 }
 
 
-/* =====================================
+/* =========================================
+   PEGA ITEM
+========================================= */
+
+function pickOne(items){
+
+    if(!items || items.length === 0){
+
+        return null;
+
+    }
+
+    return items[
+    Math.floor(
+    Math.random() * items.length
+    )];
+
+}
+
+
+/* =========================================
+   FILTRO
+========================================= */
+
+function safeNews(items){
+
+    const blocked = [
+
+        "morre",
+        "morte",
+        "crime",
+        "guerra",
+        "tragédia",
+        "assassin"
+
+    ];
+
+    return items.filter(item => {
+
+        if(!item.title) return false;
+
+        const t =
+        item.title.toLowerCase();
+
+        return !blocked.some(word =>
+        t.includes(word));
+
+    });
+
+}
+
+
+/* =========================================
    CLIMA
-===================================== */
+========================================= */
 
 async function getWeather(){
 
@@ -414,9 +389,9 @@ async function getWeather(){
 }
 
 
-/* =====================================
+/* =========================================
    COTAÇÕES
-===================================== */
+========================================= */
 
 async function getMoney(){
 
@@ -458,57 +433,9 @@ async function getMoney(){
 }
 
 
-/* =====================================
-   PEGA ITEM ALEATÓRIO
-===================================== */
-
-function pickOne(items){
-
-    if(!items || items.length === 0){
-
-        return null;
-
-    }
-
-    return items[
-    Math.floor(
-    Math.random() * items.length
-    )];
-
-}
-
-
-/* =====================================
-   RESULTADOS
-===================================== */
-
-const resultados = [
-
-    "Palmeiras 2x1 Santos",
-    "Corinthians 1x1 São Paulo",
-    "Flamengo 3x0 Vasco",
-    "Atlético-MG 1x0 Cruzeiro"
-
-];
-
-
-/* =====================================
-   CLASSIFICAÇÃO
-===================================== */
-
-const classificacao = [
-
-    "Palmeiras líder Série A",
-    "Flamengo no G4",
-    "Corinthians sobe posições",
-    "São Paulo mira Libertadores"
-
-];
-
-
-/* =====================================
+/* =========================================
    CONTEÚDO
-===================================== */
+========================================= */
 
 async function loadContent(){
 
@@ -524,7 +451,8 @@ async function loadContent(){
 
         html +=
         '<span class="clima">CLIMA</span> ' +
-        CONFIG.city + ' ' +
+        CONFIG.city +
+        ' ' +
         weather.temp +
         '°C' +
         '<span class="sep">◆</span>';
@@ -550,17 +478,114 @@ async function loadContent(){
     }
 
 
+    /* TRÂNSITO */
+
+    if(CONFIG.enabledBlocks.includes("transito")){
+
+        let transito =
+        await getRSS(
+        "https://g1.globo.com/rss/g1/sao-paulo/"
+        );
+
+        transito =
+        transito.filter(item => {
+
+            const t =
+            item.title.toLowerCase();
+
+            return t.includes("trânsito") ||
+                   t.includes("transito") ||
+                   t.includes("rodovia") ||
+                   t.includes("marginal") ||
+                   t.includes("acidente");
+
+        });
+
+        const item =
+        pickOne(
+        safeNews(transito)
+        );
+
+        if(item){
+
+            html +=
+            '<span class="transito">TRÂNSITO</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
+
+    }
+
+
+    /* ESPORTE */
+
+    if(CONFIG.enabledBlocks.includes("esporte")){
+
+        const feeds = [
+
+            "https://ge.globo.com/rss/ge/futebol/",
+            "https://www.espn.com.br/rss/futebol.xml",
+            "https://rss.uol.com.br/feed/esporte.xml"
+
+        ];
+
+        const feed =
+        feeds[
+        Math.floor(
+        Math.random() * feeds.length
+        )];
+
+        let esporte =
+        await getRSS(feed);
+
+        const item =
+        pickOne(
+        safeNews(esporte)
+        );
+
+        if(item){
+
+            html +=
+            '<span class="esporte">ESPORTE</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
+
+    }
+
+
     /* RESULTADOS */
 
     if(CONFIG.enabledBlocks.includes("resultados")){
 
-        html +=
-        '<span class="resultados">RESULTADOS</span> ' +
-        resultados[
-        Math.floor(
-        Math.random() * resultados.length
-        )] +
-        '<span class="sep">◆</span>';
+        let resultados =
+        await getRSS(
+        "https://ge.globo.com/rss/ge/futebol/"
+        );
+
+        resultados =
+        resultados.filter(item => {
+
+            const t =
+            item.title;
+
+            return /\d+x\d+/i.test(t);
+
+        });
+
+        const item =
+        pickOne(resultados);
+
+        if(item){
+
+            html +=
+            '<span class="resultados">RESULTADOS</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
 
     }
 
@@ -569,23 +594,60 @@ async function loadContent(){
 
     if(CONFIG.enabledBlocks.includes("classificacao")){
 
-        html +=
-        '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
-        classificacao[
-        Math.floor(
-        Math.random() * classificacao.length
-        )] +
-        '<span class="sep">◆</span>';
+        let tabela =
+        await getRSS(
+        "https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/"
+        );
+
+        const item =
+        pickOne(
+        safeNews(tabela)
+        );
+
+        if(item){
+
+            html +=
+            '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
 
     }
 
 
-    /* DÓLAR */
+    /* SELEÇÃO */
+
+    if(CONFIG.enabledBlocks.includes("selecao")){
+
+        let selecao =
+        await getRSS(
+        "https://ge.globo.com/rss/ge/selecao-brasileira/"
+        );
+
+        const item =
+        pickOne(
+        safeNews(selecao)
+        );
+
+        if(item){
+
+            html +=
+            '<span class="selecao">SELEÇÃO</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
+
+    }
+
+
+    /* COTAÇÕES */
+
+    const money =
+    await getMoney();
 
     if(CONFIG.enabledBlocks.includes("dolar")){
-
-        const money =
-        await getMoney();
 
         html +=
         '<span class="dolar">DÓLAR</span> R$ ' +
@@ -594,13 +656,7 @@ async function loadContent(){
 
     }
 
-
-    /* EURO */
-
     if(CONFIG.enabledBlocks.includes("euro")){
-
-        const money =
-        await getMoney();
 
         html +=
         '<span class="euro">EURO</span> R$ ' +
@@ -609,18 +665,128 @@ async function loadContent(){
 
     }
 
-
-    /* BITCOIN */
-
     if(CONFIG.enabledBlocks.includes("bitcoin")){
-
-        const money =
-        await getMoney();
 
         html +=
         '<span class="bitcoin">BITCOIN</span> R$ ' +
         money.btc +
         '<span class="sep">◆</span>';
+
+    }
+
+
+    /* MERCADO */
+
+    if(CONFIG.enabledBlocks.includes("mercado")){
+
+        let mercado =
+        await getRSS(
+        "https://g1.globo.com/rss/g1/economia/"
+        );
+
+        const item =
+        pickOne(
+        safeNews(mercado)
+        );
+
+        if(item){
+
+            html +=
+            '<span class="mercado">MERCADO</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
+
+    }
+
+
+    /* TECH */
+
+    if(CONFIG.enabledBlocks.includes("tech")){
+
+        let tech =
+        await getRSS(
+        "https://g1.globo.com/rss/g1/tecnologia/"
+        );
+
+        const item =
+        pickOne(
+        safeNews(tech)
+        );
+
+        if(item){
+
+            html +=
+            '<span class="tech">TECH</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
+
+    }
+
+
+    /* ENTRETENIMENTO */
+
+    if(CONFIG.enabledBlocks.includes("entretenimento")){
+
+        let entretenimento =
+        await getRSS(
+        "https://g1.globo.com/rss/g1/pop-arte/"
+        );
+
+        const item =
+        pickOne(
+        safeNews(entretenimento)
+        );
+
+        if(item){
+
+            html +=
+            '<span class="entretenimento">ENTRETENIMENTO</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
+
+    }
+
+
+    /* NEWS */
+
+    if(CONFIG.enabledBlocks.includes("news")){
+
+        const feeds = [
+
+            "https://g1.globo.com/rss/g1/",
+            "https://rss.uol.com.br/feed/noticias.xml",
+            "https://www.cnnbrasil.com.br/feed/"
+
+        ];
+
+        const feed =
+        feeds[
+        Math.floor(
+        Math.random() * feeds.length
+        )];
+
+        let news =
+        await getRSS(feed);
+
+        const item =
+        pickOne(
+        safeNews(news)
+        );
+
+        if(item){
+
+            html +=
+            '<span class="news">NEWS</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
 
     }
 
@@ -637,43 +803,25 @@ async function loadContent(){
     }
 
 
-    /* LUMIX */
-
-    if(CONFIG.enabledBlocks.includes("lumix")){
-
-        html +=
-        '<span class="lumix">LUMIX LED</span> Impacto visual que vende' +
-        '<span class="sep">◆</span>';
-
-    }
-
-
-    document.getElementById(
-    "ticker-content"
-    ).innerHTML = html;
+    tickerContent.innerHTML = html;
 
 }
 
 
-/* =====================================
+/* =========================================
    INICIAR
-===================================== */
+========================================= */
 
 loadContent();
 
 
-/* =====================================
-   CICLOS
-===================================== */
+/* =========================================
+   ATUALIZA APÓS 2 CICLOS
+========================================= */
 
 let cycleCount = 0;
 
-const ticker =
-document.getElementById(
-"ticker-content"
-);
-
-ticker.addEventListener(
+tickerContent.addEventListener(
 "animationiteration",
 async function(){
 
