@@ -5,6 +5,7 @@
 
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>LUMIX NEWS</title>
 
@@ -17,7 +18,9 @@ body{
     font-family:Arial, Helvetica, sans-serif;
 }
 
-/* BLOCO ESQUERDO */
+/* =========================
+BLOCO ESQUERDO
+========================= */
 
 #left-box{
     position:absolute;
@@ -31,7 +34,9 @@ body{
     z-index:5;
 }
 
-/* RELÓGIO */
+/* =========================
+RELÓGIO
+========================= */
 
 #clock{
     position:absolute;
@@ -44,7 +49,9 @@ body{
     z-index:5;
 }
 
-/* TICKER */
+/* =========================
+TICKER
+========================= */
 
 #ticker{
     position:absolute;
@@ -63,13 +70,18 @@ body{
     animation-iteration-count:infinite;
 }
 
-/* CORES */
+/* =========================
+CORES
+========================= */
 
 .clima{color:#00FFFF;font-weight:bold;}
 .previsao{color:#87CEFA;font-weight:bold;}
 .transito{color:#FF8C00;font-weight:bold;}
 .rodovias{color:#FFA500;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
+.resultados{color:#32CD32;font-weight:bold;}
+.selecao{color:#7CFC00;font-weight:bold;}
+.classificacao{color:#ADFF2F;font-weight:bold;}
 .dolar{color:#FFD700;font-weight:bold;}
 .euro{color:#F4D03F;font-weight:bold;}
 .bitcoin{color:#F39C12;font-weight:bold;}
@@ -83,6 +95,8 @@ body{
 .alerta{color:#FF0000;font-weight:bold;}
 .entretenimento{color:#FF66CC;font-weight:bold;}
 .news{color:#FFFFFF;font-weight:bold;}
+.motivacao{color:#00FFCC;font-weight:bold;}
+.lumix{color:#FFD700;font-weight:bold;}
 .instagram{color:#FF1493;font-weight:bold;}
 
 .sep{
@@ -90,7 +104,9 @@ body{
     padding:0 14px;
 }
 
-/* ANIMAÇÃO */
+/* =========================
+ANIMAÇÃO
+========================= */
 
 @keyframes scroll{
 
@@ -122,7 +138,9 @@ body{
 
 </div>
 
-<!-- CONFIG -->
+<!-- =========================
+CONFIG DINÂMICA
+========================= -->
 
 <script>
 
@@ -142,9 +160,15 @@ Date.now() +
 
 </script>
 
+<!-- =========================
+SISTEMA
+========================= -->
+
 <script>
 
-/* VISUAL */
+/* =========================
+VISUAL
+========================= */
 
 document.body.style.width =
 CONFIG.width + "px";
@@ -207,7 +231,9 @@ document.getElementById("ticker-content").style.animationDuration =
 CONFIG.speed + "s";
 
 
-/* RELÓGIO */
+/* =========================
+RELÓGIO
+========================= */
 
 function updateClock(){
 
@@ -230,7 +256,46 @@ setInterval(updateClock,1000);
 updateClock();
 
 
-/* RSS */
+/* =========================
+UTILS
+========================= */
+
+function cleanText(text){
+
+    if(!text) return "";
+
+    const txt =
+    document.createElement("textarea");
+
+    txt.innerHTML = text;
+
+    return txt.value
+    .replace(/Â/g,"")
+    .replace(/[\n\r]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+
+}
+
+function pickOne(items){
+
+    if(!items || items.length === 0){
+
+        return null;
+
+    }
+
+    return items[
+    Math.floor(
+    Math.random() * items.length
+    )];
+
+}
+
+
+/* =========================
+RSS
+========================= */
 
 async function getRSS(rssUrl){
 
@@ -246,7 +311,13 @@ async function getRSS(rssUrl){
         const data =
         await response.json();
 
-        return data.items || [];
+        if(data.status === "ok"){
+
+            return data.items || [];
+
+        }
+
+        return [];
 
     }catch(error){
 
@@ -257,7 +328,9 @@ async function getRSS(rssUrl){
 }
 
 
-/* CLIMA */
+/* =========================
+CLIMA
+========================= */
 
 async function getWeather(){
 
@@ -299,7 +372,9 @@ async function getWeather(){
 }
 
 
-/* MOEDAS */
+/* =========================
+MOEDAS
+========================= */
 
 async function getMoney(){
 
@@ -341,41 +416,9 @@ async function getMoney(){
 }
 
 
-/* UTILS */
-
-function cleanText(text){
-
-    if(!text) return "";
-
-    const txt =
-    document.createElement("textarea");
-
-    txt.innerHTML = text;
-
-    return txt.value
-    .replace(/Â/g,"")
-    .replace(/[\n\r]/g," ")
-    .trim();
-
-}
-
-function pickOne(items){
-
-    if(!items || items.length === 0){
-
-        return null;
-
-    }
-
-    return items[
-    Math.floor(
-    Math.random() * items.length
-    )];
-
-}
-
-
-/* LOAD */
+/* =========================
+LOAD CONTENT
+========================= */
 
 async function loadContent(){
 
@@ -386,6 +429,38 @@ async function loadContent(){
 
     const money =
     await getMoney();
+
+
+    async function addRSS(block, rssUrl, label){
+
+        if(CONFIG.enabledBlocks.includes(block)){
+
+            try{
+
+                const rss =
+                await getRSS(rssUrl);
+
+                const item =
+                pickOne(rss);
+
+                if(item){
+
+                    html +=
+                    '<span class="' + block + '">' +
+                    label +
+                    '</span> ' +
+                    cleanText(item.title) +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }catch(e){
+
+            }
+
+        }
+
+    }
 
 
     /* CLIMA */
@@ -418,127 +493,88 @@ async function loadContent(){
     }
 
 
-    /* TRANSITO */
+    /* RSS DINÂMICOS */
 
-    if(CONFIG.enabledBlocks.includes("transito")){
+    await addRSS(
+    "transito",
+    "https://g1.globo.com/rss/g1/sao-paulo/",
+    "TRÂNSITO"
+    );
 
-        let rss =
-        await getRSS(
-        "https://g1.globo.com/rss/g1/sao-paulo/"
-        );
+    await addRSS(
+    "rodovias",
+    "https://g1.globo.com/rss/g1/sao-paulo/",
+    "RODOVIAS"
+    );
 
-        let item =
-        pickOne(rss);
+    await addRSS(
+    "esporte",
+    "https://ge.globo.com/rss/ge/futebol/",
+    "ESPORTE"
+    );
 
-        if(item){
+    await addRSS(
+    "mercado",
+    "https://g1.globo.com/rss/g1/economia/",
+    "MERCADO"
+    );
 
-            html +=
-            '<span class="transito">TRÂNSITO</span> ' +
-            cleanText(item.title) +
-            '<span class="sep">◆</span>';
+    await addRSS(
+    "tech",
+    "https://g1.globo.com/rss/g1/tecnologia/",
+    "TECH"
+    );
 
-        }
+    await addRSS(
+    "trending",
+    "https://g1.globo.com/rss/g1/",
+    "TRENDING"
+    );
 
-    }
+    await addRSS(
+    "eventos",
+    "https://g1.globo.com/rss/g1/pop-arte/",
+    "EVENTOS"
+    );
 
+    await addRSS(
+    "aeroportos",
+    "https://g1.globo.com/rss/g1/sao-paulo/",
+    "AEROPORTOS"
+    );
 
-    /* ESPORTE */
+    await addRSS(
+    "megasena",
+    "https://g1.globo.com/rss/g1/loterias/",
+    "MEGA-SENA"
+    );
 
-    if(CONFIG.enabledBlocks.includes("esporte")){
+    await addRSS(
+    "saude",
+    "https://g1.globo.com/rss/g1/bemestar/",
+    "SAÚDE"
+    );
 
-        let rss =
-        await getRSS(
-        "https://ge.globo.com/rss/ge/futebol/"
-        );
+    await addRSS(
+    "alerta",
+    "https://g1.globo.com/rss/g1/sao-paulo/",
+    "ALERTA"
+    );
 
-        let item =
-        pickOne(rss);
+    await addRSS(
+    "entretenimento",
+    "https://g1.globo.com/rss/g1/pop-arte/",
+    "ENTRETENIMENTO"
+    );
 
-        if(item){
-
-            html +=
-            '<span class="esporte">ESPORTE</span> ' +
-            cleanText(item.title) +
-            '<span class="sep">◆</span>';
-
-        }
-
-    }
-
-
-    /* MERCADO */
-
-    if(CONFIG.enabledBlocks.includes("mercado")){
-
-        let rss =
-        await getRSS(
-        "https://g1.globo.com/rss/g1/economia/"
-        );
-
-        let item =
-        pickOne(rss);
-
-        if(item){
-
-            html +=
-            '<span class="mercado">MERCADO</span> ' +
-            cleanText(item.title) +
-            '<span class="sep">◆</span>';
-
-        }
-
-    }
-
-
-    /* TECH */
-
-    if(CONFIG.enabledBlocks.includes("tech")){
-
-        let rss =
-        await getRSS(
-        "https://g1.globo.com/rss/g1/tecnologia/"
-        );
-
-        let item =
-        pickOne(rss);
-
-        if(item){
-
-            html +=
-            '<span class="tech">TECH</span> ' +
-            cleanText(item.title) +
-            '<span class="sep">◆</span>';
-
-        }
-
-    }
+    await addRSS(
+    "news",
+    "https://g1.globo.com/rss/g1/",
+    "NEWS"
+    );
 
 
-    /* NEWS */
-
-    if(CONFIG.enabledBlocks.includes("news")){
-
-        let rss =
-        await getRSS(
-        "https://g1.globo.com/rss/g1/"
-        );
-
-        let item =
-        pickOne(rss);
-
-        if(item){
-
-            html +=
-            '<span class="news">NEWS</span> ' +
-            cleanText(item.title) +
-            '<span class="sep">◆</span>';
-
-        }
-
-    }
-
-
-    /* DOLAR */
+    /* DÓLAR */
 
     if(CONFIG.enabledBlocks.includes("dolar")){
 
@@ -592,14 +628,27 @@ async function loadContent(){
 
 }
 
+
+/* =========================
+INICIAR
+========================= */
+
 loadContent();
+
+
+/* =========================
+ATUALIZA A CADA CICLO
+========================= */
 
 document
 .getElementById("ticker-content")
 .addEventListener(
 "animationiteration",
-loadContent
-);
+async function(){
+
+    await loadContent();
+
+});
 
 </script>
 
