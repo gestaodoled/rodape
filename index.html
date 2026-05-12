@@ -538,24 +538,42 @@ async function loadContent(){
         }
 
 
-        /* RESULTADOS */
+        /* RESULTADOS REAIS */
 
         if(block === "resultados"){
 
-            let futebol =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/"
-            );
+            try{
 
-            let item =
-            pickOne(futebol);
+                const response =
+                await fetch(
+                "https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=4328"
+                );
 
-            if(item){
+                const data =
+                await response.json();
 
-                html +=
-                '<span class="resultados">RESULTADOS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
+                if(data.events && data.events.length){
+
+                    const jogo =
+                    data.events[
+                    Math.floor(
+                    Math.random() * Math.min(5,data.events.length)
+                    )];
+
+                    html +=
+                    '<span class="resultados">RESULTADOS</span> ' +
+                    jogo.strHomeTeam +
+                    ' ' +
+                    jogo.intHomeScore +
+                    'x' +
+                    jogo.intAwayScore +
+                    ' ' +
+                    jogo.strAwayTeam +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }catch(error){
 
             }
 
@@ -586,24 +604,36 @@ async function loadContent(){
         }
 
 
-        /* CLASSIFICAÇÃO */
+        /* CLASSIFICAÇÃO REAL */
 
         if(block === "classificacao"){
 
-            let brasileirao =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/"
-            );
+            try{
 
-            let item =
-            pickOne(brasileirao);
+                const response =
+                await fetch(
+                "https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2025-2026"
+                );
 
-            if(item){
+                const data =
+                await response.json();
 
-                html +=
-                '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
+                if(data.table && data.table.length){
+
+                    const top =
+                    data.table[0];
+
+                    html +=
+                    '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
+                    top.name +
+                    ' líder com ' +
+                    top.intPoints +
+                    ' pts' +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }catch(error){
 
             }
 
