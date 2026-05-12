@@ -70,9 +70,6 @@ body{
 .transito{color:#FF8C00;font-weight:bold;}
 .rodovias{color:#FFA500;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
-.resultados{color:#32CD32;font-weight:bold;}
-.proximos{color:#7CFC00;font-weight:bold;}
-.classificacao{color:#ADFF2F;font-weight:bold;}
 .dolar{color:#FFD700;font-weight:bold;}
 .euro{color:#F4D03F;font-weight:bold;}
 .bitcoin{color:#F39C12;font-weight:bold;}
@@ -86,8 +83,6 @@ body{
 .alerta{color:#FF0000;font-weight:bold;}
 .entretenimento{color:#FF66CC;font-weight:bold;}
 .news{color:#FFFFFF;font-weight:bold;}
-.motivacao{color:#00FFCC;font-weight:bold;}
-.lumix{color:#FFD700;font-weight:bold;}
 .instagram{color:#FF1493;font-weight:bold;}
 
 .sep{
@@ -395,19 +390,6 @@ async function getMoney(){
 
 
 /* =========================
-FUTEBOL RSS
-========================= */
-
-async function getFootballRSS(){
-
-    return await getRSS(
-    "https://ge.globo.com/rss/ge/futebol/"
-    );
-
-}
-
-
-/* =========================
 LOAD CONTENT
 ========================= */
 
@@ -420,9 +402,6 @@ async function loadContent(){
 
     const money =
     await getMoney();
-
-    const futebol =
-    await getFootballRSS();
 
     for(let block of CONFIG.enabledBlocks){
 
@@ -495,8 +474,13 @@ async function loadContent(){
 
         if(block === "rodovias"){
 
+            let rod =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/sao-paulo/"
+            );
+
             const item =
-            pickOne(futebol);
+            pickOne(rod);
 
             if(item){
 
@@ -514,70 +498,18 @@ async function loadContent(){
 
         if(block === "esporte"){
 
+            let esporte =
+            await getRSS(
+            "https://ge.globo.com/rss/ge/futebol/"
+            );
+
             const item =
-            pickOne(futebol);
+            pickOne(esporte);
 
             if(item){
 
                 html +=
                 '<span class="esporte">ESPORTE</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* RESULTADOS */
-
-        if(block === "resultados"){
-
-            const item =
-            pickOne(futebol);
-
-            if(item){
-
-                html +=
-                '<span class="resultados">RESULTADOS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* PRÓXIMOS JOGOS */
-
-        if(block === "proximosJogos"){
-
-            const item =
-            pickOne(futebol);
-
-            if(item){
-
-                html +=
-                '<span class="proximos">PRÓXIMOS JOGOS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* CLASSIFICAÇÃO */
-
-        if(block === "classificacao"){
-
-            const item =
-            pickOne(futebol);
-
-            if(item){
-
-                html +=
-                '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
                 cleanText(item.title) +
                 '<span class="sep">◆</span>';
 
@@ -674,13 +606,13 @@ async function loadContent(){
 
         if(block === "trending"){
 
-            let trends =
+            let trending =
             await getRSS(
             "https://g1.globo.com/rss/g1/"
             );
 
             const item =
-            pickOne(trends);
+            pickOne(trending);
 
             if(item){
 
@@ -724,7 +656,7 @@ async function loadContent(){
 
             let aero =
             await getRSS(
-            "https://g1.globo.com/rss/g1/"
+            "https://g1.globo.com/rss/g1/sao-paulo/"
             );
 
             const item =
