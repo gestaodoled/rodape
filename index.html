@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>LUMIX NEWS</title>
+<title>LUMIX NEWS PRO</title>
 
 <style>
 
@@ -17,7 +17,7 @@ body{
     font-family:Arial, Helvetica, sans-serif;
 }
 
-/* BOX ESQUERDO */
+/* BOX */
 
 #left-box{
     position:absolute;
@@ -31,7 +31,7 @@ body{
     z-index:5;
 }
 
-/* RELÓGIO */
+/* CLOCK */
 
 #clock{
     position:absolute;
@@ -71,6 +71,7 @@ body{
 .rodovias{color:#FFA500;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
 .resultados{color:#32CD32;font-weight:bold;}
+.proximos{color:#7CFC00;font-weight:bold;}
 .classificacao{color:#ADFF2F;font-weight:bold;}
 .dolar{color:#FFD700;font-weight:bold;}
 .euro{color:#F4D03F;font-weight:bold;}
@@ -94,7 +95,7 @@ body{
     padding:0 14px;
 }
 
-/* ANIMAÇÃO */
+/* SCROLL */
 
 @keyframes scroll{
 
@@ -394,234 +395,14 @@ async function getMoney(){
 
 
 /* =========================
-CAMPEONATOS
+FUTEBOL RSS
 ========================= */
 
-const leagues = [
-
-    {
-        id:4340,
-        name:"Brasileirão Série A"
-    },
-
-    {
-        id:4396,
-        name:"Brasileirão Série B"
-    },
-
-    {
-        id:5212,
-        name:"Copa do Brasil"
-    },
-
-    {
-        id:4480,
-        name:"Libertadores"
-    },
-
-    {
-        id:5250,
-        name:"Sul-Americana"
-    },
-
-    {
-        id:4328,
-        name:"Premier League"
-    },
-
-    {
-        id:4335,
-        name:"La Liga"
-    },
-
-    {
-        id:4331,
-        name:"Bundesliga"
-    },
-
-    {
-        id:4429,
-        name:"Copa do Mundo 2026"
-    }
-
-];
-
-function getRandomLeague(){
-
-    return leagues[
-    Math.floor(
-    Math.random() * leagues.length
-    )];
-
-}
-
-
-/* =========================
-RESULTADOS
-========================= */
-
-async function getResults(){
-
-    try{
-
-        const league =
-        getRandomLeague();
-
-        const response =
-        await fetch(
-        `https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=${league.id}`
-        );
-
-        const data =
-        await response.json();
-
-        if(!data.events)
-        return null;
-
-        const games =
-        data.events.filter(game =>
-
-            game.intHomeScore !== null &&
-            game.intAwayScore !== null
-
-        );
-
-        if(games.length === 0)
-        return null;
-
-        const game =
-        pickOne(games);
-
-        return (
-            league.name +
-            ' • ' +
-            game.strHomeTeam +
-            ' ' +
-            game.intHomeScore +
-            'x' +
-            game.intAwayScore +
-            ' ' +
-            game.strAwayTeam
-        );
-
-    }catch(error){
-
-        return null;
-
-    }
-
-}
-
-
-/* =========================
-PRÓXIMOS JOGOS
-========================= */
-
-async function getNextGames(){
-
-    try{
-
-        const league =
-        getRandomLeague();
-
-        const response =
-        await fetch(
-        `https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=${league.id}`
-        );
-
-        const data =
-        await response.json();
-
-        if(!data.events)
-        return null;
-
-        const game =
-        pickOne(data.events);
-
-        let time = "--:--";
-
-        if(game.strTime){
-
-            time =
-            game.strTime.substring(0,5);
-
-        }
-
-        return (
-            league.name +
-            ' • ' +
-            game.strHomeTeam +
-            ' x ' +
-            game.strAwayTeam +
-            ' ' +
-            time
-        );
-
-    }catch(error){
-
-        return null;
-
-    }
-
-}
-
-
-/* =========================
-CLASSIFICAÇÃO
-========================= */
-
-async function getStandings(){
-
-    try{
-
-        const league =
-        getRandomLeague();
-
-        const response =
-        await fetch(
-        `https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=${league.id}&s=2025-2026`
-        );
-
-        const data =
-        await response.json();
-
-        if(!data.table)
-        return null;
-
-        const top4 =
-        data.table.slice(0,4);
-
-        let text =
-        league.name + ' • ';
-
-        top4.forEach((team,index) => {
-
-            const name =
-            team.name ||
-            team.strTeam ||
-            "Time";
-
-            const points =
-            team.intPoints || 0;
-
-            text +=
-            `${index+1}° ${name} ${points} pts`;
-
-            if(index < 3){
-
-                text += ' • ';
-
-            }
-
-        });
-
-        return text;
-
-    }catch(error){
-
-        return null;
-
-    }
+async function getFootballRSS(){
+
+    return await getRSS(
+    "https://ge.globo.com/rss/ge/futebol/"
+    );
 
 }
 
@@ -639,6 +420,9 @@ async function loadContent(){
 
     const money =
     await getMoney();
+
+    const futebol =
+    await getFootballRSS();
 
     for(let block of CONFIG.enabledBlocks){
 
@@ -707,17 +491,31 @@ async function loadContent(){
         }
 
 
+        /* RODOVIAS */
+
+        if(block === "rodovias"){
+
+            const item =
+            pickOne(futebol);
+
+            if(item){
+
+                html +=
+                '<span class="rodovias">RODOVIAS</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
         /* ESPORTE */
 
         if(block === "esporte"){
 
-            let esporte =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/"
-            );
-
             const item =
-            pickOne(esporte);
+            pickOne(futebol);
 
             if(item){
 
@@ -735,14 +533,14 @@ async function loadContent(){
 
         if(block === "resultados"){
 
-            const result =
-            await getResults();
+            const item =
+            pickOne(futebol);
 
-            if(result){
+            if(item){
 
                 html +=
                 '<span class="resultados">RESULTADOS</span> ' +
-                result +
+                cleanText(item.title) +
                 '<span class="sep">◆</span>';
 
             }
@@ -754,14 +552,14 @@ async function loadContent(){
 
         if(block === "proximosJogos"){
 
-            const next =
-            await getNextGames();
+            const item =
+            pickOne(futebol);
 
-            if(next){
+            if(item){
 
                 html +=
-                '<span class="esporte">PRÓXIMOS JOGOS</span> ' +
-                next +
+                '<span class="proximos">PRÓXIMOS JOGOS</span> ' +
+                cleanText(item.title) +
                 '<span class="sep">◆</span>';
 
             }
@@ -773,14 +571,14 @@ async function loadContent(){
 
         if(block === "classificacao"){
 
-            const standing =
-            await getStandings();
+            const item =
+            pickOne(futebol);
 
-            if(standing){
+            if(item){
 
                 html +=
                 '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
-                standing +
+                cleanText(item.title) +
                 '<span class="sep">◆</span>';
 
             }
@@ -872,17 +670,185 @@ async function loadContent(){
         }
 
 
-        /* NEWS */
+        /* TRENDING */
 
-        if(block === "news"){
+        if(block === "trending"){
 
-            let geral =
+            let trends =
             await getRSS(
             "https://g1.globo.com/rss/g1/"
             );
 
             const item =
-            pickOne(geral);
+            pickOne(trends);
+
+            if(item){
+
+                html +=
+                '<span class="trending">TRENDING</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* EVENTOS */
+
+        if(block === "eventos"){
+
+            let eventos =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/pop-arte/"
+            );
+
+            const item =
+            pickOne(eventos);
+
+            if(item){
+
+                html +=
+                '<span class="eventos">EVENTOS</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* AEROPORTOS */
+
+        if(block === "aeroportos"){
+
+            let aero =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/"
+            );
+
+            const item =
+            pickOne(aero);
+
+            if(item){
+
+                html +=
+                '<span class="aeroportos">AEROPORTOS</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* MEGA-SENA */
+
+        if(block === "megasena"){
+
+            let mega =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/loterias/"
+            );
+
+            const item =
+            pickOne(mega);
+
+            if(item){
+
+                html +=
+                '<span class="megasena">MEGA-SENA</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* SAÚDE */
+
+        if(block === "saude"){
+
+            let saude =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/bemestar/"
+            );
+
+            const item =
+            pickOne(saude);
+
+            if(item){
+
+                html +=
+                '<span class="saude">SAÚDE</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* ALERTA */
+
+        if(block === "alerta"){
+
+            let alerta =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/sao-paulo/"
+            );
+
+            const item =
+            pickOne(alerta);
+
+            if(item){
+
+                html +=
+                '<span class="alerta">ALERTA</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* ENTRETENIMENTO */
+
+        if(block === "entretenimento"){
+
+            let ent =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/pop-arte/"
+            );
+
+            const item =
+            pickOne(ent);
+
+            if(item){
+
+                html +=
+                '<span class="entretenimento">ENTRETENIMENTO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* NEWS */
+
+        if(block === "news"){
+
+            let news =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/"
+            );
+
+            const item =
+            pickOne(news);
 
             if(item){
 
@@ -924,7 +890,7 @@ loadContent();
 
 
 /* =========================
-ATUALIZA
+ATUALIZAÇÃO
 ========================= */
 
 const ticker =
@@ -932,21 +898,11 @@ document.getElementById(
 "ticker-content"
 );
 
-let cycleCount = 0;
-
 ticker.addEventListener(
 "animationiteration",
 async function(){
 
-    cycleCount++;
-
-    if(cycleCount >= 1){
-
-        cycleCount = 0;
-
-        await loadContent();
-
-    }
+    await loadContent();
 
 });
 
