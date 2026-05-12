@@ -290,7 +290,16 @@ async function getRSS(rssUrl){
         const data =
         await response.json();
 
-        return data.items || [];
+        if(
+            data.status === "ok" &&
+            data.items
+        ){
+
+            return data.items;
+
+        }
+
+        return [];
 
     }catch(error){
 
@@ -440,20 +449,9 @@ async function loadContent(){
         if(block === "transito"){
 
             let transito =
-            await getRSS(CONFIG.trafficRSS);
-
-            transito =
-            transito.filter(item => {
-
-                const t =
-                item.title.toLowerCase();
-
-                return t.includes("trânsito") ||
-                       t.includes("transito") ||
-                       t.includes("acidente") ||
-                       t.includes("lentidão");
-
-            });
+            await getRSS(
+            "https://feeds.folha.uol.com.br/cotidiano/rss091.xml"
+            );
 
             const item =
             pickOne(transito);
@@ -476,7 +474,7 @@ async function loadContent(){
 
             let rod =
             await getRSS(
-            "https://g1.globo.com/rss/g1/sao-paulo/"
+            "https://feeds.folha.uol.com.br/cotidiano/rss091.xml"
             );
 
             const item =
@@ -500,7 +498,7 @@ async function loadContent(){
 
             let esporte =
             await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/"
+            "https://feeds.folha.uol.com.br/esporte/rss091.xml"
             );
 
             const item =
@@ -560,7 +558,7 @@ async function loadContent(){
 
             let mercado =
             await getRSS(
-            "https://g1.globo.com/rss/g1/economia/"
+            "https://feeds.folha.uol.com.br/mercado/rss091.xml"
             );
 
             const item =
@@ -584,7 +582,7 @@ async function loadContent(){
 
             let tech =
             await getRSS(
-            "https://g1.globo.com/rss/g1/tecnologia/"
+            "https://feeds.folha.uol.com.br/tec/rss091.xml"
             );
 
             const item =
@@ -608,7 +606,7 @@ async function loadContent(){
 
             let trending =
             await getRSS(
-            "https://g1.globo.com/rss/g1/"
+            "https://feeds.folha.uol.com.br/emcimadahora/rss091.xml"
             );
 
             const item =
@@ -632,7 +630,7 @@ async function loadContent(){
 
             let eventos =
             await getRSS(
-            "https://g1.globo.com/rss/g1/pop-arte/"
+            "https://feeds.folha.uol.com.br/ilustrada/rss091.xml"
             );
 
             const item =
@@ -656,7 +654,7 @@ async function loadContent(){
 
             let aero =
             await getRSS(
-            "https://g1.globo.com/rss/g1/sao-paulo/"
+            "https://feeds.folha.uol.com.br/cotidiano/rss091.xml"
             );
 
             const item =
@@ -680,7 +678,7 @@ async function loadContent(){
 
             let mega =
             await getRSS(
-            "https://g1.globo.com/rss/g1/loterias/"
+            "https://www.sorteonline.com.br/rss/megasena"
             );
 
             const item =
@@ -704,7 +702,7 @@ async function loadContent(){
 
             let saude =
             await getRSS(
-            "https://g1.globo.com/rss/g1/bemestar/"
+            "https://feeds.folha.uol.com.br/equilibrioesaude/rss091.xml"
             );
 
             const item =
@@ -728,7 +726,7 @@ async function loadContent(){
 
             let alerta =
             await getRSS(
-            "https://g1.globo.com/rss/g1/sao-paulo/"
+            "https://feeds.folha.uol.com.br/emcimadahora/rss091.xml"
             );
 
             const item =
@@ -752,7 +750,7 @@ async function loadContent(){
 
             let ent =
             await getRSS(
-            "https://g1.globo.com/rss/g1/pop-arte/"
+            "https://feeds.folha.uol.com.br/ilustrada/rss091.xml"
             );
 
             const item =
@@ -776,7 +774,7 @@ async function loadContent(){
 
             let news =
             await getRSS(
-            "https://g1.globo.com/rss/g1/"
+            "https://feeds.folha.uol.com.br/emcimadahora/rss091.xml"
             );
 
             const item =
