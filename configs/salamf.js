@@ -7,11 +7,11 @@ const CONFIG = {
 
     speed:70,
 
-    title:"LUMIX NEWS",
+    title:"MF ESTRUTURAS",
 
     city:"São Paulo",
 
-    instagram:"@lumix.led",
+    instagram:"@mf.estruturas",
 
     enabledBlocks:[
 
