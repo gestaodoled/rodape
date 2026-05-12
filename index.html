@@ -4,9 +4,9 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>LUMIX NEWS</title>
+<title>LUMIX NEWS PRO</title>
 
 <style>
 
@@ -16,6 +16,10 @@ body{
     background:#000;
     font-family:Arial, Helvetica, sans-serif;
 }
+
+/* =========================
+BOX ESQUERDO
+========================= */
 
 #left-box{
     position:absolute;
@@ -29,6 +33,10 @@ body{
     z-index:5;
 }
 
+/* =========================
+CLOCK
+========================= */
+
 #clock{
     position:absolute;
     top:0;
@@ -39,6 +47,10 @@ body{
     border-right:1px solid #FFF;
     z-index:5;
 }
+
+/* =========================
+TICKER
+========================= */
 
 #ticker{
     position:absolute;
@@ -57,17 +69,9 @@ body{
     animation-iteration-count:infinite;
 }
 
-@keyframes scroll{
-
-    from{
-        transform:translateX(0);
-    }
-
-    to{
-        transform:translateX(-100%);
-    }
-
-}
+/* =========================
+CORES
+========================= */
 
 .clima{color:#00FFFF;font-weight:bold;}
 .previsao{color:#87CEFA;font-weight:bold;}
@@ -94,6 +98,22 @@ body{
     padding:0 14px;
 }
 
+/* =========================
+SCROLL
+========================= */
+
+@keyframes scroll{
+
+    from{
+        transform:translateX(0);
+    }
+
+    to{
+        transform:translateX(-100%);
+    }
+
+}
+
 </style>
 
 </head>
@@ -111,6 +131,10 @@ body{
     </div>
 
 </div>
+
+<!-- =========================
+CONFIG
+========================= -->
 
 <script>
 
@@ -130,9 +154,15 @@ Date.now() +
 
 </script>
 
+<!-- =========================
+SISTEMA
+========================= -->
+
 <script>
 
-/* VISUAL */
+/* =========================
+VISUAL
+========================= */
 
 document.body.style.width =
 CONFIG.width + "px";
@@ -198,7 +228,9 @@ document.getElementById("ticker-content").style.animationDuration =
 CONFIG.speed + "s";
 
 
-/* CLOCK */
+/* =========================
+CLOCK
+========================= */
 
 function updateClock(){
 
@@ -221,7 +253,46 @@ setInterval(updateClock,1000);
 updateClock();
 
 
-/* RSS */
+/* =========================
+UTILS
+========================= */
+
+function cleanText(text){
+
+    if(!text) return "";
+
+    const txt =
+    document.createElement("textarea");
+
+    txt.innerHTML = text;
+
+    return txt.value
+    .replace(/Â/g,"")
+    .replace(/[\n\r]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+
+}
+
+function pickOne(items){
+
+    if(!items || items.length === 0){
+
+        return null;
+
+    }
+
+    return items[
+    Math.floor(
+    Math.random() * items.length
+    )];
+
+}
+
+
+/* =========================
+RSS
+========================= */
 
 async function getRSS(url){
 
@@ -237,9 +308,15 @@ async function getRSS(url){
         const data =
         await response.json();
 
-        return data.items || [];
+        if(data.items){
 
-    }catch(e){
+            return data.items;
+
+        }
+
+        return [];
+
+    }catch(error){
 
         return [];
 
@@ -248,43 +325,9 @@ async function getRSS(url){
 }
 
 
-/* CLEAN */
-
-function cleanText(text){
-
-    if(!text) return "";
-
-    const txt =
-    document.createElement("textarea");
-
-    txt.innerHTML = text;
-
-    return txt.value
-    .replace(/[\n\r]/g," ")
-    .trim();
-
-}
-
-
-/* PICK */
-
-function pickOne(items){
-
-    if(!items || !items.length){
-
-        return null;
-
-    }
-
-    return items[
-    Math.floor(
-    Math.random() * items.length
-    )];
-
-}
-
-
-/* WEATHER */
+/* =========================
+CLIMA
+========================= */
 
 async function getWeather(){
 
@@ -292,7 +335,7 @@ async function getWeather(){
 
         const response =
         await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.latitude}&longitude=${CONFIG.longitude}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.latitude}&longitude=${CONFIG.longitude}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min&forecast_days=1&timezone=auto`
         );
 
         const data =
@@ -311,7 +354,7 @@ async function getWeather(){
 
         };
 
-    }catch(e){
+    }catch(error){
 
         return {
 
@@ -326,7 +369,9 @@ async function getWeather(){
 }
 
 
-/* MONEY */
+/* =========================
+MOEDAS
+========================= */
 
 async function getMoney(){
 
@@ -353,7 +398,7 @@ async function getMoney(){
 
         };
 
-    }catch(e){
+    }catch(error){
 
         return {
 
@@ -368,7 +413,57 @@ async function getMoney(){
 }
 
 
-/* CONTENT */
+/* =========================
+RSS FEEDS
+========================= */
+
+const FEEDS = {
+
+    transito:
+    "https://g1.globo.com/rss/g1/sao-paulo/",
+
+    rodovias:
+    "https://g1.globo.com/rss/g1/sao-paulo/",
+
+    esporte:
+    "https://ge.globo.com/rss/ge/futebol/",
+
+    mercado:
+    "https://g1.globo.com/rss/g1/economia/",
+
+    tech:
+    "https://g1.globo.com/rss/g1/tecnologia/",
+
+    trending:
+    "https://g1.globo.com/rss/g1/",
+
+    eventos:
+    "https://g1.globo.com/rss/g1/pop-arte/",
+
+    aeroportos:
+    "https://g1.globo.com/rss/g1/sao-paulo/",
+
+    megasena:
+    "https://g1.globo.com/rss/g1/loterias/",
+
+    saude:
+    "https://g1.globo.com/rss/g1/bemestar/",
+
+    alerta:
+    "https://g1.globo.com/rss/g1/sao-paulo/",
+
+    entretenimento:
+    "https://g1.globo.com/rss/g1/pop-arte/",
+
+    news:
+    "https://g1.globo.com/rss/g1/"
+
+};
+
+
+/* =========================
+LOAD CONTENT
+========================= */
 
 async function loadContent(){
 
@@ -380,47 +475,9 @@ async function loadContent(){
     const money =
     await getMoney();
 
-    const feeds = {
-
-        transito:
-        "https://g1.globo.com/rss/g1/sao-paulo/",
-
-        rodovias:
-        "https://g1.globo.com/rss/g1/sao-paulo/",
-
-        esporte:
-        "https://ge.globo.com/rss/ge/futebol/",
-
-        mercado:
-        "https://g1.globo.com/rss/g1/economia/",
-
-        tech:
-        "https://g1.globo.com/rss/g1/tecnologia/",
-
-        trending:
-        "https://g1.globo.com/rss/g1/",
-
-        eventos:
-        "https://g1.globo.com/rss/g1/pop-arte/",
-
-        aeroportos:
-        "https://g1.globo.com/rss/g1/sao-paulo/",
-
-        saude:
-        "https://g1.globo.com/rss/g1/bemestar/",
-
-        alerta:
-        "https://g1.globo.com/rss/g1/sao-paulo/",
-
-        entretenimento:
-        "https://g1.globo.com/rss/g1/pop-arte/",
-
-        news:
-        "https://g1.globo.com/rss/g1/"
-
-    };
-
     for(let block of CONFIG.enabledBlocks){
+
+        /* CLIMA */
 
         if(block === "clima"){
 
@@ -429,9 +486,13 @@ async function loadContent(){
             CONFIG.city +
             ' ' +
             weather.temp +
-            '°C <span class="sep">◆</span>';
+            '°C' +
+            '<span class="sep">◆</span>';
 
         }
+
+
+        /* PREVISÃO */
 
         else if(block === "previsao"){
 
@@ -440,62 +501,86 @@ async function loadContent(){
             weather.max +
             '° Mín ' +
             weather.min +
-            '° <span class="sep">◆</span>';
+            '°' +
+            '<span class="sep">◆</span>';
 
         }
+
+
+        /* DOLAR */
 
         else if(block === "dolar"){
 
             html +=
             '<span class="dolar">DÓLAR</span> R$ ' +
             money.usd +
-            ' <span class="sep">◆</span>';
+            '<span class="sep">◆</span>';
 
         }
+
+
+        /* EURO */
 
         else if(block === "euro"){
 
             html +=
             '<span class="euro">EURO</span> R$ ' +
             money.eur +
-            ' <span class="sep">◆</span>';
+            '<span class="sep">◆</span>';
 
         }
+
+
+        /* BTC */
 
         else if(block === "bitcoin"){
 
             html +=
             '<span class="bitcoin">BITCOIN</span> R$ ' +
             money.btc +
-            ' <span class="sep">◆</span>';
+            '<span class="sep">◆</span>';
 
         }
+
+
+        /* INSTAGRAM */
 
         else if(block === "instagram"){
 
             html +=
             '<span class="instagram">INSTAGRAM</span> ' +
             CONFIG.instagram +
-            ' <span class="sep">◆</span>';
+            '<span class="sep">◆</span>';
 
         }
 
+
+        /* RSS */
+
         else{
 
-            const rss =
-            await getRSS(feeds[block]);
+            try{
 
-            const item =
-            pickOne(rss);
+                const rss =
+                await getRSS(
+                FEEDS[block]
+                );
 
-            if(item){
+                const item =
+                pickOne(rss);
 
-                html +=
-                '<span class="' + block + '">' +
-                block.toUpperCase() +
-                '</span> ' +
-                cleanText(item.title) +
-                ' <span class="sep">◆</span>';
+                if(item){
+
+                    html +=
+                    '<span class="' + block + '">' +
+                    block.toUpperCase() +
+                    '</span> ' +
+                    cleanText(item.title) +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }catch(error){
 
             }
 
@@ -509,14 +594,38 @@ async function loadContent(){
 
 }
 
+
+/* =========================
+INIT
+========================= */
+
 loadContent();
+
+
+/* =========================
+ATUALIZAÇÃO
+========================= */
 
 document
 .getElementById("ticker-content")
 .addEventListener(
 "animationiteration",
-loadContent
-);
+async function(){
+
+    await loadContent();
+
+});
+
+
+/* =========================
+AUTO RELOAD
+========================= */
+
+setInterval(() => {
+
+    location.reload();
+
+}, 1800000);
 
 </script>
 
