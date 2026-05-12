@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>LUMIX NEWS PRO</title>
+<title>LUMIX NEWS</title>
 
 <style>
 
@@ -17,9 +17,7 @@ body{
     font-family:Arial, Helvetica, sans-serif;
 }
 
-/* =========================
-BOX ESQUERDO
-========================= */
+/* BLOCO ESQUERDO */
 
 #left-box{
     position:absolute;
@@ -33,9 +31,7 @@ BOX ESQUERDO
     z-index:5;
 }
 
-/* =========================
-CLOCK
-========================= */
+/* RELÓGIO */
 
 #clock{
     position:absolute;
@@ -48,9 +44,7 @@ CLOCK
     z-index:5;
 }
 
-/* =========================
-TICKER
-========================= */
+/* TICKER */
 
 #ticker{
     position:absolute;
@@ -69,9 +63,7 @@ TICKER
     animation-iteration-count:infinite;
 }
 
-/* =========================
-CORES
-========================= */
+/* CORES */
 
 .clima{color:#00FFFF;font-weight:bold;}
 .previsao{color:#87CEFA;font-weight:bold;}
@@ -98,9 +90,7 @@ CORES
     padding:0 14px;
 }
 
-/* =========================
-SCROLL
-========================= */
+/* ANIMAÇÃO */
 
 @keyframes scroll{
 
@@ -132,9 +122,7 @@ SCROLL
 
 </div>
 
-<!-- =========================
-CONFIG
-========================= -->
+<!-- CONFIG -->
 
 <script>
 
@@ -154,15 +142,9 @@ Date.now() +
 
 </script>
 
-<!-- =========================
-SISTEMA
-========================= -->
-
 <script>
 
-/* =========================
-VISUAL
-========================= */
+/* VISUAL */
 
 document.body.style.width =
 CONFIG.width + "px";
@@ -175,9 +157,6 @@ Math.round(CONFIG.width * 0.15);
 
 const clockWidth =
 Math.round(CONFIG.width * 0.09);
-
-const tickerWidth =
-CONFIG.width - leftWidth - clockWidth - 2;
 
 document.getElementById("left-box").style.width =
 leftWidth + "px";
@@ -213,7 +192,7 @@ document.getElementById("ticker").style.left =
 (leftWidth + clockWidth + 2) + "px";
 
 document.getElementById("ticker").style.width =
-tickerWidth + "px";
+(CONFIG.width - leftWidth - clockWidth - 2) + "px";
 
 document.getElementById("ticker").style.height =
 CONFIG.height + "px";
@@ -228,23 +207,21 @@ document.getElementById("ticker-content").style.animationDuration =
 CONFIG.speed + "s";
 
 
-/* =========================
-CLOCK
-========================= */
+/* RELÓGIO */
 
 function updateClock(){
 
     const now =
     new Date();
 
-    const h =
+    const hours =
     String(now.getHours()).padStart(2,'0');
 
-    const m =
+    const minutes =
     String(now.getMinutes()).padStart(2,'0');
 
     document.getElementById("clock").innerHTML =
-    h + ":" + m;
+    hours + ":" + minutes;
 
 }
 
@@ -253,54 +230,15 @@ setInterval(updateClock,1000);
 updateClock();
 
 
-/* =========================
-UTILS
-========================= */
+/* RSS */
 
-function cleanText(text){
-
-    if(!text) return "";
-
-    const txt =
-    document.createElement("textarea");
-
-    txt.innerHTML = text;
-
-    return txt.value
-    .replace(/Â/g,"")
-    .replace(/[\n\r]/g," ")
-    .replace(/\s+/g," ")
-    .trim();
-
-}
-
-function pickOne(items){
-
-    if(!items || items.length === 0){
-
-        return null;
-
-    }
-
-    return items[
-    Math.floor(
-    Math.random() * items.length
-    )];
-
-}
-
-
-/* =========================
-RSS
-========================= */
-
-async function getRSS(url){
+async function getRSS(rssUrl){
 
     try{
 
         const api =
         "https://api.rss2json.com/v1/api.json?rss_url=" +
-        encodeURIComponent(url);
+        encodeURIComponent(rssUrl);
 
         const response =
         await fetch(api);
@@ -308,13 +246,7 @@ async function getRSS(url){
         const data =
         await response.json();
 
-        if(data.items){
-
-            return data.items;
-
-        }
-
-        return [];
+        return data.items || [];
 
     }catch(error){
 
@@ -325,9 +257,7 @@ async function getRSS(url){
 }
 
 
-/* =========================
-CLIMA
-========================= */
+/* CLIMA */
 
 async function getWeather(){
 
@@ -369,9 +299,7 @@ async function getWeather(){
 }
 
 
-/* =========================
-MOEDAS
-========================= */
+/* MOEDAS */
 
 async function getMoney(){
 
@@ -413,57 +341,41 @@ async function getMoney(){
 }
 
 
-/* =========================
-RSS FEEDS
-========================= */
+/* UTILS */
 
-const FEEDS = {
+function cleanText(text){
 
-    transito:
-    "https://g1.globo.com/rss/g1/sao-paulo/",
+    if(!text) return "";
 
-    rodovias:
-    "https://g1.globo.com/rss/g1/sao-paulo/",
+    const txt =
+    document.createElement("textarea");
 
-    esporte:
-    "https://ge.globo.com/rss/ge/futebol/",
+    txt.innerHTML = text;
 
-    mercado:
-    "https://g1.globo.com/rss/g1/economia/",
+    return txt.value
+    .replace(/Â/g,"")
+    .replace(/[\n\r]/g," ")
+    .trim();
 
-    tech:
-    "https://g1.globo.com/rss/g1/tecnologia/",
+}
 
-    trending:
-    "https://g1.globo.com/rss/g1/",
+function pickOne(items){
 
-    eventos:
-    "https://g1.globo.com/rss/g1/pop-arte/",
+    if(!items || items.length === 0){
 
-    aeroportos:
-    "https://g1.globo.com/rss/g1/sao-paulo/",
+        return null;
 
-    megasena:
-    "https://g1.globo.com/rss/g1/loterias/",
+    }
 
-    saude:
-    "https://g1.globo.com/rss/g1/bemestar/",
+    return items[
+    Math.floor(
+    Math.random() * items.length
+    )];
 
-    alerta:
-    "https://g1.globo.com/rss/g1/sao-paulo/",
-
-    entretenimento:
-    "https://g1.globo.com/rss/g1/pop-arte/",
-
-    news:
-    "https://g1.globo.com/rss/g1/"
-
-};
+}
 
 
-/* =========================
-LOAD CONTENT
-========================= */
+/* LOAD */
 
 async function loadContent(){
 
@@ -475,118 +387,204 @@ async function loadContent(){
     const money =
     await getMoney();
 
-    for(let block of CONFIG.enabledBlocks){
 
-        /* CLIMA */
+    /* CLIMA */
 
-        if(block === "clima"){
+    if(CONFIG.enabledBlocks.includes("clima")){
 
-            html +=
-            '<span class="clima">CLIMA</span> ' +
-            CONFIG.city +
-            ' ' +
-            weather.temp +
-            '°C' +
-            '<span class="sep">◆</span>';
+        html +=
+        '<span class="clima">CLIMA</span> ' +
+        CONFIG.city +
+        ' ' +
+        weather.temp +
+        '°C' +
+        '<span class="sep">◆</span>';
 
-        }
-
-
-        /* PREVISÃO */
-
-        else if(block === "previsao"){
-
-            html +=
-            '<span class="previsao">PREVISÃO</span> Máx ' +
-            weather.max +
-            '° Mín ' +
-            weather.min +
-            '°' +
-            '<span class="sep">◆</span>';
-
-        }
+    }
 
 
-        /* DOLAR */
+    /* PREVISÃO */
 
-        else if(block === "dolar"){
+    if(CONFIG.enabledBlocks.includes("previsao")){
 
-            html +=
-            '<span class="dolar">DÓLAR</span> R$ ' +
-            money.usd +
-            '<span class="sep">◆</span>';
+        html +=
+        '<span class="previsao">PREVISÃO</span> Máx ' +
+        weather.max +
+        '° Mín ' +
+        weather.min +
+        '°' +
+        '<span class="sep">◆</span>';
 
-        }
+    }
 
 
-        /* EURO */
+    /* TRANSITO */
 
-        else if(block === "euro"){
+    if(CONFIG.enabledBlocks.includes("transito")){
+
+        let rss =
+        await getRSS(
+        "https://g1.globo.com/rss/g1/sao-paulo/"
+        );
+
+        let item =
+        pickOne(rss);
+
+        if(item){
 
             html +=
-            '<span class="euro">EURO</span> R$ ' +
-            money.eur +
+            '<span class="transito">TRÂNSITO</span> ' +
+            cleanText(item.title) +
             '<span class="sep">◆</span>';
-
-        }
-
-
-        /* BTC */
-
-        else if(block === "bitcoin"){
-
-            html +=
-            '<span class="bitcoin">BITCOIN</span> R$ ' +
-            money.btc +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        /* INSTAGRAM */
-
-        else if(block === "instagram"){
-
-            html +=
-            '<span class="instagram">INSTAGRAM</span> ' +
-            CONFIG.instagram +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        /* RSS */
-
-        else{
-
-            try{
-
-                const rss =
-                await getRSS(
-                FEEDS[block]
-                );
-
-                const item =
-                pickOne(rss);
-
-                if(item){
-
-                    html +=
-                    '<span class="' + block + '">' +
-                    block.toUpperCase() +
-                    '</span> ' +
-                    cleanText(item.title) +
-                    '<span class="sep">◆</span>';
-
-                }
-
-            }catch(error){
-
-            }
 
         }
 
     }
+
+
+    /* ESPORTE */
+
+    if(CONFIG.enabledBlocks.includes("esporte")){
+
+        let rss =
+        await getRSS(
+        "https://ge.globo.com/rss/ge/futebol/"
+        );
+
+        let item =
+        pickOne(rss);
+
+        if(item){
+
+            html +=
+            '<span class="esporte">ESPORTE</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
+
+    }
+
+
+    /* MERCADO */
+
+    if(CONFIG.enabledBlocks.includes("mercado")){
+
+        let rss =
+        await getRSS(
+        "https://g1.globo.com/rss/g1/economia/"
+        );
+
+        let item =
+        pickOne(rss);
+
+        if(item){
+
+            html +=
+            '<span class="mercado">MERCADO</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
+
+    }
+
+
+    /* TECH */
+
+    if(CONFIG.enabledBlocks.includes("tech")){
+
+        let rss =
+        await getRSS(
+        "https://g1.globo.com/rss/g1/tecnologia/"
+        );
+
+        let item =
+        pickOne(rss);
+
+        if(item){
+
+            html +=
+            '<span class="tech">TECH</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
+
+    }
+
+
+    /* NEWS */
+
+    if(CONFIG.enabledBlocks.includes("news")){
+
+        let rss =
+        await getRSS(
+        "https://g1.globo.com/rss/g1/"
+        );
+
+        let item =
+        pickOne(rss);
+
+        if(item){
+
+            html +=
+            '<span class="news">NEWS</span> ' +
+            cleanText(item.title) +
+            '<span class="sep">◆</span>';
+
+        }
+
+    }
+
+
+    /* DOLAR */
+
+    if(CONFIG.enabledBlocks.includes("dolar")){
+
+        html +=
+        '<span class="dolar">DÓLAR</span> R$ ' +
+        money.usd +
+        '<span class="sep">◆</span>';
+
+    }
+
+
+    /* EURO */
+
+    if(CONFIG.enabledBlocks.includes("euro")){
+
+        html +=
+        '<span class="euro">EURO</span> R$ ' +
+        money.eur +
+        '<span class="sep">◆</span>';
+
+    }
+
+
+    /* BTC */
+
+    if(CONFIG.enabledBlocks.includes("bitcoin")){
+
+        html +=
+        '<span class="bitcoin">BITCOIN</span> R$ ' +
+        money.btc +
+        '<span class="sep">◆</span>';
+
+    }
+
+
+    /* INSTAGRAM */
+
+    if(CONFIG.enabledBlocks.includes("instagram")){
+
+        html +=
+        '<span class="instagram">INSTAGRAM</span> ' +
+        CONFIG.instagram +
+        '<span class="sep">◆</span>';
+
+    }
+
 
     document.getElementById(
     "ticker-content"
@@ -594,38 +592,14 @@ async function loadContent(){
 
 }
 
-
-/* =========================
-INIT
-========================= */
-
 loadContent();
-
-
-/* =========================
-ATUALIZAÇÃO
-========================= */
 
 document
 .getElementById("ticker-content")
 .addEventListener(
 "animationiteration",
-async function(){
-
-    await loadContent();
-
-});
-
-
-/* =========================
-AUTO RELOAD
-========================= */
-
-setInterval(() => {
-
-    location.reload();
-
-}, 1800000);
+loadContent
+);
 
 </script>
 
