@@ -17,8 +17,6 @@ body{
     font-family:Arial, Helvetica, sans-serif;
 }
 
-/* BLOCO ESQUERDO */
-
 #left-box{
     position:absolute;
     left:0;
@@ -31,8 +29,6 @@ body{
     z-index:5;
 }
 
-/* RELÓGIO */
-
 #clock{
     position:absolute;
     top:0;
@@ -44,8 +40,6 @@ body{
     z-index:5;
 }
 
-/* TICKER */
-
 #ticker{
     position:absolute;
     top:0;
@@ -53,8 +47,6 @@ body{
     white-space:nowrap;
     color:#FFF;
 }
-
-/* CONTEÚDO */
 
 #ticker-content{
     display:inline-block;
@@ -215,23 +207,51 @@ CONFIG.speed + "s";
 let cycleCount = 0;
 
 
-/* RELÓGIO */
+/* RELÓGIO INTERNET */
 
-function updateClock(){
+async function updateClock(){
 
-    const now = new Date();
+    try{
 
-    const hours =
-    String(now.getHours()).padStart(2,'0');
+        const response =
+        await fetch(
+        "https://worldtimeapi.org/api/timezone/America/Sao_Paulo"
+        );
 
-    const minutes =
-    String(now.getMinutes()).padStart(2,'0');
+        const data =
+        await response.json();
 
-    document.getElementById("clock").innerHTML =
-    hours + ":" + minutes;
+        const now =
+        new Date(data.datetime);
+
+        const hours =
+        String(now.getHours()).padStart(2,'0');
+
+        const minutes =
+        String(now.getMinutes()).padStart(2,'0');
+
+        document.getElementById("clock").innerHTML =
+        hours + ":" + minutes;
+
+    }catch(error){
+
+        const now =
+        new Date();
+
+        const hours =
+        String(now.getHours()).padStart(2,'0');
+
+        const minutes =
+        String(now.getMinutes()).padStart(2,'0');
+
+        document.getElementById("clock").innerHTML =
+        hours + ":" + minutes;
+
+    }
+
 }
 
-setInterval(updateClock,1000);
+setInterval(updateClock,60000);
 
 updateClock();
 
@@ -286,7 +306,7 @@ async function getRSS(rssUrl){
 }
 
 
-/* CLIMA */
+/* CLIMA MELHORADO */
 
 async function getWeather(){
 
@@ -294,11 +314,23 @@ async function getWeather(){
 
         const response =
         await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.latitude}&longitude=${CONFIG.longitude}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=America%2FSao_Paulo`
+        `https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.latitude}&longitude=${CONFIG.longitude}&hourly=temperature_2m&current=temperature_2m&timezone=America%2FSao_Paulo`
         );
 
         const data =
         await response.json();
+
+        const hours =
+        data.hourly.temperature_2m;
+
+        const todayTemps =
+        hours.slice(0,24);
+
+        const max =
+        Math.max(...todayTemps);
+
+        const min =
+        Math.min(...todayTemps);
 
         return {
 
@@ -306,13 +338,10 @@ async function getWeather(){
             Math.round(data.current.temperature_2m),
 
             max:
-            Math.round(data.daily.temperature_2m_max[0]),
+            Math.round(max),
 
             min:
-            Math.round(data.daily.temperature_2m_min[0]),
-
-            code:
-            data.daily.weathercode[0]
+            Math.round(min)
 
         };
 
@@ -322,8 +351,7 @@ async function getWeather(){
 
             temp:18,
             max:24,
-            min:17,
-            code:0
+            min:17
 
         };
 
@@ -538,7 +566,7 @@ async function loadContent(){
         }
 
 
-        /* RESULTADOS REAIS */
+        /* RESULTADOS */
 
         if(block === "resultados"){
 
@@ -604,7 +632,7 @@ async function loadContent(){
         }
 
 
-        /* CLASSIFICAÇÃO REAL */
+        /* CLASSIFICAÇÃO */
 
         if(block === "classificacao"){
 
@@ -724,201 +752,6 @@ async function loadContent(){
         }
 
 
-        /* TRENDING */
-
-        if(block === "trending"){
-
-            let trends =
-            await getRSS(
-            "https://rss.uol.com.br/feed/tecnologia.xml"
-            );
-
-            let item =
-            pickOne(trends);
-
-            if(item){
-
-                html +=
-                '<span class="trending">TRENDING</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* EVENTOS */
-
-        if(block === "eventos"){
-
-            let eventos =
-            await getRSS(
-            CONFIG.trafficRSS
-            );
-
-            let item =
-            pickOne(eventos);
-
-            if(item){
-
-                html +=
-                '<span class="eventos">EVENTOS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* AEROPORTOS */
-
-        if(block === "aeroportos"){
-
-            let aeroportos =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/economia/"
-            );
-
-            aeroportos =
-            aeroportos.filter(item => {
-
-                const t =
-                item.title.toLowerCase();
-
-                return t.includes("aeroporto") ||
-                       t.includes("voo") ||
-                       t.includes("avião") ||
-                       t.includes("congonhas") ||
-                       t.includes("guarulhos");
-
-            });
-
-            let item =
-            pickOne(aeroportos);
-
-            if(item){
-
-                html +=
-                '<span class="aeroportos">AEROPORTOS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* MEGA-SENA */
-
-        if(block === "megasena"){
-
-            try{
-
-                const response =
-                await fetch(
-                "https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena"
-                );
-
-                const data =
-                await response.json();
-
-                html +=
-                '<span class="megasena">MEGA-SENA</span> Concurso ' +
-                data.numero +
-                ' prêmio estimado R$ ' +
-                Number(
-                data.valorEstimadoProximoConcurso
-                ).toLocaleString('pt-BR') +
-                '<span class="sep">◆</span>';
-
-            }catch(error){
-
-            }
-
-        }
-
-
-        /* SAÚDE */
-
-        if(block === "saude"){
-
-            let saude =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/bemestar/"
-            );
-
-            let item =
-            pickOne(saude);
-
-            if(item){
-
-                html +=
-                '<span class="saude">SAÚDE</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* ALERTA */
-
-        if(block === "alerta"){
-
-            let alerta = "";
-
-            if(weather.code >= 95){
-
-                alerta =
-                "Alerta de tempestades";
-
-            }else if(weather.code >= 61){
-
-                alerta =
-                "Possibilidade de chuva";
-
-            }else{
-
-                alerta =
-                "Tempo estável";
-
-            }
-
-            html +=
-            '<span class="alerta">ALERTA</span> ' +
-            alerta +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        /* ENTRETENIMENTO */
-
-        if(block === "entretenimento"){
-
-            let entretenimento =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/pop-arte/"
-            );
-
-            let item =
-            pickOne(entretenimento);
-
-            if(item){
-
-                html +=
-                '<span class="entretenimento">ENTRETENIMENTO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
         /* NEWS */
 
         if(block === "news"){
@@ -939,53 +772,6 @@ async function loadContent(){
                 '<span class="sep">◆</span>';
 
             }
-
-        }
-
-
-        /* MOTIVAÇÃO */
-
-        if(block === "motivacao"){
-
-            const frases = [
-
-                "Grandes resultados exigem constância",
-                "Persistência gera resultados",
-                "Disciplina vence talento",
-                "Foco no objetivo"
-
-            ];
-
-            html +=
-            '<span class="motivacao">MOTIVAÇÃO</span> ' +
-            frases[
-            Math.floor(
-            Math.random() * frases.length
-            )] +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        /* LUMIX */
-
-        if(block === "lumix"){
-
-            const lumix = [
-
-                "Impacto visual que vende",
-                "Especialistas em painéis de LED",
-                "Tecnologia visual de alto impacto"
-
-            ];
-
-            html +=
-            '<span class="lumix">LUMIX LED</span> ' +
-            lumix[
-            Math.floor(
-            Math.random() * lumix.length
-            )] +
-            '<span class="sep">◆</span>';
 
         }
 
@@ -1040,7 +826,7 @@ async function(){
 });
 
 
-/* RELOAD AUTOMÁTICO */
+/* RELOAD */
 
 setInterval(() => {
 
