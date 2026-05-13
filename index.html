@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>LUMIX NEWS TESTE NOVO</title>
+<title>LUMIX NEWS NORMALIZADO</title>
 
 <style>
 
@@ -72,9 +72,6 @@ body{
 .transito{color:#FF8C00;font-weight:bold;}
 .rodovias{color:#FFA500;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
-.resultados{color:#32CD32;font-weight:bold;}
-.selecao{color:#7CFC00;font-weight:bold;}
-.classificacao{color:#ADFF2F;font-weight:bold;}
 .dolar{color:#FFD700;font-weight:bold;}
 .euro{color:#F4D03F;font-weight:bold;}
 .bitcoin{color:#F39C12;font-weight:bold;}
@@ -206,11 +203,6 @@ document.getElementById("ticker-content").style.animationDuration =
 CONFIG.speed + "s";
 
 
-/* CONTADOR */
-
-let cycleCount = 0;
-
-
 /* RELÓGIO */
 
 function updateClock(){
@@ -225,6 +217,7 @@ function updateClock(){
 
     document.getElementById("clock").innerHTML =
     hours + ":" + minutes;
+
 }
 
 setInterval(updateClock,1000);
@@ -252,9 +245,31 @@ function cleanText(text){
 }
 
 
-/* CONTROLE REPETIÇÃO */
+/* RSS */
 
-const usedTitles = new Set();
+async function getRSS(rssUrl){
+
+    try{
+
+        const api =
+        "https://api.rss2json.com/v1/api.json?rss_url=" +
+        encodeURIComponent(rssUrl);
+
+        const response =
+        await fetch(api);
+
+        const data =
+        await response.json();
+
+        return data.items || [];
+
+    }catch(error){
+
+        return [];
+
+    }
+
+}
 
 
 /* FILTRO */
@@ -286,9 +301,9 @@ function filterNews(items, keywords){
 }
 
 
-/* ITEM ÚNICO */
+/* ITEM ALEATÓRIO */
 
-function pickUnique(items){
+function pickOne(items){
 
     if(!items || items.length === 0){
 
@@ -296,67 +311,10 @@ function pickUnique(items){
 
     }
 
-    const filtered =
-    items.filter(item => {
-
-        if(!item.title) return false;
-
-        const title =
-        item.title.toLowerCase();
-
-        return !usedTitles.has(title);
-
-    });
-
-    if(filtered.length === 0){
-
-        usedTitles.clear();
-
-        return items[
-        Math.floor(
-        Math.random() * items.length
-        )];
-
-    }
-
-    const item =
-    filtered[
+    return items[
     Math.floor(
-    Math.random() * filtered.length
+    Math.random() * items.length
     )];
-
-    usedTitles.add(
-    item.title.toLowerCase()
-    );
-
-    return item;
-
-}
-
-
-/* RSS */
-
-async function getRSS(rssUrl){
-
-    try{
-
-        const api =
-        "https://api.rss2json.com/v1/api.json?rss_url=" +
-        encodeURIComponent(rssUrl);
-
-        const response =
-        await fetch(api);
-
-        const data =
-        await response.json();
-
-        return data.items || [];
-
-    }catch(error){
-
-        return [];
-
-    }
 
 }
 
@@ -407,19 +365,19 @@ async function getWeather(){
 }
 
 
-/* ALERTAS */
+/* ALERTAS REAIS */
 
 function getWeatherAlert(code){
 
     if(code >= 95){
 
-        return "Alerta de tempestade";
+        return "Tempestades previstas";
 
     }
 
     if(code >= 80){
 
-        return "Alerta de chuva forte";
+        return "Chuva forte prevista";
 
     }
 
@@ -526,7 +484,7 @@ async function loadContent(){
         }
 
 
-        /* ESPORTE ENTRE PREVISÃO E DÓLAR */
+        /* ESPORTE */
 
         if(block === "esporte"){
 
@@ -536,7 +494,7 @@ async function loadContent(){
             );
 
             let item =
-            pickUnique(esporte);
+            pickOne(esporte);
 
             if(item){
 
@@ -606,7 +564,7 @@ async function loadContent(){
             ]);
 
             let item =
-            pickUnique(transito);
+            pickOne(transito);
 
             if(item){
 
@@ -640,7 +598,7 @@ async function loadContent(){
             ]);
 
             let item =
-            pickUnique(rodovias);
+            pickOne(rodovias);
 
             if(item){
 
@@ -664,7 +622,7 @@ async function loadContent(){
             );
 
             let item =
-            pickUnique(mercado);
+            pickOne(mercado);
 
             if(item){
 
@@ -688,7 +646,7 @@ async function loadContent(){
             );
 
             let item =
-            pickUnique(tech);
+            pickOne(tech);
 
             if(item){
 
@@ -712,7 +670,7 @@ async function loadContent(){
             );
 
             let item =
-            pickUnique(trends);
+            pickOne(trends);
 
             if(item){
 
@@ -736,7 +694,7 @@ async function loadContent(){
             );
 
             let item =
-            pickUnique(eventos);
+            pickOne(eventos);
 
             if(item){
 
@@ -772,7 +730,7 @@ async function loadContent(){
             ]);
 
             let item =
-            pickUnique(aeroportos);
+            pickOne(aeroportos);
 
             if(item){
 
@@ -826,7 +784,7 @@ async function loadContent(){
             );
 
             let item =
-            pickUnique(saude);
+            pickOne(saude);
 
             if(item){
 
@@ -869,7 +827,7 @@ async function loadContent(){
             );
 
             let item =
-            pickUnique(entretenimento);
+            pickOne(entretenimento);
 
             if(item){
 
@@ -893,7 +851,7 @@ async function loadContent(){
             );
 
             let item =
-            pickUnique(geral);
+            pickOne(geral);
 
             if(item){
 
@@ -932,37 +890,13 @@ async function loadContent(){
 loadContent();
 
 
-/* ATUALIZA APÓS 2 CICLOS */
-
-const ticker =
-document.getElementById(
-"ticker-content"
-);
-
-ticker.addEventListener(
-"animationiteration",
-async function(){
-
-    cycleCount++;
-
-    if(cycleCount >= 2){
-
-        cycleCount = 0;
-
-        await loadContent();
-
-    }
-
-});
-
-
 /* RELOAD AUTOMÁTICO */
 
 setInterval(() => {
 
-    location.reload();
+    loadContent();
 
-}, 1800000);
+}, 120000);
 
 </script>
 
