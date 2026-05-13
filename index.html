@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>9 LUMIX NEWS PRO</title>
+<title>10 LUMIX NEWS PRO</title>
 
 <style>
 
@@ -183,11 +183,6 @@ document.getElementById("ticker-content").style.animationDuration =
 CONFIG.speed + "s";
 
 
-/* CONTADOR */
-
-let cycleCount = 0;
-
-
 /* RELÓGIO */
 
 function updateClock(){
@@ -324,8 +319,6 @@ const GNEWS_KEY =
 let NEWS_CACHE = [];
 let TECH_CACHE = [];
 let MARKET_CACHE = [];
-let SPORT_CACHE = [];
-let SELECAO_CACHE = [];
 
 async function getGNews(query){
 
@@ -343,13 +336,7 @@ async function getGNews(query){
         const data =
         await response.json();
 
-        if(data.articles){
-
-            return data.articles;
-
-        }
-
-        return [];
+        return data.articles || [];
 
     }catch(error){
 
@@ -360,7 +347,44 @@ async function getGNews(query){
 }
 
 
-async function loadGNews(){
+/* NEWSDATA ESPORTE */
+
+const NEWSDATA_KEY =
+"pub_demo";
+
+let SPORT_CACHE = [];
+let SELECAO_CACHE = [];
+
+async function getSportsNews(query){
+
+    try{
+
+        const url =
+        "https://newsdata.io/api/1/news?apikey=" +
+        NEWSDATA_KEY +
+        "&language=pt&category=sports&q=" +
+        encodeURIComponent(query);
+
+        const response =
+        await fetch(url);
+
+        const data =
+        await response.json();
+
+        return data.results || [];
+
+    }catch(error){
+
+        return [];
+
+    }
+
+}
+
+
+/* CACHE */
+
+async function loadNews(){
 
     NEWS_CACHE =
     await getGNews("noticias brasil");
@@ -369,13 +393,17 @@ async function loadGNews(){
     await getGNews("tecnologia");
 
     MARKET_CACHE =
-    await getGNews("economia mercado");
+    await getGNews("economia");
 
     SPORT_CACHE =
-    await getGNews("futebol brasileiro");
+    await getSportsNews(
+    "futebol brasileiro"
+    );
 
     SELECAO_CACHE =
-    await getGNews("seleção brasileira futebol");
+    await getSportsNews(
+    "seleção brasileira"
+    );
 
 }
 
@@ -385,7 +413,7 @@ async function loadGNews(){
 let RESULT_CACHE = [];
 let RESULT_INDEX = 0;
 
-async function loadSports(){
+async function loadResults(){
 
     try{
 
@@ -409,11 +437,11 @@ async function loadSports(){
 }
 
 
-/* ITEM ALEATÓRIO */
+/* ITEM */
 
 function pickOne(items){
 
-    if(!items || items.length === 0){
+    if(!items || !items.length){
 
         return null;
 
@@ -448,7 +476,8 @@ async function loadContent(){
 
             html +=
             '<span class="clima">CLIMA</span> ' +
-            CONFIG.city + ' ' +
+            CONFIG.city +
+            ' ' +
             weather.temp +
             '°C Máx ' +
             weather.max +
@@ -467,10 +496,7 @@ async function loadContent(){
             if(SPORT_CACHE.length){
 
                 const item =
-                SPORT_CACHE[
-                Math.floor(
-                Math.random() * SPORT_CACHE.length
-                )];
+                pickOne(SPORT_CACHE);
 
                 html +=
                 '<span class="esporte">ESPORTE</span> ' +
@@ -680,10 +706,7 @@ async function loadContent(){
 
             html +=
             '<span class="lumix">LUMIX LED</span> ' +
-            lumix[
-            Math.floor(
-            Math.random() * lumix.length
-            )] +
+            pickOne(lumix) +
             '<span class="sep">◆</span>';
 
         }
@@ -714,16 +737,16 @@ async function loadContent(){
 
 (async () => {
 
-    await loadGNews();
+    await loadNews();
 
-    await loadSports();
+    await loadResults();
 
     await loadContent();
 
 })();
 
 
-/* ATUALIZA */
+/* UPDATE */
 
 const ticker =
 document.getElementById(
@@ -734,19 +757,11 @@ ticker.addEventListener(
 "animationiteration",
 async function(){
 
-    cycleCount++;
+    await loadNews();
 
-    if(cycleCount >= 2){
+    await loadResults();
 
-        cycleCount = 0;
-
-        await loadGNews();
-
-        await loadSports();
-
-        await loadContent();
-
-    }
+    await loadContent();
 
 });
 
