@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>11 LUMIX NEWS PRO</title>
+<title>12 LUMIX NEWS PRO</title>
 
 <style>
 
@@ -574,9 +574,46 @@ async function loadContent(){
 
             try{
 
+                const ligas = [
+
+                    {
+                        nome:"Brasileirão Série A",
+                        id:"4331",
+                        temporada:"2025"
+                    },
+
+                    {
+                        nome:"Premier League",
+                        id:"4328",
+                        temporada:"2025-2026"
+                    },
+
+                    {
+                        nome:"La Liga",
+                        id:"4335",
+                        temporada:"2025-2026"
+                    },
+
+                    {
+                        nome:"Champions League",
+                        id:"4480",
+                        temporada:"2025-2026"
+                    }
+
+                ];
+
+                const liga =
+                ligas[
+                Math.floor(
+                Math.random() * ligas.length
+                )];
+
                 const response =
                 await fetch(
-                "https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2025-2026"
+                "https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=" +
+                liga.id +
+                "&s=" +
+                liga.temporada
                 );
 
                 const data =
@@ -588,19 +625,37 @@ async function loadContent(){
                     const p2 = data.table[1];
                     const p3 = data.table[2];
 
+                    const t1 =
+                    p1.strTeam || p1.name || "Time";
+
+                    const t2 =
+                    p2.strTeam || p2.name || "Time";
+
+                    const t3 =
+                    p3.strTeam || p3.name || "Time";
+
                     html +=
-                    '<span class="classificacao">CLASSIFICAÇÃO</span> Premier League: ' +
-                    '1º ' + p1.name +
+                    '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
+                    liga.nome + ': ' +
+
+                    '1º ' + t1 +
                     ' (' + p1.intPoints + ' pts) | ' +
-                    '2º ' + p2.name +
+
+                    '2º ' + t2 +
                     ' (' + p2.intPoints + ' pts) | ' +
-                    '3º ' + p3.name +
+
+                    '3º ' + t3 +
                     ' (' + p3.intPoints + ' pts)' +
+
                     '<span class="sep">◆</span>';
 
                 }
 
             }catch(error){
+
+                html +=
+                '<span class="classificacao">CLASSIFICAÇÃO</span> Atualizando tabela dos campeonatos' +
+                '<span class="sep">◆</span>';
 
             }
 
