@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>8 LUMIX NEWS PRO</title>
+<title>9 LUMIX NEWS PRO</title>
 
 <style>
 
@@ -372,7 +372,7 @@ async function loadGNews(){
     await getGNews("economia mercado");
 
     SPORT_CACHE =
-    await getGNews("futebol brasileiro champions league premier league");
+    await getGNews("futebol brasileiro");
 
     SELECAO_CACHE =
     await getGNews("seleção brasileira futebol");
@@ -383,6 +383,7 @@ async function loadGNews(){
 /* RESULTADOS */
 
 let RESULT_CACHE = [];
+let RESULT_INDEX = 0;
 
 async function loadSports(){
 
@@ -466,17 +467,14 @@ async function loadContent(){
             if(SPORT_CACHE.length){
 
                 const item =
-                pickOne(SPORT_CACHE);
+                SPORT_CACHE[
+                Math.floor(
+                Math.random() * SPORT_CACHE.length
+                )];
 
                 html +=
                 '<span class="esporte">ESPORTE</span> ' +
                 cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }else{
-
-                html +=
-                '<span class="esporte">ESPORTE</span> Futebol brasileiro e europeu em destaque' +
                 '<span class="sep">◆</span>';
 
             }
@@ -490,8 +488,16 @@ async function loadContent(){
 
             if(RESULT_CACHE.length){
 
+                if(RESULT_INDEX >= RESULT_CACHE.length){
+
+                    RESULT_INDEX = 0;
+
+                }
+
                 const jogo =
-                pickOne(RESULT_CACHE);
+                RESULT_CACHE[RESULT_INDEX];
+
+                RESULT_INDEX++;
 
                 html +=
                 '<span class="resultados">RESULTADOS</span> ' +
@@ -550,21 +556,17 @@ async function loadContent(){
 
                     html +=
                     '<span class="classificacao">CLASSIFICAÇÃO</span> Premier League: ' +
-                    '1º ' + p1.strTeam +
+                    '1º ' + p1.name +
                     ' (' + p1.intPoints + ' pts) | ' +
-                    '2º ' + p2.strTeam +
+                    '2º ' + p2.name +
                     ' (' + p2.intPoints + ' pts) | ' +
-                    '3º ' + p3.strTeam +
+                    '3º ' + p3.name +
                     ' (' + p3.intPoints + ' pts)' +
                     '<span class="sep">◆</span>';
 
                 }
 
             }catch(error){
-
-                html +=
-                '<span class="classificacao">CLASSIFICAÇÃO</span> Premier League em atualização' +
-                '<span class="sep">◆</span>';
 
             }
 
