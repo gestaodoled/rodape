@@ -1,190 +1,226 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
 <meta charset="UTF-8">
-<title>LUMIX NEWS STABLE</title>
+<title>LUMIX NEWS PRO</title>
 
 <style>
+
 body{
     margin:0;
     overflow:hidden;
     background:#000;
-    font-family:Arial;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
+/* BARRA ESQUERDA (LOGO) */
 #left-box{
     position:absolute;
     left:0;
     top:0;
-    width:15%;
-    height:100%;
     background:#C00000;
-    color:#fff;
+    color:#FFF;
     font-weight:bold;
+    text-align:center;
+    border-right:1px solid #FFF;
     display:flex;
     align-items:center;
     justify-content:center;
 }
 
+/* RELÓGIO */
 #clock{
     position:absolute;
-    left:15%;
     top:0;
-    width:10%;
-    height:100%;
     background:#111;
     color:#00FF99;
+    font-weight:bold;
+    text-align:center;
+    border-right:1px solid #222;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-weight:bold;
 }
 
+/* TICKER */
 #ticker{
     position:absolute;
-    left:25%;
     top:0;
-    width:75%;
-    height:100%;
     overflow:hidden;
     white-space:nowrap;
-    color:#fff;
+    color:#FFF;
 }
 
 #ticker-content{
     display:inline-block;
     white-space:nowrap;
     padding-left:100%;
-    animation:scroll 25s linear infinite;
+    animation:scroll linear infinite;
 }
 
-.sep{color:#666;padding:0 14px;}
-
+/* ESTILOS */
 .esporte{color:#00FF00;font-weight:bold;}
 .transito{color:#FF8C00;font-weight:bold;}
-.news{color:#fff;font-weight:bold;}
+.news{color:#FFFFFF;font-weight:bold;}
 .lumix{color:#FFD700;font-weight:bold;}
+.sep{color:#666;padding:0 14px;}
 
 @keyframes scroll{
     from{transform:translateX(0);}
     to{transform:translateX(-100%);}
 }
+
 </style>
+
 </head>
 
 <body>
 
-<div id="left-box">LUMIX</div>
+<div id="left-box"></div>
 <div id="clock"></div>
-<div id="ticker"><div id="ticker-content">Carregando...</div></div>
+
+<div id="ticker">
+    <div id="ticker-content">Carregando notícias...</div>
+</div>
 
 <script>
 
-/* CLOCK */
-setInterval(()=>{
+/* CONFIG */
+const params = new URLSearchParams(window.location.search);
+const configName = params.get("config") || "default";
+
+document.write(
+'<script src="configs/' + configName + '.js?v=' + Date.now() + '"><\/script>'
+);
+
+/* LAYOUT CORRETO (SEM 100% ALTURA ERRADA) */
+
+function applyLayout(){
+
+    const left = document.getElementById("left-box");
+    const clock = document.getElementById("clock");
+    const ticker = document.getElementById("ticker");
+
+    document.body.style.width = CONFIG.width + "px";
+    document.body.style.height = CONFIG.height + "px";
+
+    const leftW = CONFIG.width * 0.15;
+    const clockW = CONFIG.width * 0.10;
+    const tickerW = CONFIG.width * 0.75;
+
+    left.style.width = leftW + "px";
+    left.style.height = CONFIG.height + "px";
+    left.style.fontSize = CONFIG.fontSize + "px";
+    left.innerHTML = CONFIG.title || "LUMIX";
+
+    clock.style.left = leftW + "px";
+    clock.style.width = clockW + "px";
+    clock.style.height = CONFIG.height + "px";
+    clock.style.fontSize = CONFIG.fontSize + "px";
+
+    ticker.style.left = (leftW + clockW) + "px";
+    ticker.style.width = tickerW + "px";
+    ticker.style.height = CONFIG.height + "px";
+    ticker.style.fontSize = CONFIG.fontSize + "px";
+}
+
+applyLayout();
+
+/* RELÓGIO */
+function updateClock(){
     const d = new Date();
     document.getElementById("clock").innerHTML =
-    String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0');
-},1000);
+    String(d.getHours()).padStart(2,'0') + ":" +
+    String(d.getMinutes()).padStart(2,'0');
+}
+setInterval(updateClock,1000);
+updateClock();
 
-/* SAFE FETCH RSS */
-async function safeRSS(url){
+/* RSS BASE */
+async function getRSS(url){
     try{
-        const res = await fetch(
-        "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(url),
-        {timeout:4000}
+        const r = await fetch(
+        "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(url)
         );
-        const data = await res.json();
-        return data.items || [];
+        const d = await r.json();
+        return d.items || [];
     }catch{
         return [];
     }
 }
 
-/* TIMEOUT WRAPPER */
-function timeoutPromise(promise, ms){
-    return new Promise((resolve)=>{
-        const t = setTimeout(()=>resolve([]), ms);
-        promise.then(v=>{
-            clearTimeout(t);
-            resolve(v);
-        }).catch(()=>resolve([]));
-    });
+/* PICK */
+function pick(list){
+    if(!list || !list.length) return null;
+    return list[Math.floor(Math.random()*list.length)];
 }
 
-/* ESPORTE (ROBUSTO) */
-async function getEsporte(){
+/* ESPORTE (BR + SP + EUROPA) */
+async function esporte(){
 
-    const feeds = await Promise.all([
-        timeoutPromise(safeRSS("https://ge.globo.com/rss/ge/futebol/"),4000),
-        timeoutPromise(safeRSS("https://rss.uol.com.br/feed/esporte.xml"),4000)
+    const feeds = await Promise.allSettled([
+        getRSS("https://ge.globo.com/rss/ge/futebol/"),
+        getRSS("https://rss.uol.com.br/feed/esporte.xml"),
+        getRSS("https://feeds.bbci.co.uk/sport/football/rss.xml")
     ]);
 
-    let all = feeds.flat();
+    let all = feeds.flatMap(f => f.status === "fulfilled" ? f.value : []);
 
-    if(!all.length){
-        return "Futebol em atualização";
-    }
+    let item = pick(all);
 
-    return all[Math.floor(Math.random()*all.length)].title;
+    return item ? item.title : "Futebol nacional e internacional em destaque";
 }
 
-/* TRÂNSITO SP (ROBUSTO) */
-async function getTransito(){
+/* TRÂNSITO SP */
+async function transito(){
 
-    const feeds = await Promise.all([
-        timeoutPromise(safeRSS("https://g1.globo.com/rss/g1/sao-paulo/"),4000),
-        timeoutPromise(safeRSS("https://rss.uol.com.br/feed/noticias.xml"),4000)
+    const feeds = await Promise.allSettled([
+        getRSS("https://g1.globo.com/rss/g1/sao-paulo/"),
+        getRSS("https://rss.uol.com.br/feed/noticias.xml")
     ]);
 
-    let all = feeds.flat();
+    let all = feeds.flatMap(f => f.status === "fulfilled" ? f.value : []);
 
     let filtered = all.filter(i =>
-        /trânsito|acidente|lentidão|marginal|sp|rodovia/i.test(i.title)
+        /trânsito|acidente|lentidão|marginal|rodovia|sp/i.test(i.title)
     );
 
     let pool = filtered.length ? filtered : all;
 
-    if(!pool.length){
-        return "SP fluindo normalmente";
-    }
+    let item = pick(pool);
 
-    return pool[Math.floor(Math.random()*pool.length)].title;
+    return item ? item.title : "SP com fluxo normal neste momento";
 }
 
-/* BUILD SAFE */
-async function build(){
+/* BUILD */
+async function load(){
 
     let html = "";
 
-    let esporte = await getEsporte();
-    let transito = await getTransito();
+    const [esp, tra] = await Promise.all([
+        esporte(),
+        transito()
+    ]);
 
-    html += `<span class="esporte">ESPORTE</span> ${esporte}<span class="sep">◆</span>`;
-    html += `<span class="transito">TRÂNSITO SP</span> ${transito}<span class="sep">◆</span>`;
-
-    html += `<span class="news">NEWS</span> Atualizando informações<span class="sep">◆</span>`;
+    html += `<span class="esporte">ESPORTE</span> ${esp}<span class="sep">◆</span>`;
+    html += `<span class="transito">TRÂNSITO SP</span> ${tra}<span class="sep">◆</span>`;
+    html += `<span class="news">NEWS</span> Atualização contínua<span class="sep">◆</span>`;
     html += `<span class="lumix">LUMIX</span> Sistema ativo<span class="sep">◆</span>`;
+
+    /* 🔥 GARANTIA FINAL */
+    if(!html.trim()){
+        html =
+        `<span class="lumix">LUMIX</span> Sistema de mídia ativo<span class="sep">◆</span>`;
+    }
 
     document.getElementById("ticker-content").innerHTML = html;
 }
 
-/* START SAFE LOOP */
-async function start(){
+load();
 
-    try{
-        await build();
-    }catch(e){
-        document.getElementById("ticker-content").innerHTML =
-        `<span class="lumix">LUMIX</span> Sistema de fallback ativo<span class="sep">◆</span>`;
-    }
-
-}
-
-start();
-
-/* refresh seguro */
-setInterval(start, 10000);
+/* LOOP ESTÁVEL */
+setInterval(load, 10000);
 
 </script>
 
