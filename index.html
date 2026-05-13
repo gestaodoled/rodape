@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>LUMIX NEWS NORMALIZADO</title>
+<title>LUMIX NEWS PROXY RSS</title>
 
 <style>
 
@@ -16,8 +16,6 @@ body{
     background:#000;
     font-family:Arial, Helvetica, sans-serif;
 }
-
-/* BLOCO ESQUERDO */
 
 #left-box{
     position:absolute;
@@ -31,8 +29,6 @@ body{
     z-index:5;
 }
 
-/* RELÓGIO */
-
 #clock{
     position:absolute;
     top:0;
@@ -44,8 +40,6 @@ body{
     z-index:5;
 }
 
-/* TICKER */
-
 #ticker{
     position:absolute;
     top:0;
@@ -53,8 +47,6 @@ body{
     white-space:nowrap;
     color:#FFF;
 }
-
-/* CONTEÚDO */
 
 #ticker-content{
     display:inline-block;
@@ -64,8 +56,6 @@ body{
     animation-timing-function:linear;
     animation-iteration-count:infinite;
 }
-
-/* CORES */
 
 .clima{color:#00FFFF;font-weight:bold;}
 .previsao{color:#87CEFA;font-weight:bold;}
@@ -122,8 +112,6 @@ body{
 
 </div>
 
-<!-- CONFIG -->
-
 <script>
 
 const params =
@@ -142,11 +130,9 @@ new Date().getTime() +
 
 </script>
 
-<!-- SISTEMA -->
-
 <script>
 
-/* CONFIG VISUAL */
+/* VISUAL */
 
 document.body.style.width =
 CONFIG.width + "px";
@@ -225,78 +211,61 @@ setInterval(updateClock,1000);
 updateClock();
 
 
-/* LIMPA TEXTO */
+/* LIMPA */
 
 function cleanText(text){
 
     if(!text) return "";
 
-    const txt =
-    document.createElement("textarea");
-
-    txt.innerHTML = text;
-
-    return txt.value
-    .replace(/Â/g,"")
-    .replace(/[\n\r]/g," ")
-    .replace(/\s+/g," ")
+    return text
+    .replace(/<[^>]*>/g,'')
+    .replace(/&[^;]+;/g,' ')
+    .replace(/\s+/g,' ')
     .trim();
 
 }
 
 
-/* RSS */
+/* RSS DIRETO */
 
 async function getRSS(rssUrl){
 
     try{
 
-        const api =
-        "https://api.rss2json.com/v1/api.json?rss_url=" +
+        const proxy =
+        "https://api.allorigins.win/raw?url=" +
         encodeURIComponent(rssUrl);
 
         const response =
-        await fetch(api);
+        await fetch(proxy);
 
-        const data =
-        await response.json();
+        const xmlText =
+        await response.text();
 
-        return data.items || [];
+        const parser =
+        new DOMParser();
+
+        const xml =
+        parser.parseFromString(
+        xmlText,
+        "text/xml"
+        );
+
+        const items =
+        [...xml.querySelectorAll("item")];
+
+        return items.map(item => ({
+
+            title:
+            item.querySelector("title")?.textContent || ""
+
+        }));
 
     }catch(error){
 
         return [];
 
     }
-
-}
-
-
-/* FILTRO */
-
-function filterNews(items, keywords){
-
-    const filtered =
-    items.filter(item => {
-
-        if(!item.title) return false;
-
-        const title =
-        item.title.toLowerCase();
-
-        return keywords.some(word =>
-        title.includes(word)
-        );
-
-    });
-
-    if(filtered.length === 0){
-
-        return items;
-
-    }
-
-    return filtered;
 
 }
 
@@ -365,7 +334,7 @@ async function getWeather(){
 }
 
 
-/* ALERTAS REAIS */
+/* ALERTA */
 
 function getWeatherAlert(code){
 
@@ -384,12 +353,6 @@ function getWeatherAlert(code){
     if(code >= 61){
 
         return "Possibilidade de chuva";
-
-    }
-
-    if(code >= 45){
-
-        return "Neblina na região";
 
     }
 
@@ -455,8 +418,6 @@ async function loadContent(){
 
     for(let block of CONFIG.enabledBlocks){
 
-        /* CLIMA */
-
         if(block === "clima"){
 
             html +=
@@ -468,8 +429,6 @@ async function loadContent(){
 
         }
 
-
-        /* PREVISÃO */
 
         if(block === "previsao"){
 
@@ -483,8 +442,6 @@ async function loadContent(){
 
         }
 
-
-        /* ESPORTE */
 
         if(block === "esporte"){
 
@@ -508,8 +465,6 @@ async function loadContent(){
         }
 
 
-        /* DÓLAR */
-
         if(block === "dolar"){
 
             html +=
@@ -519,8 +474,6 @@ async function loadContent(){
 
         }
 
-
-        /* EURO */
 
         if(block === "euro"){
 
@@ -532,8 +485,6 @@ async function loadContent(){
         }
 
 
-        /* BITCOIN */
-
         if(block === "bitcoin"){
 
             html +=
@@ -544,32 +495,20 @@ async function loadContent(){
         }
 
 
-        /* TRÂNSITO */
+        if(block === "news"){
 
-        if(block === "transito"){
-
-            let transito =
-            await getRSS(CONFIG.trafficRSS);
-
-            transito =
-            filterNews(transito,[
-
-                "trânsito",
-                "transito",
-                "acidente",
-                "lentidão",
-                "engarrafamento",
-                "marginal"
-
-            ]);
+            let news =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/"
+            );
 
             let item =
-            pickOne(transito);
+            pickOne(news);
 
             if(item){
 
                 html +=
-                '<span class="transito">TRÂNSITO</span> ' +
+                '<span class="news">NEWS</span> ' +
                 cleanText(item.title) +
                 '<span class="sep">◆</span>';
 
@@ -577,42 +516,6 @@ async function loadContent(){
 
         }
 
-
-        /* RODOVIAS */
-
-        if(block === "rodovias"){
-
-            let rodovias =
-            await getRSS(CONFIG.trafficRSS);
-
-            rodovias =
-            filterNews(rodovias,[
-
-                "rodovia",
-                "anchieta",
-                "imigrantes",
-                "castello",
-                "anhanguera",
-                "bandeirantes"
-
-            ]);
-
-            let item =
-            pickOne(rodovias);
-
-            if(item){
-
-                html +=
-                '<span class="rodovias">RODOVIAS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* MERCADO */
 
         if(block === "mercado"){
 
@@ -636,8 +539,6 @@ async function loadContent(){
         }
 
 
-        /* TECH */
-
         if(block === "tech"){
 
             let tech =
@@ -659,165 +560,6 @@ async function loadContent(){
 
         }
 
-
-        /* TRENDING */
-
-        if(block === "trending"){
-
-            let trends =
-            await getRSS(
-            "https://rss.uol.com.br/feed/tecnologia.xml"
-            );
-
-            let item =
-            pickOne(trends);
-
-            if(item){
-
-                html +=
-                '<span class="trending">TRENDING</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* EVENTOS */
-
-        if(block === "eventos"){
-
-            let eventos =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/pop-arte/"
-            );
-
-            let item =
-            pickOne(eventos);
-
-            if(item){
-
-                html +=
-                '<span class="eventos">EVENTOS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* AEROPORTOS */
-
-        if(block === "aeroportos"){
-
-            let aeroportos =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/economia/"
-            );
-
-            aeroportos =
-            filterNews(aeroportos,[
-
-                "aeroporto",
-                "voo",
-                "avião",
-                "congonhas",
-                "guarulhos",
-                "viracopos"
-
-            ]);
-
-            let item =
-            pickOne(aeroportos);
-
-            if(item){
-
-                html +=
-                '<span class="aeroportos">AEROPORTOS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* MEGA-SENA */
-
-        if(block === "megasena"){
-
-            try{
-
-                const response =
-                await fetch(
-                "https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena"
-                );
-
-                const data =
-                await response.json();
-
-                html +=
-                '<span class="megasena">MEGA-SENA</span> Concurso ' +
-                data.numero +
-                ' prêmio estimado R$ ' +
-                Number(
-                data.valorEstimadoProximoConcurso
-                ).toLocaleString('pt-BR') +
-                '<span class="sep">◆</span>';
-
-            }catch(error){
-
-            }
-
-        }
-
-
-        /* SAÚDE */
-
-        if(block === "saude"){
-
-            let saude =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/bemestar/"
-            );
-
-            let item =
-            pickOne(saude);
-
-            if(item){
-
-                html +=
-                '<span class="saude">SAÚDE</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* ALERTA */
-
-        if(block === "alerta"){
-
-            const alertText =
-            getWeatherAlert(weather.code);
-
-            if(alertText){
-
-                html +=
-                '<span class="alerta">ALERTA</span> ' +
-                alertText +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* ENTRETENIMENTO */
 
         if(block === "entretenimento"){
 
@@ -841,22 +583,20 @@ async function loadContent(){
         }
 
 
-        /* NEWS */
+        if(block === "saude"){
 
-        if(block === "news"){
-
-            let geral =
+            let saude =
             await getRSS(
-            "https://g1.globo.com/rss/g1/"
+            "https://g1.globo.com/rss/g1/bemestar/"
             );
 
             let item =
-            pickOne(geral);
+            pickOne(saude);
 
             if(item){
 
                 html +=
-                '<span class="news">NEWS</span> ' +
+                '<span class="saude">SAÚDE</span> ' +
                 cleanText(item.title) +
                 '<span class="sep">◆</span>';
 
@@ -865,14 +605,29 @@ async function loadContent(){
         }
 
 
-        /* INSTAGRAM */
-
         if(block === "instagram"){
 
             html +=
             '<span class="instagram">INSTAGRAM</span> ' +
             CONFIG.instagram +
             '<span class="sep">◆</span>';
+
+        }
+
+
+        if(block === "alerta"){
+
+            const alertText =
+            getWeatherAlert(weather.code);
+
+            if(alertText){
+
+                html +=
+                '<span class="alerta">ALERTA</span> ' +
+                alertText +
+                '<span class="sep">◆</span>';
+
+            }
 
         }
 
@@ -885,12 +640,12 @@ async function loadContent(){
 }
 
 
-/* INICIAR */
+/* START */
 
 loadContent();
 
 
-/* RELOAD AUTOMÁTICO */
+/* REFRESH */
 
 setInterval(() => {
 
