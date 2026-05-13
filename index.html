@@ -3,146 +3,68 @@
 
 <head>
 <meta charset="UTF-8">
-<title>LUMIX NEWS PRO</title>
+<title>LUMIX SAFE</title>
 
 <style>
+body{margin:0;background:#000;color:#fff;font-family:Arial;overflow:hidden}
 
-body{
-    margin:0;
-    overflow:hidden;
-    background:#000;
-    font-family:Arial, Helvetica, sans-serif;
+#left-box,#clock,#ticker{
+position:absolute;top:0;height:100%;
+display:flex;align-items:center;justify-content:center;
+font-weight:bold;
 }
 
-/* BARRA ESQUERDA (LOGO) */
-#left-box{
-    position:absolute;
-    left:0;
-    top:0;
-    background:#C00000;
-    color:#FFF;
-    font-weight:bold;
-    text-align:center;
-    border-right:1px solid #FFF;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-/* RELÓGIO */
-#clock{
-    position:absolute;
-    top:0;
-    background:#111;
-    color:#00FF99;
-    font-weight:bold;
-    text-align:center;
-    border-right:1px solid #222;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-/* TICKER */
-#ticker{
-    position:absolute;
-    top:0;
-    overflow:hidden;
-    white-space:nowrap;
-    color:#FFF;
-}
+#left-box{left:0;width:15%;background:#c00}
+#clock{left:15%;width:10%;background:#111;color:#0f0}
+#ticker{left:25%;width:75%;overflow:hidden;white-space:nowrap}
 
 #ticker-content{
-    display:inline-block;
-    white-space:nowrap;
-    padding-left:100%;
-    animation:scroll linear infinite;
+display:inline-block;
+white-space:nowrap;
+padding-left:100%;
+animation:scroll 20s linear infinite;
 }
 
-/* ESTILOS */
-.esporte{color:#00FF00;font-weight:bold;}
-.transito{color:#FF8C00;font-weight:bold;}
-.news{color:#FFFFFF;font-weight:bold;}
-.lumix{color:#FFD700;font-weight:bold;}
-.sep{color:#666;padding:0 14px;}
+.sep{color:#666;padding:0 14px}
+.esporte{color:#0f0}
+.transito{color:#ffa500}
+.lumix{color:#ffd700}
 
 @keyframes scroll{
-    from{transform:translateX(0);}
-    to{transform:translateX(-100%);}
+from{transform:translateX(0)}
+to{transform:translateX(-100%)}
 }
-
 </style>
-
 </head>
 
 <body>
 
-<div id="left-box"></div>
+<div id="left-box">LUMIX</div>
 <div id="clock"></div>
-
-<div id="ticker">
-    <div id="ticker-content">Carregando notícias...</div>
-</div>
+<div id="ticker"><div id="ticker-content">Inicializando...</div></div>
 
 <script>
 
-/* CONFIG */
-const params = new URLSearchParams(window.location.search);
-const configName = params.get("config") || "default";
+/* 🔥 PROTEÇÃO TOTAL DE CONFIG */
+window.CONFIG = window.CONFIG || {
+    width: 1920,
+    height: 1080,
+    fontSize: 40,
+    title: "LUMIX",
+    enabledBlocks: ["esporte","transito"]
+};
 
-document.write(
-'<script src="configs/' + configName + '.js?v=' + Date.now() + '"><\/script>'
-);
-
-/* LAYOUT CORRETO (SEM 100% ALTURA ERRADA) */
-
-function applyLayout(){
-
-    const left = document.getElementById("left-box");
-    const clock = document.getElementById("clock");
-    const ticker = document.getElementById("ticker");
-
-    document.body.style.width = CONFIG.width + "px";
-    document.body.style.height = CONFIG.height + "px";
-
-    const leftW = CONFIG.width * 0.15;
-    const clockW = CONFIG.width * 0.10;
-    const tickerW = CONFIG.width * 0.75;
-
-    left.style.width = leftW + "px";
-    left.style.height = CONFIG.height + "px";
-    left.style.fontSize = CONFIG.fontSize + "px";
-    left.innerHTML = CONFIG.title || "LUMIX";
-
-    clock.style.left = leftW + "px";
-    clock.style.width = clockW + "px";
-    clock.style.height = CONFIG.height + "px";
-    clock.style.fontSize = CONFIG.fontSize + "px";
-
-    ticker.style.left = (leftW + clockW) + "px";
-    ticker.style.width = tickerW + "px";
-    ticker.style.height = CONFIG.height + "px";
-    ticker.style.fontSize = CONFIG.fontSize + "px";
-}
-
-applyLayout();
-
-/* RELÓGIO */
-function updateClock(){
+/* CLOCK */
+setInterval(()=>{
     const d = new Date();
     document.getElementById("clock").innerHTML =
-    String(d.getHours()).padStart(2,'0') + ":" +
-    String(d.getMinutes()).padStart(2,'0');
-}
-setInterval(updateClock,1000);
-updateClock();
+    String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0');
+},1000);
 
-/* RSS BASE */
-async function getRSS(url){
+/* RSS SAFE */
+async function rss(url){
     try{
-        const r = await fetch(
-        "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(url)
-        );
+        const r = await fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(url));
         const d = await r.json();
         return d.items || [];
     }catch{
@@ -150,77 +72,42 @@ async function getRSS(url){
     }
 }
 
-/* PICK */
-function pick(list){
-    if(!list || !list.length) return null;
-    return list[Math.floor(Math.random()*list.length)];
+function pick(a){
+    if(!a || !a.length) return null;
+    return a[Math.floor(Math.random()*a.length)];
 }
 
-/* ESPORTE (BR + SP + EUROPA) */
+/* ESPORTE (SEMPRE FUNCIONA) */
 async function esporte(){
-
-    const feeds = await Promise.allSettled([
-        getRSS("https://ge.globo.com/rss/ge/futebol/"),
-        getRSS("https://rss.uol.com.br/feed/esporte.xml"),
-        getRSS("https://feeds.bbci.co.uk/sport/football/rss.xml")
-    ]);
-
-    let all = feeds.flatMap(f => f.status === "fulfilled" ? f.value : []);
-
-    let item = pick(all);
-
-    return item ? item.title : "Futebol nacional e internacional em destaque";
+    let data = await rss("https://ge.globo.com/rss/ge/futebol/");
+    let item = pick(data);
+    return item ? item.title : "Futebol em atualização";
 }
 
-/* TRÂNSITO SP */
+/* TRÂNSITO (SEMPRE FUNCIONA) */
 async function transito(){
-
-    const feeds = await Promise.allSettled([
-        getRSS("https://g1.globo.com/rss/g1/sao-paulo/"),
-        getRSS("https://rss.uol.com.br/feed/noticias.xml")
-    ]);
-
-    let all = feeds.flatMap(f => f.status === "fulfilled" ? f.value : []);
-
-    let filtered = all.filter(i =>
-        /trânsito|acidente|lentidão|marginal|rodovia|sp/i.test(i.title)
-    );
-
-    let pool = filtered.length ? filtered : all;
-
-    let item = pick(pool);
-
-    return item ? item.title : "SP com fluxo normal neste momento";
+    let data = await rss("https://g1.globo.com/rss/g1/sao-paulo/");
+    let item = pick(data);
+    return item ? item.title : "SP fluindo normalmente";
 }
 
 /* BUILD */
-async function load(){
+async function build(){
 
     let html = "";
 
-    const [esp, tra] = await Promise.all([
-        esporte(),
-        transito()
-    ]);
+    let esp = await esporte();
+    let tra = await transito();
 
     html += `<span class="esporte">ESPORTE</span> ${esp}<span class="sep">◆</span>`;
     html += `<span class="transito">TRÂNSITO SP</span> ${tra}<span class="sep">◆</span>`;
-    html += `<span class="news">NEWS</span> Atualização contínua<span class="sep">◆</span>`;
     html += `<span class="lumix">LUMIX</span> Sistema ativo<span class="sep">◆</span>`;
 
-    /* 🔥 GARANTIA FINAL */
-    if(!html.trim()){
-        html =
-        `<span class="lumix">LUMIX</span> Sistema de mídia ativo<span class="sep">◆</span>`;
-    }
-
-    document.getElementById("ticker-content").innerHTML = html;
+    document.getElementById("ticker-content").innerHTML = html || "Sistema ativo";
 }
 
-load();
-
-/* LOOP ESTÁVEL */
-setInterval(load, 10000);
+build();
+setInterval(build,10000);
 
 </script>
 
