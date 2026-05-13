@@ -3,155 +3,138 @@
 
 <head>
 <meta charset="UTF-8">
-<title>TESTE FASE 2 - TRÂNSITO SP</title>
+<title>LUMIX NEWS PRO SERVER</title>
 
 <style>
-body{
-margin:0;
-background:#000;
-color:#fff;
-font-family:Arial;
-overflow:hidden;
-}
-
-#box{
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:28px;
-text-align:center;
-}
-
-.transito{
-color:#ff8c00;
-font-weight:bold;
-}
+body{margin:0;overflow:hidden;background:#000;font-family:Arial}
+#left-box{position:absolute;left:0;top:0;background:#C00000;color:#fff;font-weight:bold;text-align:center}
+#clock{position:absolute;top:0;background:#111;color:#00FF99;font-weight:bold;text-align:center}
+#ticker{position:absolute;top:0;overflow:hidden;white-space:nowrap;color:#fff}
+#ticker-content{display:inline-block;white-space:nowrap;padding-left:100%;animation:scroll linear infinite}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+.esporte{color:#0f0;font-weight:bold}
+.news{color:#fff;font-weight:bold}
+.economia{color:#ffd700;font-weight:bold}
+.sep{color:#666;padding:0 14px}
 </style>
 
 </head>
 
 <body>
 
-<div id="box">Carregando trânsito SP...</div>
+<div id="left-box"></div>
+<div id="clock"></div>
+
+<div id="ticker"><div id="ticker-content">Carregando...</div></div>
 
 <script>
 
-/* ================= RSS CORE ================= */
+const params=new URLSearchParams(window.location.search);
+const configName=params.get("config")||"default";
+
+document.write('<script src="configs/'+configName+'.js"><\/script>');
+
+</script>
+
+<script>
+
+/* CONFIG */
+document.body.style.width=CONFIG.width+"px";
+document.body.style.height=CONFIG.height+"px";
+
+document.getElementById("left-box").style.width=Math.round(CONFIG.width*0.15)+"px";
+document.getElementById("left-box").style.height=CONFIG.height+"px";
+document.getElementById("left-box").innerHTML=CONFIG.title;
+
+document.getElementById("clock").style.left=Math.round(CONFIG.width*0.15)+"px";
+
+/* CLOCK */
+setInterval(()=>{
+const d=new Date();
+document.getElementById("clock").innerHTML=
+String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0');
+},1000);
+
+/* CACHE LOCAL (DIFERENCIAL DA VERSÃO B) */
+let CACHE={
+esporte:[],
+news:[],
+econ:[]
+};
+
+let last={};
 
 async function fetchRSS(url){
 
 try{
+const r=await fetch(url);
+const t=await r.text();
+const xml=new DOMParser().parseFromString(t,"text/xml");
+const items=xml.querySelectorAll("item");
 
-const r = await fetch(url);
-const t = await r.text();
-
-const xml = new DOMParser().parseFromString(t,"text/xml");
-const items = xml.querySelectorAll("item");
-
-let out = [];
-
+let out=[];
 items.forEach(i=>{
-const title = i.querySelector("title")?.textContent;
-if(title) out.push(title);
+const title=i.querySelector("title")?.textContent;
+if(title) out.push({title});
 });
 
 return out;
 
-}catch(e){
-return [];
-}
+}catch{return [];}
 
 }
 
-/* ================= TRÂNSITO SP (MULTIFONTE) ================= */
+/* CARREGA CACHE */
+async function refreshCache(){
 
-async function loadTransito(){
-
-let all = [];
-
-const feeds = [
-
-"https://g1.globo.com/rss/g1/sao-paulo/",
-"https://g1.globo.com/rss/g1/sao-paulo/mobilidade/",
-"https://g1.globo.com/rss/g1/economia/"
-
-];
-
-/* fallback inteligente por palavras-chave */
-const keywords = [
-"trânsito",
-"transito",
-"marginal",
-"rodovia",
-"lentidão",
-"acidente",
-"colisão",
-"engavetamento",
-"castelo branco",
-"anhanguera",
-"imigrantes",
-"anchieta"
-];
-
-for(let url of feeds){
-
-try{
-
-const data = await fetchRSS(url);
-
-data.forEach(title=>{
-
-let t = title.toLowerCase();
-
-if(keywords.some(k => t.includes(k))){
-all.push(title);
-}
-
-});
-
-}catch(e){
-// ignora feed quebrado
-}
+CACHE.esporte=await fetchRSS("https://ge.globo.com/rss/ge/futebol/");
+CACHE.news=await fetchRSS("https://g1.globo.com/rss/g1/");
+CACHE.econ=await fetchRSS("https://g1.globo.com/rss/g1/economia/");
 
 }
 
-return all;
+function pick(arr,key){
+
+if(!arr.length) return null;
+
+let f=arr.filter(i=>i.title!==last[key]);
+if(!f.length) f=arr;
+
+const item=f[Math.floor(Math.random()*f.length)];
+
+last[key]=item.title;
+
+return item;
 
 }
 
-/* ================= RENDER ================= */
+function render(){
+
+let html="";
+
+let e=pick(CACHE.esporte,"e");
+let n=pick(CACHE.news,"n");
+let c=pick(CACHE.econ,"c");
+
+if(e) html+=`<span class="esporte">ESPORTE</span> ${e.title}<span class="sep">◆</span>`;
+if(n) html+=`<span class="news">NEWS</span> ${n.title}<span class="sep">◆</span>`;
+if(c) html+=`<span class="economia">ECONOMIA</span> ${c.title}<span class="sep">◆</span>`;
+
+document.getElementById("ticker-content").innerHTML=html;
+
+}
 
 async function start(){
 
-let data = await loadTransito();
+await refreshCache();
+render();
 
-if(!data.length){
-
-document.getElementById("box").innerHTML =
-"<span class='transito'>TRÂNSITO SP</span><br>Sem dados no momento";
-
-return;
-
-}
-
-let html = "<span class='transito'>TRÂNSITO SP</span><br><br>";
-
-data.slice(0,10).forEach(i=>{
-html += "• " + i + "<br>";
-});
-
-document.getElementById("box").innerHTML = html;
+setInterval(render,5000);
+setInterval(refreshCache,60000);
 
 }
 
 start();
-
-setInterval(start,60000);
 
 </script>
 
