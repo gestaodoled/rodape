@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>LUMIX NEWS PROXY RSS</title>
+<title>LUMIX NEWS STABLE</title>
 
 <style>
 
@@ -57,11 +57,13 @@ body{
     animation-iteration-count:infinite;
 }
 
+/* CORES */
+
 .clima{color:#00FFFF;font-weight:bold;}
 .previsao{color:#87CEFA;font-weight:bold;}
+.esporte{color:#00FF00;font-weight:bold;}
 .transito{color:#FF8C00;font-weight:bold;}
 .rodovias{color:#FFA500;font-weight:bold;}
-.esporte{color:#00FF00;font-weight:bold;}
 .dolar{color:#FFD700;font-weight:bold;}
 .euro{color:#F4D03F;font-weight:bold;}
 .bitcoin{color:#F39C12;font-weight:bold;}
@@ -112,6 +114,8 @@ body{
 
 </div>
 
+<!-- CONFIG -->
+
 <script>
 
 const params =
@@ -129,6 +133,8 @@ new Date().getTime() +
 );
 
 </script>
+
+<!-- SISTEMA -->
 
 <script>
 
@@ -211,7 +217,7 @@ setInterval(updateClock,1000);
 updateClock();
 
 
-/* LIMPA */
+/* LIMPA TEXTO */
 
 function cleanText(text){
 
@@ -226,18 +232,37 @@ function cleanText(text){
 }
 
 
-/* RSS DIRETO */
+/* TIMEOUT */
+
+function fetchWithTimeout(url, timeout = 8000){
+
+    return Promise.race([
+
+        fetch(url),
+
+        new Promise((_, reject) =>
+            setTimeout(() =>
+            reject(new Error("timeout")),
+            timeout)
+        )
+
+    ]);
+
+}
+
+
+/* RSS */
 
 async function getRSS(rssUrl){
 
     try{
 
         const proxy =
-        "https://api.allorigins.win/raw?url=" +
+        "https://api.codetabs.com/v1/proxy/?quest=" +
         encodeURIComponent(rssUrl);
 
         const response =
-        await fetch(proxy);
+        await fetchWithTimeout(proxy);
 
         const xmlText =
         await response.text();
@@ -270,7 +295,7 @@ async function getRSS(rssUrl){
 }
 
 
-/* ITEM ALEATÓRIO */
+/* ITEM */
 
 function pickOne(items){
 
@@ -334,7 +359,7 @@ async function getWeather(){
 }
 
 
-/* ALERTA */
+/* ALERTAS */
 
 function getWeatherAlert(code){
 
@@ -418,220 +443,218 @@ async function loadContent(){
 
     for(let block of CONFIG.enabledBlocks){
 
-        if(block === "clima"){
+        try{
 
-            html +=
-            '<span class="clima">CLIMA</span> ' +
-            CONFIG.city + ' ' +
-            weather.temp +
-            '°C' +
-            '<span class="sep">◆</span>';
+            if(block === "clima"){
 
-        }
+                html +=
+                '<span class="clima">CLIMA</span> ' +
+                CONFIG.city + ' ' +
+                weather.temp +
+                '°C' +
+                '<span class="sep">◆</span>';
 
-
-        if(block === "previsao"){
-
-            html +=
-            '<span class="previsao">PREVISÃO</span> Máx ' +
-            weather.max +
-            '° Mín ' +
-            weather.min +
-            '°' +
-            '<span class="sep">◆</span>';
-
-        }
+            }
 
 
-        if(block === "esporte"){
+            if(block === "previsao"){
 
-            let esporte =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/"
+                html +=
+                '<span class="previsao">PREVISÃO</span> Máx ' +
+                weather.max +
+                '° Mín ' +
+                weather.min +
+                '°' +
+                '<span class="sep">◆</span>';
+
+            }
+
+
+            if(block === "esporte"){
+
+                let esporte =
+                await getRSS(
+                "https://ge.globo.com/rss/ge/futebol/"
+                );
+
+                let item =
+                pickOne(esporte);
+
+                if(item){
+
+                    html +=
+                    '<span class="esporte">ESPORTE</span> ' +
+                    cleanText(item.title) +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }
+
+
+            if(block === "news"){
+
+                let news =
+                await getRSS(
+                "https://g1.globo.com/rss/g1/"
+                );
+
+                let item =
+                pickOne(news);
+
+                if(item){
+
+                    html +=
+                    '<span class="news">NEWS</span> ' +
+                    cleanText(item.title) +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }
+
+
+            if(block === "mercado"){
+
+                let mercado =
+                await getRSS(
+                "https://g1.globo.com/rss/g1/economia/"
+                );
+
+                let item =
+                pickOne(mercado);
+
+                if(item){
+
+                    html +=
+                    '<span class="mercado">MERCADO</span> ' +
+                    cleanText(item.title) +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }
+
+
+            if(block === "tech"){
+
+                let tech =
+                await getRSS(
+                "https://g1.globo.com/rss/g1/tecnologia/"
+                );
+
+                let item =
+                pickOne(tech);
+
+                if(item){
+
+                    html +=
+                    '<span class="tech">TECH</span> ' +
+                    cleanText(item.title) +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }
+
+
+            if(block === "entretenimento"){
+
+                let entretenimento =
+                await getRSS(
+                "https://g1.globo.com/rss/g1/pop-arte/"
+                );
+
+                let item =
+                pickOne(entretenimento);
+
+                if(item){
+
+                    html +=
+                    '<span class="entretenimento">ENTRETENIMENTO</span> ' +
+                    cleanText(item.title) +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }
+
+
+            if(block === "dolar"){
+
+                html +=
+                '<span class="dolar">DÓLAR</span> R$ ' +
+                money.usd +
+                '<span class="sep">◆</span>';
+
+            }
+
+
+            if(block === "euro"){
+
+                html +=
+                '<span class="euro">EURO</span> R$ ' +
+                money.eur +
+                '<span class="sep">◆</span>';
+
+            }
+
+
+            if(block === "bitcoin"){
+
+                html +=
+                '<span class="bitcoin">BITCOIN</span> R$ ' +
+                money.btc +
+                '<span class="sep">◆</span>';
+
+            }
+
+
+            if(block === "instagram"){
+
+                html +=
+                '<span class="instagram">INSTAGRAM</span> ' +
+                CONFIG.instagram +
+                '<span class="sep">◆</span>';
+
+            }
+
+
+            if(block === "alerta"){
+
+                const alertText =
+                getWeatherAlert(weather.code);
+
+                if(alertText){
+
+                    html +=
+                    '<span class="alerta">ALERTA</span> ' +
+                    alertText +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }
+
+        }catch(error){
+
+            console.log(
+            "Erro bloco:",
+            block
             );
-
-            let item =
-            pickOne(esporte);
-
-            if(item){
-
-                html +=
-                '<span class="esporte">ESPORTE</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        if(block === "dolar"){
-
-            html +=
-            '<span class="dolar">DÓLAR</span> R$ ' +
-            money.usd +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        if(block === "euro"){
-
-            html +=
-            '<span class="euro">EURO</span> R$ ' +
-            money.eur +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        if(block === "bitcoin"){
-
-            html +=
-            '<span class="bitcoin">BITCOIN</span> R$ ' +
-            money.btc +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        if(block === "news"){
-
-            let news =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/"
-            );
-
-            let item =
-            pickOne(news);
-
-            if(item){
-
-                html +=
-                '<span class="news">NEWS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        if(block === "mercado"){
-
-            let mercado =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/economia/"
-            );
-
-            let item =
-            pickOne(mercado);
-
-            if(item){
-
-                html +=
-                '<span class="mercado">MERCADO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        if(block === "tech"){
-
-            let tech =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/tecnologia/"
-            );
-
-            let item =
-            pickOne(tech);
-
-            if(item){
-
-                html +=
-                '<span class="tech">TECH</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        if(block === "entretenimento"){
-
-            let entretenimento =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/pop-arte/"
-            );
-
-            let item =
-            pickOne(entretenimento);
-
-            if(item){
-
-                html +=
-                '<span class="entretenimento">ENTRETENIMENTO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        if(block === "saude"){
-
-            let saude =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/bemestar/"
-            );
-
-            let item =
-            pickOne(saude);
-
-            if(item){
-
-                html +=
-                '<span class="saude">SAÚDE</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        if(block === "instagram"){
-
-            html +=
-            '<span class="instagram">INSTAGRAM</span> ' +
-            CONFIG.instagram +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        if(block === "alerta"){
-
-            const alertText =
-            getWeatherAlert(weather.code);
-
-            if(alertText){
-
-                html +=
-                '<span class="alerta">ALERTA</span> ' +
-                alertText +
-                '<span class="sep">◆</span>';
-
-            }
 
         }
 
     }
+
+
+    if(html.trim() === ""){
+
+        html =
+        '<span class="news">Sistema online</span>';
+
+    }
+
 
     document.getElementById(
     "ticker-content"
@@ -645,7 +668,7 @@ async function loadContent(){
 loadContent();
 
 
-/* REFRESH */
+/* UPDATE */
 
 setInterval(() => {
 
