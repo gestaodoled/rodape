@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>5 LUMIX NEWS PRO</title>
+<title>6 LUMIX NEWS PRO</title>
 
 <style>
 
@@ -461,16 +461,19 @@ async function loadContent(){
 
         if(block === "esporte"){
 
-            if(SPORT_CACHE.length){
+            const esporteNews =
+            await getGNews(
+            "futebol brasileiro champions league premier league la liga serie a"
+            );
 
-                const jogo =
-                pickOne(SPORT_CACHE);
+            if(esporteNews.length){
+
+                const item =
+                pickOne(esporteNews);
 
                 html +=
                 '<span class="esporte">ESPORTE</span> ' +
-                jogo.strHomeTeam +
-                ' x ' +
-                jogo.strAwayTeam +
+                cleanText(item.title) +
                 '<span class="sep">◆</span>';
 
             }
@@ -507,9 +510,22 @@ async function loadContent(){
 
         if(block === "selecao"){
 
-            html +=
-            '<span class="selecao">SELEÇÃO</span> Notícias da Seleção Brasileira' +
-            '<span class="sep">◆</span>';
+            const selecaoNews =
+            await getGNews(
+            "seleção brasileira futebol"
+            );
+
+            if(selecaoNews.length){
+
+                const item =
+                pickOne(selecaoNews);
+
+                html +=
+                '<span class="selecao">SELEÇÃO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
 
         }
 
@@ -518,9 +534,34 @@ async function loadContent(){
 
         if(block === "classificacao"){
 
-            html +=
-            '<span class="classificacao">CLASSIFICAÇÃO</span> Brasileirão Série A em atualização' +
-            '<span class="sep">◆</span>';
+            try{
+
+                const response =
+                await fetch(
+                "https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2025-2026"
+                );
+
+                const data =
+                await response.json();
+
+                if(data.table && data.table.length){
+
+                    const top =
+                    data.table[0];
+
+                    html +=
+                    '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
+                    top.name +
+                    ' lidera com ' +
+                    top.intPoints +
+                    ' pontos' +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }catch(error){
+
+            }
 
         }
 
