@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>10 LUMIX NEWS PRO</title>
+<title>11 LUMIX NEWS PRO</title>
 
 <style>
 
@@ -316,9 +316,26 @@ async function getMoney(){
 const GNEWS_KEY =
 "9c1aaf5a12ad6ffe75f77c7fe15ad790";
 
+
+/* NEWSDATA */
+
+const NEWSDATA_KEY =
+"pub_81dda51e603744ad9bfbb85b23339f46";
+
+
+/* CACHE */
+
 let NEWS_CACHE = [];
 let TECH_CACHE = [];
 let MARKET_CACHE = [];
+let SPORT_CACHE = [];
+let SELECAO_CACHE = [];
+let RESULT_CACHE = [];
+
+let RESULT_INDEX = 0;
+
+
+/* GNEWS */
 
 async function getGNews(query){
 
@@ -347,13 +364,7 @@ async function getGNews(query){
 }
 
 
-/* NEWSDATA ESPORTE */
-
-const NEWSDATA_KEY =
-"pub_demo";
-
-let SPORT_CACHE = [];
-let SELECAO_CACHE = [];
+/* NEWSDATA */
 
 async function getSportsNews(query){
 
@@ -382,18 +393,18 @@ async function getSportsNews(query){
 }
 
 
-/* CACHE */
+/* CARREGA NEWS */
 
 async function loadNews(){
 
     NEWS_CACHE =
-    await getGNews("noticias brasil");
+    await getGNews("ultimas noticias brasil");
 
     TECH_CACHE =
-    await getGNews("tecnologia");
+    await getGNews("tecnologia ia apple google");
 
     MARKET_CACHE =
-    await getGNews("economia");
+    await getGNews("economia bolsa dolar");
 
     SPORT_CACHE =
     await getSportsNews(
@@ -409,9 +420,6 @@ async function loadNews(){
 
 
 /* RESULTADOS */
-
-let RESULT_CACHE = [];
-let RESULT_INDEX = 0;
 
 async function loadResults(){
 
@@ -437,7 +445,7 @@ async function loadResults(){
 }
 
 
-/* ITEM */
+/* ITEM RANDOM */
 
 function pickOne(items){
 
@@ -455,7 +463,7 @@ function pickOne(items){
 }
 
 
-/* LOAD */
+/* LOAD CONTENT */
 
 async function loadContent(){
 
