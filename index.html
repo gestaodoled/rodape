@@ -3,6 +3,7 @@
 
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>LUMIX NEWS PRO MAX</title>
 
 <style>
@@ -14,6 +15,7 @@ body{
     font-family:Arial, Helvetica, sans-serif;
 }
 
+/* LAYOUT */
 #left-box{
     position:absolute;
     left:0;
@@ -55,11 +57,11 @@ body{
     to{transform:translateX(-100%);}
 }
 
-/* cores */
+/* CORES */
 .esporte{color:#00FF00;font-weight:bold;}
 .news{color:#FFFFFF;font-weight:bold;}
-.transito{color:#FF8C00;font-weight:bold;}
 .economia{color:#FFD700;font-weight:bold;}
+.transito{color:#FF8C00;font-weight:bold;}
 .clima{color:#00FFFF;font-weight:bold;}
 .sep{color:#666;padding:0 14px;}
 
@@ -73,7 +75,7 @@ body{
 <div id="clock"></div>
 
 <div id="ticker">
-<div id="ticker-content">Carregando informações...</div>
+    <div id="ticker-content">Carregando informações...</div>
 </div>
 
 <script>
@@ -117,17 +119,15 @@ function updateClock(){
 setInterval(updateClock,1000);
 updateClock();
 
-/* ================= RSS MULTI-FONTE ================= */
+/* ================= RSS CORE ================= */
 
 async function getRSS(url){
-
     try{
-
         const r = await fetch(url);
         const t = await r.text();
-
         const xml = new DOMParser().parseFromString(t,"text/xml");
-        const items = xml.querySelectorAll("item");
+
+        let items = xml.querySelectorAll("item");
 
         let out = [];
 
@@ -144,156 +144,75 @@ async function getRSS(url){
     }
 }
 
-/* ================= FONTES ================= */
+/* ================= 1. BANCO GLOBAL ================= */
 
-const FEEDS = {
+let NEWS_POOL = [];
 
-esporte: [
-"https://ge.globo.com/rss/ge/futebol/",
-"https://feeds.folha.uol.com.br/esporte/rss091.xml"
-],
+/* ================= 2. MULTI-FONTE ================= */
 
-news: [
-"https://g1.globo.com/rss/g1/",
-"https://feeds.folha.uol.com.br/emcimadahora/rss091.xml"
-],
+async function fetchAllNews(){
 
-economia: [
-"https://g1.globo.com/rss/g1/economia/",
-"https://feeds.folha.uol.com.br/mercado/rss091.xml"
-],
+    let pool = [];
 
-transito: [
-CONFIG.trafficRSS
-]
+    async function add(url, tag){
 
-};
+        let data = await getRSS(url);
 
-/* ================= CACHE ANTI-REPETIÇÃO ================= */
+        data.forEach(i=>{
+            pool.push({
+                title: i.title,
+                tag: tag
+            });
+        });
 
-let last = {};
-
-/* ================= PICK INTELIGENTE ================= */
-
-function pick(arr,key){
-
-    if(!arr.length) return null;
-
-    let filtered = arr.filter(i => i.title !== last[key]);
-
-    if(!filtered.length) filtered = arr;
-
-    const item = filtered[Math.floor(Math.random()*filtered.length)];
-
-    last[key] = item.title;
-
-    return item;
-}
-
-/* ================= WEATHER + MONEY ================= */
-
-async function getWeather(){
-    try{
-        const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.latitude}&longitude=${CONFIG.longitude}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=America%2FSao_Paulo`);
-        const d = await r.json();
-
-        return {
-            temp: Math.round(d.current.temperature_2m),
-        };
-
-    }catch{
-        return {temp:20};
     }
+
+    /* ESPORTE */
+    await add("https://ge.globo.com/rss/ge/futebol/", "esporte");
+    await add("https://rss.uol.com.br/feed/esporte.xml", "esporte");
+
+    /* NEWS */
+    await add("https://g1.globo.com/rss/g1/", "news");
+    await add("https://feeds.folha.uol.com.br/emcimadahora/rss091.xml", "news");
+
+    /* ECONOMIA */
+    await add("https://g1.globo.com/rss/g1/economia/", "economia");
+
+    return pool;
 }
 
-async function getMoney(){
-    try{
-        const r = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,BTC-BRL");
-        const d = await r.json();
+/* ================= 3. TICKER BUILDER ================= */
 
-        return {
-            usd: parseFloat(d.USDBRL.bid).toFixed(2),
-            eur: parseFloat(d.EURBRL.bid).toFixed(2),
-            btc: Math.round(d.BTCBRL.bid)
-        };
-
-    }catch{
-        return {usd:"5.40",eur:"6.10",btc:"580000"};
-    }
-}
-
-/* ================= LOAD ================= */
-
-async function load(){
+function buildTicker(pool){
 
     let html = "";
 
-    const weather = await getWeather();
-    const money = await getMoney();
+    pool.forEach(item=>{
+        html += `<span class="${item.tag}">${item.tag.toUpperCase()}</span> ${item.title}<span class="sep">◆</span>`;
+    });
 
-    for(let block of CONFIG.enabledBlocks){
+    return html;
+}
 
-        /* ESPORTE MULTIFONTE */
-        if(block==="esporte"){
+/* ================= 4. LOAD FINAL ================= */
 
-            let all = [];
+async function loadContent(){
 
-            for(let f of FEEDS.esporte){
-                let data = await getRSS(f);
-                all = all.concat(data);
-            }
+    let pool = await fetchAllNews();
 
-            let item = pick(all,"esporte");
+    /* embaralha para fluxo dinâmico */
+    pool = pool.sort(()=>Math.random()-0.5);
 
-            if(item){
-                html += `<span class="esporte">ESPORTE</span> ${item.title}<span class="sep">◆</span>`;
-            }
-        }
-
-        /* NEWS MULTIFONTE */
-        if(block==="news"){
-
-            let all = [];
-
-            for(let f of FEEDS.news){
-                let data = await getRSS(f);
-                all = all.concat(data);
-            }
-
-            let item = pick(all,"news");
-
-            if(item){
-                html += `<span class="news">NEWS</span> ${item.title}<span class="sep">◆</span>`;
-            }
-        }
-
-        /* ECONOMIA */
-        if(block==="dolar"){
-            html += `<span class="economia">DÓLAR</span> R$ ${money.usd}<span class="sep">◆</span>`;
-        }
-
-        if(block==="euro"){
-            html += `<span class="economia">EURO</span> R$ ${money.eur}<span class="sep">◆</span>`;
-        }
-
-        if(block==="bitcoin"){
-            html += `<span class="economia">BITCOIN</span> R$ ${money.btc}<span class="sep">◆</span>`;
-        }
-
-        /* CLIMA */
-        if(block==="clima"){
-            html += `<span class="clima">CLIMA</span> ${CONFIG.city} ${weather.temp}°C<span class="sep">◆</span>`;
-        }
-
-    }
+    let html = buildTicker(pool);
 
     document.getElementById("ticker-content").innerHTML = html;
 }
 
-load();
+/* START */
+loadContent();
 
-/* LOOP */
-setInterval(load,60000);
+/* REFRESH CONTÍNUO */
+setInterval(loadContent, 60000);
 
 </script>
 
