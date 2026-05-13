@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>7 LUMIX NEWS PRO</title>
+<title>8 LUMIX NEWS PRO</title>
 
 <style>
 
@@ -324,6 +324,8 @@ const GNEWS_KEY =
 let NEWS_CACHE = [];
 let TECH_CACHE = [];
 let MARKET_CACHE = [];
+let SPORT_CACHE = [];
+let SELECAO_CACHE = [];
 
 async function getGNews(query){
 
@@ -369,10 +371,16 @@ async function loadGNews(){
     MARKET_CACHE =
     await getGNews("economia mercado");
 
+    SPORT_CACHE =
+    await getGNews("futebol brasileiro champions league premier league");
+
+    SELECAO_CACHE =
+    await getGNews("seleção brasileira futebol");
+
 }
 
 
-/* SPORTS API */
+/* RESULTADOS */
 
 let RESULT_CACHE = [];
 
@@ -455,35 +463,20 @@ async function loadContent(){
 
         if(block === "esporte"){
 
-            try{
+            if(SPORT_CACHE.length){
 
-                const esporteNews =
-                await getGNews(
-                "futebol brasileiro champions league premier league la liga"
-                );
-
-                if(esporteNews && esporteNews.length){
-
-                    const item =
-                    pickOne(esporteNews);
-
-                    html +=
-                    '<span class="esporte">ESPORTE</span> ' +
-                    cleanText(item.title) +
-                    '<span class="sep">◆</span>';
-
-                }else{
-
-                    html +=
-                    '<span class="esporte">ESPORTE</span> Mercado da bola e futebol internacional em destaque' +
-                    '<span class="sep">◆</span>';
-
-                }
-
-            }catch(error){
+                const item =
+                pickOne(SPORT_CACHE);
 
                 html +=
-                '<span class="esporte">ESPORTE</span> Futebol brasileiro e europeu em atualização' +
+                '<span class="esporte">ESPORTE</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }else{
+
+                html +=
+                '<span class="esporte">ESPORTE</span> Futebol brasileiro e europeu em destaque' +
                 '<span class="sep">◆</span>';
 
             }
@@ -520,15 +513,10 @@ async function loadContent(){
 
         if(block === "selecao"){
 
-            const selecaoNews =
-            await getGNews(
-            "seleção brasileira futebol"
-            );
-
-            if(selecaoNews.length){
+            if(SELECAO_CACHE.length){
 
                 const item =
-                pickOne(selecaoNews);
+                pickOne(SELECAO_CACHE);
 
                 html +=
                 '<span class="selecao">SELEÇÃO</span> ' +
@@ -562,11 +550,11 @@ async function loadContent(){
 
                     html +=
                     '<span class="classificacao">CLASSIFICAÇÃO</span> Premier League: ' +
-                    '1º ' + p1.name +
+                    '1º ' + p1.strTeam +
                     ' (' + p1.intPoints + ' pts) | ' +
-                    '2º ' + p2.name +
+                    '2º ' + p2.strTeam +
                     ' (' + p2.intPoints + ' pts) | ' +
-                    '3º ' + p3.name +
+                    '3º ' + p3.strTeam +
                     ' (' + p3.intPoints + ' pts)' +
                     '<span class="sep">◆</span>';
 
