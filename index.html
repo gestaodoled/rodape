@@ -3,37 +3,71 @@
 
 <head>
 <meta charset="UTF-8">
-<title>LUMIX SAFE</title>
+<title>LUMIX NEWS</title>
 
 <style>
-body{margin:0;background:#000;color:#fff;font-family:Arial;overflow:hidden}
 
-#left-box,#clock,#ticker{
-position:absolute;top:0;height:100%;
-display:flex;align-items:center;justify-content:center;
-font-weight:bold;
+body{
+    margin:0;
+    overflow:hidden;
+    background:#000;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
-#left-box{left:0;width:15%;background:#c00}
-#clock{left:15%;width:10%;background:#111;color:#0f0}
-#ticker{left:25%;width:75%;overflow:hidden;white-space:nowrap}
+/* LAYOUT BASE (SEGURO) */
+#left-box{
+    position:absolute;
+    left:0;
+    top:0;
+    background:#C00000;
+    color:#FFF;
+    font-weight:bold;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-right:1px solid #FFF;
+}
+
+#clock{
+    position:absolute;
+    top:0;
+    background:#111;
+    color:#00FF99;
+    font-weight:bold;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-right:1px solid #222;
+}
+
+#ticker{
+    position:absolute;
+    top:0;
+    overflow:hidden;
+    white-space:nowrap;
+    color:#FFF;
+}
 
 #ticker-content{
-display:inline-block;
-white-space:nowrap;
-padding-left:100%;
-animation:scroll 20s linear infinite;
+    display:inline-block;
+    white-space:nowrap;
+    padding-left:100%;
+    animation:scroll 22s linear infinite;
 }
 
 .sep{color:#666;padding:0 14px}
-.esporte{color:#0f0}
-.transito{color:#ffa500}
-.lumix{color:#ffd700}
+
+/* CORES */
+.esporte{color:#00FF00;font-weight:bold;}
+.transito{color:#FF8C00;font-weight:bold;}
+.news{color:#FFFFFF;font-weight:bold;}
+.lumix{color:#FFD700;font-weight:bold;}
 
 @keyframes scroll{
-from{transform:translateX(0)}
-to{transform:translateX(-100%)}
+    from{transform:translateX(0)}
+    to{transform:translateX(-100%)}
 }
+
 </style>
 </head>
 
@@ -41,73 +75,169 @@ to{transform:translateX(-100%)}
 
 <div id="left-box">LUMIX</div>
 <div id="clock"></div>
-<div id="ticker"><div id="ticker-content">Inicializando...</div></div>
+
+<div id="ticker">
+    <div id="ticker-content">Carregando notícias...</div>
+</div>
 
 <script>
 
-/* 🔥 PROTEÇÃO TOTAL DE CONFIG */
-window.CONFIG = window.CONFIG || {
-    width: 1920,
-    height: 1080,
-    fontSize: 40,
-    title: "LUMIX",
-    enabledBlocks: ["esporte","transito"]
-};
+/* =========================
+   🔥 LAYOUT NORMALIZADO
+========================= */
 
-/* CLOCK */
+function initLayout(){
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    const left = document.getElementById("left-box");
+    const clock = document.getElementById("clock");
+    const ticker = document.getElementById("ticker");
+
+    const leftW = w * 0.15;
+    const clockW = w * 0.10;
+
+    left.style.width = leftW + "px";
+    left.style.height = h + "px";
+    left.style.fontSize = "20px";
+
+    clock.style.left = leftW + "px";
+    clock.style.width = clockW + "px";
+    clock.style.height = h + "px";
+    clock.style.fontSize = "20px";
+
+    ticker.style.left = (leftW + clockW) + "px";
+    ticker.style.width = (w - leftW - clockW) + "px";
+    ticker.style.height = h + "px";
+    ticker.style.lineHeight = h + "px";
+    ticker.style.fontSize = "20px";
+}
+
+initLayout();
+window.addEventListener("resize", initLayout);
+
+/* =========================
+   🕒 RELÓGIO
+========================= */
+
 setInterval(()=>{
     const d = new Date();
     document.getElementById("clock").innerHTML =
-    String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0');
+    String(d.getHours()).padStart(2,'0') + ":" +
+    String(d.getMinutes()).padStart(2,'0');
 },1000);
 
-/* RSS SAFE */
-async function rss(url){
+/* =========================
+   🧠 RSS SAFE CORE
+========================= */
+
+async function fetchRSS(url){
+
     try{
-        const r = await fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(url));
+        const r = await fetch(
+            "https://api.rss2json.com/v1/api.json?rss_url=" +
+            encodeURIComponent(url)
+        );
+
         const d = await r.json();
         return d.items || [];
+
     }catch{
         return [];
     }
 }
 
-function pick(a){
-    if(!a || !a.length) return null;
-    return a[Math.floor(Math.random()*a.length)];
+function pick(arr){
+    if(!arr || !arr.length) return null;
+    return arr[Math.floor(Math.random()*arr.length)];
 }
 
-/* ESPORTE (SEMPRE FUNCIONA) */
-async function esporte(){
-    let data = await rss("https://ge.globo.com/rss/ge/futebol/");
-    let item = pick(data);
-    return item ? item.title : "Futebol em atualização";
+/* =========================
+   ⚽ ESPORTE (ROBUSTO)
+========================= */
+
+async function getEsporte(){
+
+    const feeds = await Promise.allSettled([
+        fetchRSS("https://ge.globo.com/rss/ge/futebol/"),
+        fetchRSS("https://rss.uol.com.br/feed/esporte.xml"),
+        fetchRSS("https://feeds.bbci.co.uk/sport/football/rss.xml")
+    ]);
+
+    let all = [];
+
+    feeds.forEach(f=>{
+        if(f.status === "fulfilled"){
+            all = all.concat(f.value);
+        }
+    });
+
+    let item = pick(all);
+
+    return item ? item.title : "Futebol em destaque no momento";
 }
 
-/* TRÂNSITO (SEMPRE FUNCIONA) */
-async function transito(){
-    let data = await rss("https://g1.globo.com/rss/g1/sao-paulo/");
-    let item = pick(data);
-    return item ? item.title : "SP fluindo normalmente";
+/* =========================
+   🚦 TRÂNSITO SP
+========================= */
+
+async function getTransito(){
+
+    const feeds = await Promise.allSettled([
+        fetchRSS("https://g1.globo.com/rss/g1/sao-paulo/"),
+        fetchRSS("https://rss.uol.com.br/feed/noticias.xml")
+    ]);
+
+    let all = [];
+
+    feeds.forEach(f=>{
+        if(f.status === "fulfilled"){
+            all = all.concat(f.value);
+        }
+    });
+
+    let filtered = all.filter(i =>
+        /trânsito|acidente|lentidão|marginal|rodovia|sp/i.test(i.title)
+    );
+
+    let pool = filtered.length ? filtered : all;
+
+    let item = pick(pool);
+
+    return item ? item.title : "SP com fluxo normal";
 }
 
-/* BUILD */
+/* =========================
+   🧩 BUILD FINAL SEGURO
+========================= */
+
 async function build(){
 
     let html = "";
 
-    let esp = await esporte();
-    let tra = await transito();
+    let [esp, tra] = await Promise.all([
+        getEsporte(),
+        getTransito()
+    ]);
 
     html += `<span class="esporte">ESPORTE</span> ${esp}<span class="sep">◆</span>`;
     html += `<span class="transito">TRÂNSITO SP</span> ${tra}<span class="sep">◆</span>`;
+    html += `<span class="news">NEWS</span> Atualização contínua<span class="sep">◆</span>`;
     html += `<span class="lumix">LUMIX</span> Sistema ativo<span class="sep">◆</span>`;
 
-    document.getElementById("ticker-content").innerHTML = html || "Sistema ativo";
+    /* 🔥 GARANTIA ABSOLUTA */
+    if(!html || html.trim() === ""){
+        html =
+        `<span class="lumix">LUMIX</span> Sistema online<span class="sep">◆</span>`;
+    }
+
+    document.getElementById("ticker-content").innerHTML = html;
 }
 
+/* LOOP ESTÁVEL */
 build();
-setInterval(build,10000);
+setInterval(build, 10000);
 
 </script>
 
