@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>1 LUMIX NEWS</title>
+<title>2 LUMIX NEWS</title>
 
 <style>
 
@@ -68,11 +68,9 @@ body{
 /* CORES */
 
 .clima{color:#00FFFF;font-weight:bold;}
-.previsao{color:#87CEFA;font-weight:bold;}
-.transito{color:#FF8C00;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
+.transito{color:#FF8C00;font-weight:bold;}
 .news{color:#FFFFFF;font-weight:bold;}
-.motivacao{color:#00FFCC;font-weight:bold;}
 .lumix{color:#FFD700;font-weight:bold;}
 
 .sep{
@@ -351,6 +349,11 @@ async function loadContent(){
             "https://ge.globo.com/rss/ge/futebol/"
             );
 
+            esporte = esporte.filter(item =>
+                item.title &&
+                item.title.length > 15
+            );
+
             let item =
             pickOne(esporte);
 
@@ -375,6 +378,11 @@ async function loadContent(){
             CONFIG.trafficRSS
             );
 
+            transito = transito.filter(item =>
+                item.title &&
+                item.title.length > 15
+            );
+
             let item =
             pickOne(transito);
 
@@ -390,21 +398,14 @@ async function loadContent(){
         }
 
 
-        /* NEWS G1 + UOL */
+        /* NEWS */
 
         if(block === "news"){
 
-            let geral = [
-
-                ...(await getRSS(
-                "https://g1.globo.com/rss/g1/"
-                )),
-
-                ...(await getRSS(
-                "https://rss.uol.com.br/feed/noticias.xml"
-                ))
-
-            ];
+            let geral =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/"
+            );
 
             geral = geral.filter(item =>
                 item.title &&
@@ -463,7 +464,7 @@ async function loadContent(){
 loadContent();
 
 
-/* RELOAD DE CONTEÚDO */
+/* RELOAD CONTEÚDO */
 
 setInterval(() => {
 
