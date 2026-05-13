@@ -252,9 +252,35 @@ function cleanText(text){
     result = result
     .replace(/Â/g,"")
     .replace(/[\n\r]/g," ")
+    .replace(/\s+/g," ")
     .trim();
 
     return result;
+
+}
+
+
+/* CONTROLE DE REPETIÇÃO */
+
+const usedTitles = new Set();
+
+
+/* FILTRO */
+
+function filterNews(items, keywords){
+
+    return items.filter(item => {
+
+        if(!item.title) return false;
+
+        const title =
+        item.title.toLowerCase();
+
+        return keywords.some(word =>
+        title.includes(word)
+        );
+
+    });
 
 }
 
@@ -376,7 +402,7 @@ async function getMoney(){
 
 /* ITEM ALEATÓRIO */
 
-function pickOne(items){
+function pickUnique(items){
 
     if(!items || items.length === 0){
 
@@ -384,10 +410,40 @@ function pickOne(items){
 
     }
 
-    return items[
+    const filtered =
+    items.filter(item => {
+
+        if(!item.title) return false;
+
+        const title =
+        item.title.toLowerCase();
+
+        return !usedTitles.has(title);
+
+    });
+
+    if(filtered.length === 0){
+
+        usedTitles.clear();
+
+        return items[
+        Math.floor(
+        Math.random() * items.length
+        )];
+
+    }
+
+    const item =
+    filtered[
     Math.floor(
-    Math.random() * items.length
+    Math.random() * filtered.length
     )];
+
+    usedTitles.add(
+    item.title.toLowerCase()
+    );
+
+    return item;
 
 }
 
@@ -446,22 +502,19 @@ async function loadContent(){
             );
 
             transito =
-            transito.filter(item => {
+            filterNews(transito,[
 
-                const t =
-                item.title.toLowerCase();
+                "trânsito",
+                "transito",
+                "acidente",
+                "lentidão",
+                "engarrafamento",
+                "marginal"
 
-                return t.includes("trânsito") ||
-                       t.includes("transito") ||
-                       t.includes("acidente") ||
-                       t.includes("lentidão") ||
-                       t.includes("marginal") ||
-                       t.includes("rodovia");
-
-            });
+            ]);
 
             let item =
-            pickOne(transito);
+            pickUnique(transito);
 
             if(item){
 
@@ -485,22 +538,19 @@ async function loadContent(){
             );
 
             rodovias =
-            rodovias.filter(item => {
+            filterNews(rodovias,[
 
-                const t =
-                item.title.toLowerCase();
+                "rodovia",
+                "anchieta",
+                "imigrantes",
+                "castello",
+                "anhanguera",
+                "bandeirantes"
 
-                return t.includes("rodovia") ||
-                       t.includes("castello") ||
-                       t.includes("anhanguera") ||
-                       t.includes("imigrantes") ||
-                       t.includes("anchieta") ||
-                       t.includes("bandeirantes");
-
-            });
+            ]);
 
             let item =
-            pickOne(rodovias);
+            pickUnique(rodovias);
 
             if(item){
 
@@ -524,84 +574,12 @@ async function loadContent(){
             );
 
             let item =
-            pickOne(esporte);
+            pickUnique(esporte);
 
             if(item){
 
                 html +=
                 '<span class="esporte">ESPORTE</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* RESULTADOS */
-
-        if(block === "resultados"){
-
-            let futebol =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/"
-            );
-
-            let item =
-            pickOne(futebol);
-
-            if(item){
-
-                html +=
-                '<span class="resultados">RESULTADOS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* SELEÇÃO */
-
-        if(block === "selecao"){
-
-            let selecao =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/selecao-brasileira/"
-            );
-
-            let item =
-            pickOne(selecao);
-
-            if(item){
-
-                html +=
-                '<span class="selecao">SELEÇÃO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* CLASSIFICAÇÃO */
-
-        if(block === "classificacao"){
-
-            let brasileirao =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/"
-            );
-
-            let item =
-            pickOne(brasileirao);
-
-            if(item){
-
-                html +=
-                '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
                 cleanText(item.title) +
                 '<span class="sep">◆</span>';
 
@@ -656,7 +634,7 @@ async function loadContent(){
             );
 
             let item =
-            pickOne(mercado);
+            pickUnique(mercado);
 
             if(item){
 
@@ -680,7 +658,7 @@ async function loadContent(){
             );
 
             let item =
-            pickOne(tech);
+            pickUnique(tech);
 
             if(item){
 
@@ -704,7 +682,7 @@ async function loadContent(){
             );
 
             let item =
-            pickOne(trends);
+            pickUnique(trends);
 
             if(item){
 
@@ -724,11 +702,11 @@ async function loadContent(){
 
             let eventos =
             await getRSS(
-            CONFIG.trafficRSS
+            "https://g1.globo.com/rss/g1/pop-arte/"
             );
 
             let item =
-            pickOne(eventos);
+            pickUnique(eventos);
 
             if(item){
 
@@ -752,21 +730,19 @@ async function loadContent(){
             );
 
             aeroportos =
-            aeroportos.filter(item => {
+            filterNews(aeroportos,[
 
-                const t =
-                item.title.toLowerCase();
+                "aeroporto",
+                "voo",
+                "avião",
+                "congonhas",
+                "guarulhos",
+                "viracopos"
 
-                return t.includes("aeroporto") ||
-                       t.includes("voo") ||
-                       t.includes("avião") ||
-                       t.includes("congonhas") ||
-                       t.includes("guarulhos");
-
-            });
+            ]);
 
             let item =
-            pickOne(aeroportos);
+            pickUnique(aeroportos);
 
             if(item){
 
@@ -820,7 +796,7 @@ async function loadContent(){
             );
 
             let item =
-            pickOne(saude);
+            pickUnique(saude);
 
             if(item){
 
@@ -875,7 +851,7 @@ async function loadContent(){
             );
 
             let item =
-            pickOne(entretenimento);
+            pickUnique(entretenimento);
 
             if(item){
 
@@ -899,7 +875,7 @@ async function loadContent(){
             );
 
             let item =
-            pickOne(geral);
+            pickUnique(geral);
 
             if(item){
 
@@ -909,53 +885,6 @@ async function loadContent(){
                 '<span class="sep">◆</span>';
 
             }
-
-        }
-
-
-        /* MOTIVAÇÃO */
-
-        if(block === "motivacao"){
-
-            const frases = [
-
-                "Grandes resultados exigem constância",
-                "Persistência gera resultados",
-                "Disciplina vence talento",
-                "Foco no objetivo"
-
-            ];
-
-            html +=
-            '<span class="motivacao">MOTIVAÇÃO</span> ' +
-            frases[
-            Math.floor(
-            Math.random() * frases.length
-            )] +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        /* LUMIX */
-
-        if(block === "lumix"){
-
-            const lumix = [
-
-                "Impacto visual que vende",
-                "Especialistas em painéis de LED",
-                "Tecnologia visual de alto impacto"
-
-            ];
-
-            html +=
-            '<span class="lumix">LUMIX LED</span> ' +
-            lumix[
-            Math.floor(
-            Math.random() * lumix.length
-            )] +
-            '<span class="sep">◆</span>';
 
         }
 
