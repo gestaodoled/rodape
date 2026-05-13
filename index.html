@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>LUMIX NEWS STABLE</title>
+<title>LUMIX NEWS</title>
 
 <style>
 
@@ -16,6 +16,8 @@ body{
     background:#000;
     font-family:Arial, Helvetica, sans-serif;
 }
+
+/* BLOCO ESQUERDO */
 
 #left-box{
     position:absolute;
@@ -29,6 +31,8 @@ body{
     z-index:5;
 }
 
+/* RELÓGIO */
+
 #clock{
     position:absolute;
     top:0;
@@ -40,6 +44,8 @@ body{
     z-index:5;
 }
 
+/* TICKER */
+
 #ticker{
     position:absolute;
     top:0;
@@ -47,6 +53,8 @@ body{
     white-space:nowrap;
     color:#FFF;
 }
+
+/* CONTEÚDO */
 
 #ticker-content{
     display:inline-block;
@@ -61,9 +69,12 @@ body{
 
 .clima{color:#00FFFF;font-weight:bold;}
 .previsao{color:#87CEFA;font-weight:bold;}
-.esporte{color:#00FF00;font-weight:bold;}
 .transito{color:#FF8C00;font-weight:bold;}
 .rodovias{color:#FFA500;font-weight:bold;}
+.esporte{color:#00FF00;font-weight:bold;}
+.resultados{color:#32CD32;font-weight:bold;}
+.selecao{color:#7CFC00;font-weight:bold;}
+.classificacao{color:#ADFF2F;font-weight:bold;}
 .dolar{color:#FFD700;font-weight:bold;}
 .euro{color:#F4D03F;font-weight:bold;}
 .bitcoin{color:#F39C12;font-weight:bold;}
@@ -77,12 +88,16 @@ body{
 .alerta{color:#FF0000;font-weight:bold;}
 .entretenimento{color:#FF66CC;font-weight:bold;}
 .news{color:#FFFFFF;font-weight:bold;}
+.motivacao{color:#00FFCC;font-weight:bold;}
+.lumix{color:#FFD700;font-weight:bold;}
 .instagram{color:#FF1493;font-weight:bold;}
 
 .sep{
     color:#666;
     padding:0 14px;
 }
+
+/* ANIMAÇÃO */
 
 @keyframes scroll{
 
@@ -138,7 +153,7 @@ new Date().getTime() +
 
 <script>
 
-/* VISUAL */
+/* CONFIG VISUAL */
 
 document.body.style.width =
 CONFIG.width + "px";
@@ -195,6 +210,11 @@ document.getElementById("ticker-content").style.animationDuration =
 CONFIG.speed + "s";
 
 
+/* CONTADOR */
+
+let cycleCount = 0;
+
+
 /* RELÓGIO */
 
 function updateClock(){
@@ -209,7 +229,6 @@ function updateClock(){
 
     document.getElementById("clock").innerHTML =
     hours + ":" + minutes;
-
 }
 
 setInterval(updateClock,1000);
@@ -223,30 +242,19 @@ function cleanText(text){
 
     if(!text) return "";
 
-    return text
-    .replace(/<[^>]*>/g,'')
-    .replace(/&[^;]+;/g,' ')
-    .replace(/\s+/g,' ')
+    const txt =
+    document.createElement("textarea");
+
+    txt.innerHTML = text;
+
+    let result = txt.value;
+
+    result = result
+    .replace(/Â/g,"")
+    .replace(/[\n\r]/g," ")
     .trim();
 
-}
-
-
-/* TIMEOUT */
-
-function fetchWithTimeout(url, timeout = 8000){
-
-    return Promise.race([
-
-        fetch(url),
-
-        new Promise((_, reject) =>
-            setTimeout(() =>
-            reject(new Error("timeout")),
-            timeout)
-        )
-
-    ]);
+    return result;
 
 }
 
@@ -257,58 +265,23 @@ async function getRSS(rssUrl){
 
     try{
 
-        const proxy =
-        "https://api.codetabs.com/v1/proxy/?quest=" +
+        const api =
+        "https://api.rss2json.com/v1/api.json?rss_url=" +
         encodeURIComponent(rssUrl);
 
         const response =
-        await fetchWithTimeout(proxy);
+        await fetch(api);
 
-        const xmlText =
-        await response.text();
+        const data =
+        await response.json();
 
-        const parser =
-        new DOMParser();
-
-        const xml =
-        parser.parseFromString(
-        xmlText,
-        "text/xml"
-        );
-
-        const items =
-        [...xml.querySelectorAll("item")];
-
-        return items.map(item => ({
-
-            title:
-            item.querySelector("title")?.textContent || ""
-
-        }));
+        return data.items || [];
 
     }catch(error){
 
         return [];
 
     }
-
-}
-
-
-/* ITEM */
-
-function pickOne(items){
-
-    if(!items || items.length === 0){
-
-        return null;
-
-    }
-
-    return items[
-    Math.floor(
-    Math.random() * items.length
-    )];
 
 }
 
@@ -321,7 +294,7 @@ async function getWeather(){
 
         const response =
         await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.latitude}&longitude=${CONFIG.longitude}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.latitude}&longitude=${CONFIG.longitude}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=America%2FSao_Paulo`
         );
 
         const data =
@@ -339,7 +312,7 @@ async function getWeather(){
             Math.round(data.daily.temperature_2m_min[0]),
 
             code:
-            data.current.weather_code
+            data.daily.weathercode[0]
 
         };
 
@@ -347,9 +320,9 @@ async function getWeather(){
 
         return {
 
-            temp:20,
-            max:25,
-            min:18,
+            temp:18,
+            max:24,
+            min:17,
             code:0
 
         };
@@ -359,34 +332,7 @@ async function getWeather(){
 }
 
 
-/* ALERTAS */
-
-function getWeatherAlert(code){
-
-    if(code >= 95){
-
-        return "Tempestades previstas";
-
-    }
-
-    if(code >= 80){
-
-        return "Chuva forte prevista";
-
-    }
-
-    if(code >= 61){
-
-        return "Possibilidade de chuva";
-
-    }
-
-    return null;
-
-}
-
-
-/* MOEDAS */
+/* COTAÇÕES */
 
 async function getMoney(){
 
@@ -428,6 +374,24 @@ async function getMoney(){
 }
 
 
+/* ITEM ALEATÓRIO */
+
+function pickOne(items){
+
+    if(!items || items.length === 0){
+
+        return null;
+
+    }
+
+    return items[
+    Math.floor(
+    Math.random() * items.length
+    )];
+
+}
+
+
 /* LOAD */
 
 async function loadContent(){
@@ -443,215 +407,599 @@ async function loadContent(){
 
     for(let block of CONFIG.enabledBlocks){
 
-        try{
-
-            if(block === "clima"){
-
-                html +=
-                '<span class="clima">CLIMA</span> ' +
-                CONFIG.city + ' ' +
-                weather.temp +
-                '°C' +
-                '<span class="sep">◆</span>';
-
-            }
-
-
-            if(block === "previsao"){
-
-                html +=
-                '<span class="previsao">PREVISÃO</span> Máx ' +
-                weather.max +
-                '° Mín ' +
-                weather.min +
-                '°' +
-                '<span class="sep">◆</span>';
-
-            }
-
-
-            if(block === "esporte"){
-
-                let esporte =
-                await getRSS(
-                "https://ge.globo.com/rss/ge/futebol/"
-                );
-
-                let item =
-                pickOne(esporte);
-
-                if(item){
-
-                    html +=
-                    '<span class="esporte">ESPORTE</span> ' +
-                    cleanText(item.title) +
-                    '<span class="sep">◆</span>';
-
-                }
-
-            }
-
-
-            if(block === "news"){
-
-                let news =
-                await getRSS(
-                "https://g1.globo.com/rss/g1/"
-                );
-
-                let item =
-                pickOne(news);
-
-                if(item){
-
-                    html +=
-                    '<span class="news">NEWS</span> ' +
-                    cleanText(item.title) +
-                    '<span class="sep">◆</span>';
-
-                }
-
-            }
-
-
-            if(block === "mercado"){
-
-                let mercado =
-                await getRSS(
-                "https://g1.globo.com/rss/g1/economia/"
-                );
-
-                let item =
-                pickOne(mercado);
-
-                if(item){
-
-                    html +=
-                    '<span class="mercado">MERCADO</span> ' +
-                    cleanText(item.title) +
-                    '<span class="sep">◆</span>';
-
-                }
-
-            }
-
-
-            if(block === "tech"){
-
-                let tech =
-                await getRSS(
-                "https://g1.globo.com/rss/g1/tecnologia/"
-                );
-
-                let item =
-                pickOne(tech);
-
-                if(item){
-
-                    html +=
-                    '<span class="tech">TECH</span> ' +
-                    cleanText(item.title) +
-                    '<span class="sep">◆</span>';
-
-                }
-
-            }
-
-
-            if(block === "entretenimento"){
-
-                let entretenimento =
-                await getRSS(
-                "https://g1.globo.com/rss/g1/pop-arte/"
-                );
-
-                let item =
-                pickOne(entretenimento);
-
-                if(item){
-
-                    html +=
-                    '<span class="entretenimento">ENTRETENIMENTO</span> ' +
-                    cleanText(item.title) +
-                    '<span class="sep">◆</span>';
-
-                }
-
-            }
-
-
-            if(block === "dolar"){
-
-                html +=
-                '<span class="dolar">DÓLAR</span> R$ ' +
-                money.usd +
-                '<span class="sep">◆</span>';
-
-            }
-
-
-            if(block === "euro"){
-
-                html +=
-                '<span class="euro">EURO</span> R$ ' +
-                money.eur +
-                '<span class="sep">◆</span>';
-
-            }
-
-
-            if(block === "bitcoin"){
-
-                html +=
-                '<span class="bitcoin">BITCOIN</span> R$ ' +
-                money.btc +
-                '<span class="sep">◆</span>';
-
-            }
-
-
-            if(block === "instagram"){
-
-                html +=
-                '<span class="instagram">INSTAGRAM</span> ' +
-                CONFIG.instagram +
-                '<span class="sep">◆</span>';
-
-            }
-
-
-            if(block === "alerta"){
-
-                const alertText =
-                getWeatherAlert(weather.code);
-
-                if(alertText){
-
-                    html +=
-                    '<span class="alerta">ALERTA</span> ' +
-                    alertText +
-                    '<span class="sep">◆</span>';
-
-                }
-
-            }
-
-        }catch(error){
-
-            console.log(
-            "Erro bloco:",
-            block
-            );
+        /* CLIMA */
+
+        if(block === "clima"){
+
+            html +=
+            '<span class="clima">CLIMA</span> ' +
+            CONFIG.city + ' ' +
+            weather.temp +
+            '°C' +
+            '<span class="sep">◆</span>';
 
         }
 
-    }
+
+        /* PREVISÃO */
+
+        if(block === "previsao"){
+
+            html +=
+            '<span class="previsao">PREVISÃO</span> Máx ' +
+            weather.max +
+            '° Mín ' +
+            weather.min +
+            '°' +
+            '<span class="sep">◆</span>';
+
+        }
 
 
-    if(html.trim() === ""){
+        /* TRÂNSITO */
 
-        html =
-        '<span class="news">Sistema online</span>';
+        if(block === "transito"){
+
+            let transito =
+            await getRSS(
+            CONFIG.trafficRSS
+            );
+
+            transito =
+            transito.filter(item => {
+
+                const t =
+                item.title.toLowerCase();
+
+                return t.includes("trânsito") ||
+                       t.includes("transito") ||
+                       t.includes("acidente") ||
+                       t.includes("lentidão") ||
+                       t.includes("marginal") ||
+                       t.includes("rodovia");
+
+            });
+
+            let item =
+            pickOne(transito);
+
+            if(item){
+
+                html +=
+                '<span class="transito">TRÂNSITO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* RODOVIAS */
+
+        if(block === "rodovias"){
+
+            let rodovias =
+            await getRSS(
+            CONFIG.trafficRSS
+            );
+
+            rodovias =
+            rodovias.filter(item => {
+
+                const t =
+                item.title.toLowerCase();
+
+                return t.includes("rodovia") ||
+                       t.includes("castello") ||
+                       t.includes("anhanguera") ||
+                       t.includes("imigrantes") ||
+                       t.includes("anchieta") ||
+                       t.includes("bandeirantes");
+
+            });
+
+            let item =
+            pickOne(rodovias);
+
+            if(item){
+
+                html +=
+                '<span class="rodovias">RODOVIAS</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* ESPORTE */
+
+        if(block === "esporte"){
+
+            let esporte =
+            await getRSS(
+            "https://ge.globo.com/rss/ge/futebol/"
+            );
+
+            let item =
+            pickOne(esporte);
+
+            if(item){
+
+                html +=
+                '<span class="esporte">ESPORTE</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* RESULTADOS REAIS */
+
+        if(block === "resultados"){
+
+            try{
+
+                const response =
+                await fetch(
+                "https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=4328"
+                );
+
+                const data =
+                await response.json();
+
+                if(data.events && data.events.length){
+
+                    const jogo =
+                    data.events[
+                    Math.floor(
+                    Math.random() * Math.min(5,data.events.length)
+                    )];
+
+                    html +=
+                    '<span class="resultados">RESULTADOS</span> ' +
+                    jogo.strHomeTeam +
+                    ' ' +
+                    jogo.intHomeScore +
+                    'x' +
+                    jogo.intAwayScore +
+                    ' ' +
+                    jogo.strAwayTeam +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }catch(error){
+
+            }
+
+        }
+
+
+        /* SELEÇÃO */
+
+        if(block === "selecao"){
+
+            let selecao =
+            await getRSS(
+            "https://ge.globo.com/rss/ge/futebol/selecao-brasileira/"
+            );
+
+            let item =
+            pickOne(selecao);
+
+            if(item){
+
+                html +=
+                '<span class="selecao">SELEÇÃO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* CLASSIFICAÇÃO REAL */
+
+        if(block === "classificacao"){
+
+            try{
+
+                const response =
+                await fetch(
+                "https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&s=2025-2026"
+                );
+
+                const data =
+                await response.json();
+
+                if(data.table && data.table.length){
+
+                    const top =
+                    data.table[0];
+
+                    html +=
+                    '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
+                    top.name +
+                    ' líder com ' +
+                    top.intPoints +
+                    ' pts' +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }catch(error){
+
+            }
+
+        }
+
+
+        /* DÓLAR */
+
+        if(block === "dolar"){
+
+            html +=
+            '<span class="dolar">DÓLAR</span> R$ ' +
+            money.usd +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* EURO */
+
+        if(block === "euro"){
+
+            html +=
+            '<span class="euro">EURO</span> R$ ' +
+            money.eur +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* BITCOIN */
+
+        if(block === "bitcoin"){
+
+            html +=
+            '<span class="bitcoin">BITCOIN</span> R$ ' +
+            money.btc +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* MERCADO */
+
+        if(block === "mercado"){
+
+            let mercado =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/economia/"
+            );
+
+            let item =
+            pickOne(mercado);
+
+            if(item){
+
+                html +=
+                '<span class="mercado">MERCADO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* TECH */
+
+        if(block === "tech"){
+
+            let tech =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/tecnologia/"
+            );
+
+            let item =
+            pickOne(tech);
+
+            if(item){
+
+                html +=
+                '<span class="tech">TECH</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* TRENDING */
+
+        if(block === "trending"){
+
+            let trends =
+            await getRSS(
+            "https://rss.uol.com.br/feed/tecnologia.xml"
+            );
+
+            let item =
+            pickOne(trends);
+
+            if(item){
+
+                html +=
+                '<span class="trending">TRENDING</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* EVENTOS */
+
+        if(block === "eventos"){
+
+            let eventos =
+            await getRSS(
+            CONFIG.trafficRSS
+            );
+
+            let item =
+            pickOne(eventos);
+
+            if(item){
+
+                html +=
+                '<span class="eventos">EVENTOS</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* AEROPORTOS */
+
+        if(block === "aeroportos"){
+
+            let aeroportos =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/economia/"
+            );
+
+            aeroportos =
+            aeroportos.filter(item => {
+
+                const t =
+                item.title.toLowerCase();
+
+                return t.includes("aeroporto") ||
+                       t.includes("voo") ||
+                       t.includes("avião") ||
+                       t.includes("congonhas") ||
+                       t.includes("guarulhos");
+
+            });
+
+            let item =
+            pickOne(aeroportos);
+
+            if(item){
+
+                html +=
+                '<span class="aeroportos">AEROPORTOS</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* MEGA-SENA */
+
+        if(block === "megasena"){
+
+            try{
+
+                const response =
+                await fetch(
+                "https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena"
+                );
+
+                const data =
+                await response.json();
+
+                html +=
+                '<span class="megasena">MEGA-SENA</span> Concurso ' +
+                data.numero +
+                ' prêmio estimado R$ ' +
+                Number(
+                data.valorEstimadoProximoConcurso
+                ).toLocaleString('pt-BR') +
+                '<span class="sep">◆</span>';
+
+            }catch(error){
+
+            }
+
+        }
+
+
+        /* SAÚDE */
+
+        if(block === "saude"){
+
+            let saude =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/bemestar/"
+            );
+
+            let item =
+            pickOne(saude);
+
+            if(item){
+
+                html +=
+                '<span class="saude">SAÚDE</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* ALERTA */
+
+        if(block === "alerta"){
+
+            let alerta = "";
+
+            if(weather.code >= 95){
+
+                alerta =
+                "Alerta de tempestades";
+
+            }else if(weather.code >= 61){
+
+                alerta =
+                "Possibilidade de chuva";
+
+            }else{
+
+                alerta =
+                "Tempo estável";
+
+            }
+
+            html +=
+            '<span class="alerta">ALERTA</span> ' +
+            alerta +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* ENTRETENIMENTO */
+
+        if(block === "entretenimento"){
+
+            let entretenimento =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/pop-arte/"
+            );
+
+            let item =
+            pickOne(entretenimento);
+
+            if(item){
+
+                html +=
+                '<span class="entretenimento">ENTRETENIMENTO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* NEWS */
+
+        if(block === "news"){
+
+            let geral =
+            await getRSS(
+            "https://g1.globo.com/rss/g1/"
+            );
+
+            let item =
+            pickOne(geral);
+
+            if(item){
+
+                html +=
+                '<span class="news">NEWS</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* MOTIVAÇÃO */
+
+        if(block === "motivacao"){
+
+            const frases = [
+
+                "Grandes resultados exigem constância",
+                "Persistência gera resultados",
+                "Disciplina vence talento",
+                "Foco no objetivo"
+
+            ];
+
+            html +=
+            '<span class="motivacao">MOTIVAÇÃO</span> ' +
+            frases[
+            Math.floor(
+            Math.random() * frases.length
+            )] +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* LUMIX */
+
+        if(block === "lumix"){
+
+            const lumix = [
+
+                "Impacto visual que vende",
+                "Especialistas em painéis de LED",
+                "Tecnologia visual de alto impacto"
+
+            ];
+
+            html +=
+            '<span class="lumix">LUMIX LED</span> ' +
+            lumix[
+            Math.floor(
+            Math.random() * lumix.length
+            )] +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* INSTAGRAM */
+
+        if(block === "instagram"){
+
+            html +=
+            '<span class="instagram">INSTAGRAM</span> ' +
+            CONFIG.instagram +
+            '<span class="sep">◆</span>';
+
+        }
 
     }
 
@@ -663,18 +1011,42 @@ async function loadContent(){
 }
 
 
-/* START */
+/* INICIAR */
 
 loadContent();
 
 
-/* UPDATE */
+/* ATUALIZA APÓS 2 CICLOS */
+
+const ticker =
+document.getElementById(
+"ticker-content"
+);
+
+ticker.addEventListener(
+"animationiteration",
+async function(){
+
+    cycleCount++;
+
+    if(cycleCount >= 2){
+
+        cycleCount = 0;
+
+        await loadContent();
+
+    }
+
+});
+
+
+/* RELOAD AUTOMÁTICO */
 
 setInterval(() => {
 
-    loadContent();
+    location.reload();
 
-}, 120000);
+}, 1800000);
 
 </script>
 
