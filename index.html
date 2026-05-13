@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>6 LUMIX NEWS PRO</title>
+<title>7 LUMIX NEWS PRO</title>
 
 <style>
 
@@ -58,7 +58,6 @@ body{
 }
 
 .clima{color:#00FFFF;font-weight:bold;}
-.previsao{color:#87CEFA;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
 .resultados{color:#32CD32;font-weight:bold;}
 .selecao{color:#7CFC00;font-weight:bold;}
@@ -375,7 +374,6 @@ async function loadGNews(){
 
 /* SPORTS API */
 
-let SPORT_CACHE = [];
 let RESULT_CACHE = [];
 
 async function loadSports(){
@@ -390,15 +388,11 @@ async function loadSports(){
         const data =
         await response.json();
 
-        SPORT_CACHE =
-        data.events || [];
-
         RESULT_CACHE =
         data.events || [];
 
     }catch(error){
 
-        SPORT_CACHE = [];
         RESULT_CACHE = [];
 
     }
@@ -461,19 +455,35 @@ async function loadContent(){
 
         if(block === "esporte"){
 
-            const esporteNews =
-            await getGNews(
-            "futebol brasileiro champions league premier league la liga serie a"
-            );
+            try{
 
-            if(esporteNews.length){
+                const esporteNews =
+                await getGNews(
+                "futebol brasileiro champions league premier league la liga"
+                );
 
-                const item =
-                pickOne(esporteNews);
+                if(esporteNews && esporteNews.length){
+
+                    const item =
+                    pickOne(esporteNews);
+
+                    html +=
+                    '<span class="esporte">ESPORTE</span> ' +
+                    cleanText(item.title) +
+                    '<span class="sep">◆</span>';
+
+                }else{
+
+                    html +=
+                    '<span class="esporte">ESPORTE</span> Mercado da bola e futebol internacional em destaque' +
+                    '<span class="sep">◆</span>';
+
+                }
+
+            }catch(error){
 
                 html +=
-                '<span class="esporte">ESPORTE</span> ' +
-                cleanText(item.title) +
+                '<span class="esporte">ESPORTE</span> Futebol brasileiro e europeu em atualização' +
                 '<span class="sep">◆</span>';
 
             }
@@ -544,22 +554,29 @@ async function loadContent(){
                 const data =
                 await response.json();
 
-                if(data.table && data.table.length){
+                if(data.table && data.table.length >= 3){
 
-                    const top =
-                    data.table[0];
+                    const p1 = data.table[0];
+                    const p2 = data.table[1];
+                    const p3 = data.table[2];
 
                     html +=
-                    '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
-                    top.name +
-                    ' lidera com ' +
-                    top.intPoints +
-                    ' pontos' +
+                    '<span class="classificacao">CLASSIFICAÇÃO</span> Premier League: ' +
+                    '1º ' + p1.name +
+                    ' (' + p1.intPoints + ' pts) | ' +
+                    '2º ' + p2.name +
+                    ' (' + p2.intPoints + ' pts) | ' +
+                    '3º ' + p3.name +
+                    ' (' + p3.intPoints + ' pts)' +
                     '<span class="sep">◆</span>';
 
                 }
 
             }catch(error){
+
+                html +=
+                '<span class="classificacao">CLASSIFICAÇÃO</span> Premier League em atualização' +
+                '<span class="sep">◆</span>';
 
             }
 
