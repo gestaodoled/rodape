@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>LUMIX NEWS </title>
+<title>LUMIX NEWS TESTE NOVO</title>
 
 <style>
 
@@ -407,7 +407,7 @@ async function getWeather(){
 }
 
 
-/* ALERTAS REAIS */
+/* ALERTAS */
 
 function getWeatherAlert(code){
 
@@ -526,6 +526,66 @@ async function loadContent(){
         }
 
 
+        /* ESPORTE ENTRE PREVISÃO E DÓLAR */
+
+        if(block === "esporte"){
+
+            let esporte =
+            await getRSS(
+            "https://ge.globo.com/rss/ge/futebol/"
+            );
+
+            let item =
+            pickUnique(esporte);
+
+            if(item){
+
+                html +=
+                '<span class="esporte">ESPORTE</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+
+        /* DÓLAR */
+
+        if(block === "dolar"){
+
+            html +=
+            '<span class="dolar">DÓLAR</span> R$ ' +
+            money.usd +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* EURO */
+
+        if(block === "euro"){
+
+            html +=
+            '<span class="euro">EURO</span> R$ ' +
+            money.eur +
+            '<span class="sep">◆</span>';
+
+        }
+
+
+        /* BITCOIN */
+
+        if(block === "bitcoin"){
+
+            html +=
+            '<span class="bitcoin">BITCOIN</span> R$ ' +
+            money.btc +
+            '<span class="sep">◆</span>';
+
+        }
+
+
         /* TRÂNSITO */
 
         if(block === "transito"){
@@ -586,30 +646,6 @@ async function loadContent(){
 
                 html +=
                 '<span class="rodovias">RODOVIAS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* ESPORTE */
-
-        if(block === "esporte"){
-
-            let esporte =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/"
-            );
-
-            let item =
-            pickUnique(esporte);
-
-            if(item){
-
-                html +=
-                '<span class="esporte">ESPORTE</span> ' +
                 cleanText(item.title) +
                 '<span class="sep">◆</span>';
 
@@ -804,7 +840,7 @@ async function loadContent(){
         }
 
 
-        /* ALERTA REAL */
+        /* ALERTA */
 
         if(block === "alerta"){
 
@@ -871,42 +907,6 @@ async function loadContent(){
         }
 
 
-        /* DÓLAR */
-
-        if(block === "dolar"){
-
-            html +=
-            '<span class="dolar">DÓLAR</span> R$ ' +
-            money.usd +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        /* EURO */
-
-        if(block === "euro"){
-
-            html +=
-            '<span class="euro">EURO</span> R$ ' +
-            money.eur +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        /* BITCOIN */
-
-        if(block === "bitcoin"){
-
-            html +=
-            '<span class="bitcoin">BITCOIN</span> R$ ' +
-            money.btc +
-            '<span class="sep">◆</span>';
-
-        }
-
-
         /* INSTAGRAM */
 
         if(block === "instagram"){
@@ -919,7 +919,6 @@ async function loadContent(){
         }
 
     }
-
 
     document.getElementById(
     "ticker-content"
