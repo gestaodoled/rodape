@@ -1,43 +1,51 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
 <meta charset="UTF-8">
-<title>LUMIX NEWS PRO</title>
+<title>LUMIX NEWS STABLE</title>
 
 <style>
-
 body{
     margin:0;
     overflow:hidden;
     background:#000;
-    font-family:Arial, sans-serif;
+    font-family:Arial;
 }
 
 #left-box{
     position:absolute;
     left:0;
     top:0;
+    width:15%;
+    height:100%;
     background:#C00000;
     color:#fff;
     font-weight:bold;
-    text-align:center;
-    border-right:1px solid #fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 #clock{
     position:absolute;
+    left:15%;
     top:0;
+    width:10%;
+    height:100%;
     background:#111;
     color:#00FF99;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     font-weight:bold;
-    text-align:center;
-    border-right:1px solid #fff;
 }
 
 #ticker{
     position:absolute;
+    left:25%;
     top:0;
+    width:75%;
+    height:100%;
     overflow:hidden;
     white-space:nowrap;
     color:#fff;
@@ -47,199 +55,136 @@ body{
     display:inline-block;
     white-space:nowrap;
     padding-left:100%;
-    animation:scroll linear infinite;
+    animation:scroll 25s linear infinite;
 }
 
 .sep{color:#666;padding:0 14px;}
 
-.clima{color:#00FFFF;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
 .transito{color:#FF8C00;font-weight:bold;}
-.dolar{color:#FFD700;font-weight:bold;}
-.euro{color:#F4D03F;font-weight:bold;}
-.bitcoin{color:#F39C12;font-weight:bold;}
-.motivacao{color:#00FFCC;font-weight:bold;}
+.news{color:#fff;font-weight:bold;}
 .lumix{color:#FFD700;font-weight:bold;}
 
 @keyframes scroll{
     from{transform:translateX(0);}
     to{transform:translateX(-100%);}
 }
-
 </style>
 </head>
 
 <body>
 
-<div id="left-box"></div>
+<div id="left-box">LUMIX</div>
 <div id="clock"></div>
-
-<div id="ticker">
-    <div id="ticker-content">Carregando...</div>
-</div>
+<div id="ticker"><div id="ticker-content">Carregando...</div></div>
 
 <script>
 
-const params = new URLSearchParams(window.location.search);
-const configName = params.get("config") || "default";
-
-document.write(
-'<script src="configs/' + configName + '.js?v=' + Date.now() + '"><\/script>'
-);
-
-let cycle = 0;
-
 /* CLOCK */
-function clock(){
+setInterval(()=>{
     const d = new Date();
     document.getElementById("clock").innerHTML =
-    String(d.getHours()).padStart(2,'0') + ":" +
-    String(d.getMinutes()).padStart(2,'0');
-}
-setInterval(clock,1000);
-clock();
+    String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0');
+},1000);
 
-/* RSS */
-async function getRSS(url){
+/* SAFE FETCH RSS */
+async function safeRSS(url){
     try{
-        const r = await fetch(
-        "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(url)
+        const res = await fetch(
+        "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(url),
+        {timeout:4000}
         );
-        const d = await r.json();
-        return d.items || [];
+        const data = await res.json();
+        return data.items || [];
     }catch{
         return [];
     }
 }
 
-/* PICK SAFE */
-function pick(list){
-    if(!list || !list.length) return null;
-    return list[Math.floor(Math.random()*list.length)];
+/* TIMEOUT WRAPPER */
+function timeoutPromise(promise, ms){
+    return new Promise((resolve)=>{
+        const t = setTimeout(()=>resolve([]), ms);
+        promise.then(v=>{
+            clearTimeout(t);
+            resolve(v);
+        }).catch(()=>resolve([]));
+    });
 }
 
-/* ESPORTE ROBUSTO */
-async function esporte(){
+/* ESPORTE (ROBUSTO) */
+async function getEsporte(){
 
-    const feeds = await Promise.allSettled([
-        getRSS("https://ge.globo.com/rss/ge/futebol/"),
-        getRSS("https://rss.uol.com.br/feed/esporte.xml"),
-        getRSS("https://feeds.bbci.co.uk/sport/football/rss.xml")
+    const feeds = await Promise.all([
+        timeoutPromise(safeRSS("https://ge.globo.com/rss/ge/futebol/"),4000),
+        timeoutPromise(safeRSS("https://rss.uol.com.br/feed/esporte.xml"),4000)
     ]);
 
-    let all = [];
+    let all = feeds.flat();
 
-    feeds.forEach(f=>{
-        if(f.status === "fulfilled"){
-            all = all.concat(f.value);
-        }
-    });
+    if(!all.length){
+        return "Futebol em atualização";
+    }
 
-    let item = pick(all);
-
-    return item
-    ? item.title
-    : "Futebol em atualização";
+    return all[Math.floor(Math.random()*all.length)].title;
 }
 
-/* TRÂNSITO SP ROBUSTO */
-async function transito(){
+/* TRÂNSITO SP (ROBUSTO) */
+async function getTransito(){
 
-    const feeds = await Promise.allSettled([
-        getRSS(CONFIG.trafficRSS),
-        getRSS("https://g1.globo.com/rss/g1/sao-paulo/"),
-        getRSS("https://rss.uol.com.br/feed/noticias.xml")
+    const feeds = await Promise.all([
+        timeoutPromise(safeRSS("https://g1.globo.com/rss/g1/sao-paulo/"),4000),
+        timeoutPromise(safeRSS("https://rss.uol.com.br/feed/noticias.xml"),4000)
     ]);
 
-    let all = [];
-
-    feeds.forEach(f=>{
-        if(f.status === "fulfilled"){
-            all = all.concat(f.value);
-        }
-    });
+    let all = feeds.flat();
 
     let filtered = all.filter(i =>
         /trânsito|acidente|lentidão|marginal|sp|rodovia/i.test(i.title)
     );
 
-    let item = pick(filtered.length ? filtered : all);
+    let pool = filtered.length ? filtered : all;
 
-    return item
-    ? item.title
-    : "SP sem ocorrências relevantes";
+    if(!pool.length){
+        return "SP fluindo normalmente";
+    }
+
+    return pool[Math.floor(Math.random()*pool.length)].title;
 }
 
-/* MONTAGEM */
-async function load(){
+/* BUILD SAFE */
+async function build(){
 
     let html = "";
 
-    const [esp, tra] = await Promise.all([
-        esporte(),
-        transito()
-    ]);
+    let esporte = await getEsporte();
+    let transito = await getTransito();
 
-    const money = {
-        usd:"5.20",
-        eur:"6.10",
-        btc:"590000"
-    };
+    html += `<span class="esporte">ESPORTE</span> ${esporte}<span class="sep">◆</span>`;
+    html += `<span class="transito">TRÂNSITO SP</span> ${transito}<span class="sep">◆</span>`;
 
-    const blocks = CONFIG.enabledBlocks || [];
-
-    for(let b of blocks){
-
-        if(b === "esporte"){
-            html += `<span class="esporte">ESPORTE</span> ${esp}<span class="sep">◆</span>`;
-        }
-
-        if(b === "transito"){
-            html += `<span class="transito">TRÂNSITO SP</span> ${tra}<span class="sep">◆</span>`;
-        }
-
-        if(b === "dolar"){
-            html += `<span class="dolar">DÓLAR</span> R$ ${money.usd}<span class="sep">◆</span>`;
-        }
-
-        if(b === "euro"){
-            html += `<span class="euro">EURO</span> R$ ${money.eur}<span class="sep">◆</span>`;
-        }
-
-        if(b === "bitcoin"){
-            html += `<span class="bitcoin">BITCOIN</span> R$ ${money.btc}<span class="sep">◆</span>`;
-        }
-
-        if(b === "motivacao"){
-            const f = [
-                "Disciplina gera resultado",
-                "Consistência vence talento",
-                "Foco cria destino"
-            ];
-            html += `<span class="motivacao">FOCO</span> ${pick(f)}<span class="sep">◆</span>`;
-        }
-    }
-
-    /* 🔥 GARANTIA FINAL (NUNCA FICA VAZIO) */
-    if(!html.trim()){
-        html =
-        `<span class="lumix">LUMIX</span> Sistema ativo<span class="sep">◆</span>` +
-        `<span class="esporte">ESPORTE</span> Atualizando notícias<span class="sep">◆</span>`;
-    }
+    html += `<span class="news">NEWS</span> Atualizando informações<span class="sep">◆</span>`;
+    html += `<span class="lumix">LUMIX</span> Sistema ativo<span class="sep">◆</span>`;
 
     document.getElementById("ticker-content").innerHTML = html;
 }
 
-load();
+/* START SAFE LOOP */
+async function start(){
+
+    try{
+        await build();
+    }catch(e){
+        document.getElementById("ticker-content").innerHTML =
+        `<span class="lumix">LUMIX</span> Sistema de fallback ativo<span class="sep">◆</span>`;
+    }
+
+}
+
+start();
 
 /* refresh seguro */
-setInterval(()=>{
-    cycle++;
-    if(cycle >= 2){
-        cycle = 0;
-        load();
-    }
-}, 7000);
+setInterval(start, 10000);
 
 </script>
 
