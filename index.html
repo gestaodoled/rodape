@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>23 LUMIX NEWS</title>
+<title>24 LUMIX NEWS</title>
 
 <style>
 
@@ -73,8 +73,6 @@ body{
 .rodovias{color:#FFA500;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
 .resultados{color:#32CD32;font-weight:bold;}
-.selecao{color:#7CFC00;font-weight:bold;}
-.classificacao{color:#ADFF2F;font-weight:bold;}
 .dolar{color:#FFD700;font-weight:bold;}
 .euro{color:#F4D03F;font-weight:bold;}
 .bitcoin{color:#F39C12;font-weight:bold;}
@@ -85,7 +83,6 @@ body{
 .aeroportos{color:#40E0D0;font-weight:bold;}
 .megasena{color:#32CD32;font-weight:bold;}
 .saude{color:#FF1493;font-weight:bold;}
-.alerta{color:#FF0000;font-weight:bold;}
 .entretenimento{color:#FF66CC;font-weight:bold;}
 .news{color:#FFFFFF;font-weight:bold;}
 .motivacao{color:#00FFCC;font-weight:bold;}
@@ -100,15 +97,8 @@ body{
 /* ANIMAÇÃO */
 
 @keyframes scroll{
-
-    from{
-        transform:translateX(0);
-    }
-
-    to{
-        transform:translateX(-100%);
-    }
-
+    from{transform:translateX(0);}
+    to{transform:translateX(-100%);}
 }
 
 </style>
@@ -118,15 +108,10 @@ body{
 <body>
 
 <div id="left-box"></div>
-
 <div id="clock"></div>
 
 <div id="ticker">
-
-    <div id="ticker-content">
-        Carregando informações...
-    </div>
-
+    <div id="ticker-content">Carregando informações...</div>
 </div>
 
 <!-- CONFIG -->
@@ -176,6 +161,8 @@ CONFIG.fontSize + "px";
 document.getElementById("left-box").innerHTML =
 CONFIG.title;
 
+/* CLOCK */
+
 document.getElementById("clock").style.left =
 Math.round(CONFIG.width * 0.15 + 1) + "px";
 
@@ -190,6 +177,8 @@ CONFIG.height + "px";
 
 document.getElementById("clock").style.fontSize =
 CONFIG.fontSize + "px";
+
+/* TICKER */
 
 document.getElementById("ticker").style.left =
 Math.round(CONFIG.width * 0.24) + "px";
@@ -208,11 +197,6 @@ CONFIG.fontSize + "px";
 
 document.getElementById("ticker-content").style.animationDuration =
 CONFIG.speed + "s";
-
-
-/* CONTADOR */
-
-let cycleCount = 0;
 
 
 /* RELÓGIO */
@@ -302,17 +286,10 @@ async function getWeather(){
 
         return {
 
-            temp:
-            Math.round(data.current.temperature_2m),
-
-            max:
-            Math.round(data.daily.temperature_2m_max[0]),
-
-            min:
-            Math.round(data.daily.temperature_2m_min[0]),
-
-            code:
-            data.daily.weathercode[0]
+            temp: Math.round(data.current.temperature_2m),
+            max: Math.round(data.daily.temperature_2m_max[0]),
+            min: Math.round(data.daily.temperature_2m_min[0]),
+            code: data.daily.weathercode[0]
 
         };
 
@@ -348,14 +325,9 @@ async function getMoney(){
 
         return {
 
-            usd:
-            parseFloat(data.USDBRL.bid).toFixed(2),
-
-            eur:
-            parseFloat(data.EURBRL.bid).toFixed(2),
-
-            btc:
-            Math.round(data.BTCBRL.bid)
+            usd: parseFloat(data.USDBRL.bid).toFixed(2),
+            eur: parseFloat(data.EURBRL.bid).toFixed(2),
+            btc: Math.round(data.BTCBRL.bid)
 
         };
 
@@ -379,15 +351,12 @@ async function getMoney(){
 function pickOne(items){
 
     if(!items || items.length === 0){
-
         return null;
-
     }
 
     return items[
-    Math.floor(
-    Math.random() * items.length
-    )];
+        Math.floor(Math.random() * items.length)
+    ];
 
 }
 
@@ -398,16 +367,10 @@ async function loadContent(){
 
     let html = "";
 
-    const weather =
-    await getWeather();
-
-    const money =
-    await getMoney();
-
+    const weather = await getWeather();
+    const money = await getMoney();
 
     for(let block of CONFIG.enabledBlocks){
-
-        /* CLIMA */
 
         if(block === "clima"){
 
@@ -419,9 +382,6 @@ async function loadContent(){
             '<span class="sep">◆</span>';
 
         }
-
-
-        /* PREVISÃO */
 
         if(block === "previsao"){
 
@@ -435,33 +395,19 @@ async function loadContent(){
 
         }
 
-
-        /* TRÂNSITO */
-
         if(block === "transito"){
 
-            let transito =
-            await getRSS(
-            CONFIG.trafficRSS
-            );
+            let transito = await getRSS(CONFIG.trafficRSS);
 
-            transito =
-            transito.filter(item => {
-
-                const t =
-                item.title.toLowerCase();
-
+            transito = transito.filter(item => {
+                const t = item.title.toLowerCase();
                 return t.includes("trânsito") ||
-                       t.includes("transito") ||
                        t.includes("acidente") ||
                        t.includes("lentidão") ||
-                       t.includes("marginal") ||
                        t.includes("rodovia");
-
             });
 
-            let item =
-            pickOne(transito);
+            let item = pickOne(transito);
 
             if(item){
 
@@ -474,33 +420,18 @@ async function loadContent(){
 
         }
 
-
-        /* RODOVIAS */
-
         if(block === "rodovias"){
 
-            let rodovias =
-            await getRSS(
-            CONFIG.trafficRSS
-            );
+            let rodovias = await getRSS(CONFIG.trafficRSS);
 
-            rodovias =
-            rodovias.filter(item => {
-
-                const t =
-                item.title.toLowerCase();
-
+            rodovias = rodovias.filter(item => {
+                const t = item.title.toLowerCase();
                 return t.includes("rodovia") ||
                        t.includes("castello") ||
-                       t.includes("anhanguera") ||
-                       t.includes("imigrantes") ||
-                       t.includes("anchieta") ||
-                       t.includes("bandeirantes");
-
+                       t.includes("anhanguera");
             });
 
-            let item =
-            pickOne(rodovias);
+            let item = pickOne(rodovias);
 
             if(item){
 
@@ -513,18 +444,10 @@ async function loadContent(){
 
         }
 
-
-        /* ESPORTE */
-
         if(block === "esporte"){
 
-            let esporte =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/"
-            );
-
-            let item =
-            pickOne(esporte);
+            let esporte = await getRSS("https://ge.globo.com/rss/ge/futebol/");
+            let item = pickOne(esporte);
 
             if(item){
 
@@ -537,18 +460,10 @@ async function loadContent(){
 
         }
 
-
-        /* RESULTADOS */
-
         if(block === "resultados"){
 
-            let futebol =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/"
-            );
-
-            let item =
-            pickOne(futebol);
+            let futebol = await getRSS("https://ge.globo.com/rss/ge/futebol/");
+            let item = pickOne(futebol);
 
             if(item){
 
@@ -561,57 +476,6 @@ async function loadContent(){
 
         }
 
-
-        /* SELEÇÃO */
-
-        if(block === "selecao"){
-
-            let selecao =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/selecao-brasileira/"
-            );
-
-            let item =
-            pickOne(selecao);
-
-            if(item){
-
-                html +=
-                '<span class="selecao">SELEÇÃO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* CLASSIFICAÇÃO */
-
-        if(block === "classificacao"){
-
-            let brasileirao =
-            await getRSS(
-            "https://ge.globo.com/rss/ge/futebol/brasileirao-serie-a/"
-            );
-
-            let item =
-            pickOne(brasileirao);
-
-            if(item){
-
-                html +=
-                '<span class="classificacao">CLASSIFICAÇÃO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* DÓLAR */
-
         if(block === "dolar"){
 
             html +=
@@ -620,9 +484,6 @@ async function loadContent(){
             '<span class="sep">◆</span>';
 
         }
-
-
-        /* EURO */
 
         if(block === "euro"){
 
@@ -633,9 +494,6 @@ async function loadContent(){
 
         }
 
-
-        /* BITCOIN */
-
         if(block === "bitcoin"){
 
             html +=
@@ -645,18 +503,10 @@ async function loadContent(){
 
         }
 
-
-        /* MERCADO */
-
         if(block === "mercado"){
 
-            let mercado =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/economia/"
-            );
-
-            let item =
-            pickOne(mercado);
+            let mercado = await getRSS("https://g1.globo.com/rss/g1/economia/");
+            let item = pickOne(mercado);
 
             if(item){
 
@@ -669,18 +519,10 @@ async function loadContent(){
 
         }
 
-
-        /* TECH */
-
         if(block === "tech"){
 
-            let tech =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/tecnologia/"
-            );
-
-            let item =
-            pickOne(tech);
+            let tech = await getRSS("https://g1.globo.com/rss/g1/tecnologia/");
+            let item = pickOne(tech);
 
             if(item){
 
@@ -693,189 +535,10 @@ async function loadContent(){
 
         }
 
-
-        /* TRENDING */
-
-        if(block === "trending"){
-
-            let trends =
-            await getRSS(
-            "https://rss.uol.com.br/feed/tecnologia.xml"
-            );
-
-            let item =
-            pickOne(trends);
-
-            if(item){
-
-                html +=
-                '<span class="trending">TRENDING</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* EVENTOS */
-
-        if(block === "eventos"){
-
-            let eventos =
-            await getRSS(
-            CONFIG.trafficRSS
-            );
-
-            let item =
-            pickOne(eventos);
-
-            if(item){
-
-                html +=
-                '<span class="eventos">EVENTOS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* AEROPORTOS */
-
-        if(block === "aeroportos"){
-
-            let aeroportos =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/economia/"
-            );
-
-            aeroportos =
-            aeroportos.filter(item => {
-
-                const t =
-                item.title.toLowerCase();
-
-                return t.includes("aeroporto") ||
-                       t.includes("voo") ||
-                       t.includes("avião") ||
-                       t.includes("congonhas") ||
-                       t.includes("guarulhos");
-
-            });
-
-            let item =
-            pickOne(aeroportos);
-
-            if(item){
-
-                html +=
-                '<span class="aeroportos">AEROPORTOS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* MEGA-SENA */
-
-        if(block === "megasena"){
-
-            try{
-
-                const response =
-                await fetch(
-                "https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena"
-                );
-
-                const data =
-                await response.json();
-
-                html +=
-                '<span class="megasena">MEGA-SENA</span> Concurso ' +
-                data.numero +
-                ' prêmio estimado R$ ' +
-                Number(
-                data.valorEstimadoProximoConcurso
-                ).toLocaleString('pt-BR') +
-                '<span class="sep">◆</span>';
-
-            }catch(error){
-
-            }
-
-        }
-
-
-        /* SAÚDE */
-
-        if(block === "saude"){
-
-            let saude =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/bemestar/"
-            );
-
-            let item =
-            pickOne(saude);
-
-            if(item){
-
-                html +=
-                '<span class="saude">SAÚDE</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-
-        /* ALERTA */
-
-        if(block === "alerta"){
-
-            let alerta = "";
-
-            if(weather.code >= 95){
-
-                alerta =
-                "Alerta de tempestades";
-
-            }else if(weather.code >= 61){
-
-                alerta =
-                "Possibilidade de chuva";
-
-            }else{
-
-                alerta =
-                "Tempo estável";
-
-            }
-
-            html +=
-            '<span class="alerta">ALERTA</span> ' +
-            alerta +
-            '<span class="sep">◆</span>';
-
-        }
-
-
-        /* ENTRETENIMENTO */
-
         if(block === "entretenimento"){
 
-            let entretenimento =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/pop-arte/"
-            );
-
-            let item =
-            pickOne(entretenimento);
+            let ent = await getRSS("https://g1.globo.com/rss/g1/pop-arte/");
+            let item = pickOne(ent);
 
             if(item){
 
@@ -888,18 +551,10 @@ async function loadContent(){
 
         }
 
-
-        /* NEWS */
-
         if(block === "news"){
 
-            let geral =
-            await getRSS(
-            "https://g1.globo.com/rss/g1/"
-            );
-
-            let item =
-            pickOne(geral);
+            let geral = await getRSS("https://g1.globo.com/rss/g1/");
+            let item = pickOne(geral);
 
             if(item){
 
@@ -912,55 +567,35 @@ async function loadContent(){
 
         }
 
-
-        /* MOTIVAÇÃO */
-
         if(block === "motivacao"){
 
             const frases = [
-
-                "Grandes resultados exigem constância",
-                "Persistência gera resultados",
-                "Disciplina vence talento",
-                "Foco no objetivo"
-
+                "Disciplina gera resultado",
+                "Foco muda tudo",
+                "Constância vence talento"
             ];
 
             html +=
             '<span class="motivacao">MOTIVAÇÃO</span> ' +
-            frases[
-            Math.floor(
-            Math.random() * frases.length
-            )] +
+            frases[Math.floor(Math.random()*frases.length)] +
             '<span class="sep">◆</span>';
 
         }
-
-
-        /* LUMIX */
 
         if(block === "lumix"){
 
             const lumix = [
-
                 "Impacto visual que vende",
                 "Especialistas em painéis de LED",
-                "Tecnologia visual de alto impacto"
-
+                "Tecnologia de alto impacto"
             ];
 
             html +=
             '<span class="lumix">LUMIX LED</span> ' +
-            lumix[
-            Math.floor(
-            Math.random() * lumix.length
-            )] +
+            lumix[Math.floor(Math.random()*lumix.length)] +
             '<span class="sep">◆</span>';
 
         }
-
-
-        /* INSTAGRAM */
 
         if(block === "instagram"){
 
@@ -973,44 +608,17 @@ async function loadContent(){
 
     }
 
-
-    document.getElementById(
-    "ticker-content"
-    ).innerHTML = html;
+    document.getElementById("ticker-content").innerHTML = html;
 
 }
 
 
-/* INICIAR */
+/* START */
 
 loadContent();
 
 
-/* ATUALIZA APÓS 2 CICLOS */
-
-const ticker =
-document.getElementById(
-"ticker-content"
-);
-
-ticker.addEventListener(
-"animationiteration",
-async function(){
-
-    cycleCount++;
-
-    if(cycleCount >= 2){
-
-        cycleCount = 0;
-
-        await loadContent();
-
-    }
-
-});
-
-
-/* RELOAD AUTOMÁTICO */
+/* REFRESH */
 
 setInterval(() => {
 
