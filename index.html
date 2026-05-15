@@ -3,7 +3,7 @@
 
 <head>
 <meta charset="UTF-8">
-<title>19 LUMIX NEWS PRO STABLE</title>
+<title>20 LUMIX NEWS PRO STABLE</title>
 
 <style>
 
@@ -46,7 +46,9 @@ body{
     display:inline-block;
     white-space:nowrap;
     padding-left:100%;
-    animation:scroll linear infinite;
+    animation-name:scroll;
+    animation-timing-function:linear;
+    animation-iteration-count:infinite;
 }
 
 @keyframes scroll{
@@ -59,10 +61,12 @@ body{
 .clima{color:#00FFFF;font-weight:bold;}
 .news{color:#fff;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
-.resultados{color:#32CD32;font-weight:bold;}
 .politica{color:#FF4444;font-weight:bold;}
 .mundo{color:#4FC3F7;font-weight:bold;}
-.tech{color:#00BFFF;font-weight:bold;}
+.entretenimento{color:#FF66CC;font-weight:bold;}
+.agro{color:#8BC34A;font-weight:bold;}
+.ciencia{color:#00E5FF;font-weight:bold;}
+.games{color:#AA66CC;font-weight:bold;}
 
 </style>
 
@@ -72,44 +76,102 @@ body{
 
 <div id="left-box"></div>
 <div id="clock"></div>
+
 <div id="ticker">
-<div id="ticker-content">Carregando...</div>
+    <div id="ticker-content">Carregando...</div>
 </div>
 
 <script>
 
-/* CONFIG BASE SEGURA */
-const CONFIG = window.CONFIG || {
-    width:800,
-    height:30,
-    speed:70,
-    city:"São Paulo",
-    title:"LUMIX"
-};
+/* =========================
+   CONFIG LOADER SEGURO
+========================= */
 
-/* LAYOUT */
-document.body.style.width = CONFIG.width + "px";
-document.body.style.height = CONFIG.height + "px";
+let CONFIG = {};
 
-document.getElementById("left-box").style.width = "120px";
-document.getElementById("left-box").style.height = CONFIG.height + "px";
-document.getElementById("left-box").style.lineHeight = CONFIG.height + "px";
-document.getElementById("left-box").innerHTML = CONFIG.title;
+async function loadConfig(){
 
-document.getElementById("clock").style.left = "121px";
-document.getElementById("clock").style.width = "80px";
-document.getElementById("clock").style.height = CONFIG.height + "px";
-document.getElementById("clock").style.lineHeight = CONFIG.height + "px";
+    const params =
+    new URLSearchParams(window.location.search);
 
-document.getElementById("ticker").style.left = "200px";
-document.getElementById("ticker").style.width = (CONFIG.width - 200) + "px";
-document.getElementById("ticker").style.height = CONFIG.height + "px";
-document.getElementById("ticker").style.lineHeight = CONFIG.height + "px";
+    const configName =
+    params.get("config") || "default";
 
-document.getElementById("ticker-content").style.animationDuration = CONFIG.speed + "s";
+    return new Promise((resolve)=>{
+
+        const script =
+        document.createElement("script");
+
+        script.src =
+        "configs/" + configName + ".js?v=" + Date.now();
+
+        script.onload = () => {
+
+            CONFIG = window.CONFIG || {};
+
+            resolve();
+
+        };
+
+        script.onerror = () => {
+
+            CONFIG = {
+                width:800,
+                height:30,
+                speed:70,
+                city:"São Paulo",
+                title:"LUMIX"
+            };
+
+            resolve();
+
+        };
+
+        document.head.appendChild(script);
+
+    });
+
+}
 
 
-/* CLOCK */
+/* =========================
+   LAYOUT
+========================= */
+
+function applyLayout(){
+
+    document.body.style.width = CONFIG.width + "px";
+    document.body.style.height = CONFIG.height + "px";
+
+    const left = document.getElementById("left-box");
+    const clock = document.getElementById("clock");
+    const ticker = document.getElementById("ticker");
+    const content = document.getElementById("ticker-content");
+
+    left.style.width = Math.round(CONFIG.width * 0.15) + "px";
+    left.style.height = CONFIG.height + "px";
+    left.style.lineHeight = CONFIG.height + "px";
+    left.innerHTML = CONFIG.title || "LUMIX";
+
+    clock.style.left = Math.round(CONFIG.width * 0.15 + 1) + "px";
+    clock.style.width = Math.round(CONFIG.width * 0.09) + "px";
+    clock.style.height = CONFIG.height + "px";
+    clock.style.lineHeight = CONFIG.height + "px";
+
+    ticker.style.left = Math.round(CONFIG.width * 0.24) + "px";
+    ticker.style.width = Math.round(CONFIG.width * 0.76) + "px";
+    ticker.style.height = CONFIG.height + "px";
+    ticker.style.lineHeight = CONFIG.height + "px";
+
+    content.style.animationDuration = (CONFIG.speed || 70) + "s";
+
+}
+
+
+/* =========================
+   CLOCK
+========================= */
+
 setInterval(()=>{
     const d = new Date();
     document.getElementById("clock").innerHTML =
@@ -118,88 +180,125 @@ setInterval(()=>{
 },1000);
 
 
-/* SAFE TEXT */
+/* =========================
+   SAFE TEXT
+========================= */
+
 function safe(t){
-    return (t || "")
-    .replace(/[\n\r]/g," ")
-    .slice(0,120);
+    return (t || "").replace(/[\n\r]/g," ").slice(0,120);
 }
 
 
-/* CACHE LOCAL (SE API FALHAR NADA MUDA) */
+/* =========================
+   CACHE SIMPLES
+========================= */
+
 let CACHE = {
-    news:[
-        "Economia em destaque no Brasil",
-        "Mercado financeiro segue estável",
-        "Tecnologia impulsiona inovação"
-    ],
-    esporte:[
-        "Futebol movimenta rodada nacional",
-        "Clubes seguem preparação intensa"
-    ],
-    politica:[
-        "Cenário político em atualização",
-        "Decisões no congresso em foco"
-    ]
+    news:[],
+    esporte:[],
+    politica:[]
 };
 
 
-/* API (COM FALLBACK REAL) */
-async function fetchNews(query){
+/* =========================
+   GNEWS
+========================= */
+
+async function getGNews(query){
+
     try{
-        const r = await fetch(
-        "https://gnews.io/api/v4/search?q="+query+"&lang=pt&max=5&apikey=9c1aaf5a12ad6ffe75f77c7fe15ad790"
+
+        const r =
+        await fetch(
+        "https://gnews.io/api/v4/search?q=" +
+        encodeURIComponent(query) +
+        "&lang=pt&max=5&apikey=9c1aaf5a12ad6ffe75f77c7fe15ad790"
         );
+
         const d = await r.json();
+
         return (d.articles || []).map(a=>a.title);
+
     }catch(e){
         return [];
     }
+
 }
 
 
-/* UPDATE CACHE (SE FALHAR USA LOCAL) */
+/* =========================
+   UPDATE CACHE
+========================= */
+
 async function updateCache(){
 
-    const n = await fetchNews("brasil economia");
+    const n = await getGNews("brasil economia");
     if(n.length) CACHE.news = n;
 
-    const s = await fetchNews("futebol");
+    const s = await getGNews("futebol");
     if(s.length) CACHE.esporte = s;
 
-    const p = await fetchNews("politica");
+    const p = await getGNews("politica");
     if(p.length) CACHE.politica = p;
 
 }
 
 
-/* RENDER SEM NUNCA QUEBRAR */
+/* =========================
+   RENDER
+========================= */
+
+function pick(arr){
+    if(!arr || !arr.length) return "";
+    return arr[Math.floor(Math.random()*arr.length)];
+}
+
+
+/* =========================
+   RENDER SAFE
+========================= */
+
 function render(){
 
-    let html = "";
+    const ticker = document.getElementById("ticker-content");
 
-    html += `<span class="clima">CLIMA</span> ${CONFIG.city} 28°C${"◆"}`;
+    ticker.innerHTML =
 
-    html += `<span class="news">NEWS</span> ${safe(CACHE.news[Math.floor(Math.random()*CACHE.news.length)])}${"◆"}`;
+    `<span class="clima">CLIMA</span> ${CONFIG.city || ""} 28°C <span class="sep">◆</span>` +
 
-    html += `<span class="esporte">ESPORTE</span> ${safe(CACHE.esporte[Math.floor(Math.random()*CACHE.esporte.length)])}${"◆"}`;
+    `<span class="news">NEWS</span> ${safe(pick(CACHE.news))} <span class="sep">◆</span>` +
 
-    html += `<span class="politica">POLÍTICA</span> ${safe(CACHE.politica[Math.floor(Math.random()*CACHE.politica.length)])}${"◆"}`;
+    `<span class="esporte">ESPORTE</span> ${safe(pick(CACHE.esporte))} <span class="sep">◆</span>` +
 
-    document.getElementById("ticker-content").innerHTML = html;
+    `<span class="politica">POLÍTICA</span> ${safe(pick(CACHE.politica))} <span class="sep">◆</span>`;
+
 }
 
 
-/* LOOP ESTÁVEL */
-async function loop(){
+/* =========================
+   LOOP
+========================= */
 
+async function loop(){
     await updateCache();
     render();
-
 }
 
-loop();
-setInterval(loop, 60000);
+
+/* =========================
+   START SEGURO
+========================= */
+
+(async ()=>{
+
+    await loadConfig();
+    applyLayout();
+
+    await loop();
+
+    setInterval(loop, 60000);
+
+})();
 
 </script>
 
