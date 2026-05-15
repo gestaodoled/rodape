@@ -2,8 +2,9 @@
 <html lang="pt-BR">
 
 <head>
+
 <meta charset="UTF-8">
-<title>20 LUMIX NEWS PRO STABLE</title>
+<title>LUMIX NEWS PRO</title>
 
 <style>
 
@@ -11,18 +12,20 @@ body{
     margin:0;
     overflow:hidden;
     background:#000;
-    font-family:Arial;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
+/* LAYOUT ORIGINAL */
 #left-box{
     position:absolute;
     left:0;
     top:0;
     background:#C00000;
-    color:#fff;
+    color:#FFF;
     font-weight:bold;
     text-align:center;
-    border-right:1px solid #fff;
+    border-right:1px solid #FFF;
+    z-index:5;
 }
 
 #clock{
@@ -32,6 +35,7 @@ body{
     color:#00FF99;
     font-weight:bold;
     text-align:center;
+    z-index:5;
 }
 
 #ticker{
@@ -39,7 +43,7 @@ body{
     top:0;
     overflow:hidden;
     white-space:nowrap;
-    color:#fff;
+    color:#FFF;
 }
 
 #ticker-content{
@@ -59,14 +63,18 @@ body{
 .sep{color:#666;padding:0 14px;}
 
 .clima{color:#00FFFF;font-weight:bold;}
-.news{color:#fff;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
-.politica{color:#FF4444;font-weight:bold;}
-.mundo{color:#4FC3F7;font-weight:bold;}
-.entretenimento{color:#FF66CC;font-weight:bold;}
-.agro{color:#8BC34A;font-weight:bold;}
-.ciencia{color:#00E5FF;font-weight:bold;}
-.games{color:#AA66CC;font-weight:bold;}
+.resultados{color:#32CD32;font-weight:bold;}
+.selecao{color:#7CFC00;font-weight:bold;}
+.classificacao{color:#ADFF2F;font-weight:bold;}
+.dolar{color:#FFD700;font-weight:bold;}
+.euro{color:#F4D03F;font-weight:bold;}
+.bitcoin{color:#F39C12;font-weight:bold;}
+.mercado{color:#00FA9A;font-weight:bold;}
+.tech{color:#00BFFF;font-weight:bold;}
+.news{color:#FFFFFF;font-weight:bold;}
+.lumix{color:#FFD700;font-weight:bold;}
+.instagram{color:#FF1493;font-weight:bold;}
 
 </style>
 
@@ -78,64 +86,64 @@ body{
 <div id="clock"></div>
 
 <div id="ticker">
-    <div id="ticker-content">Carregando...</div>
+    <div id="ticker-content">Carregando informações...</div>
 </div>
 
 <script>
 
 /* =========================
-   CONFIG LOADER SEGURO
+   CONFIG EXTERNO (SEGURO)
 ========================= */
 
 let CONFIG = {};
 
-async function loadConfig(){
+const params =
+new URLSearchParams(window.location.search);
 
-    const params =
-    new URLSearchParams(window.location.search);
+const configName =
+params.get("config") || "default";
 
-    const configName =
-    params.get("config") || "default";
+const script =
+document.createElement("script");
 
-    return new Promise((resolve)=>{
+script.src =
+"configs/" + configName + ".js?v=" + Date.now();
 
-        const script =
-        document.createElement("script");
+script.onload = init;
 
-        script.src =
-        "configs/" + configName + ".js?v=" + Date.now();
+script.onerror = function(){
 
-        script.onload = () => {
+    CONFIG = {
+        width:800,
+        height:30,
+        speed:70,
+        city:"São Paulo",
+        title:"LUMIX"
+    };
 
-            CONFIG = window.CONFIG || {};
+    init();
 
-            resolve();
+};
 
-        };
+document.head.appendChild(script);
 
-        script.onerror = () => {
 
-            CONFIG = {
-                width:800,
-                height:30,
-                speed:70,
-                city:"São Paulo",
-                title:"LUMIX"
-            };
+/* =========================
+   INIT
+========================= */
 
-            resolve();
+function init(){
 
-        };
+    CONFIG = window.CONFIG || CONFIG;
 
-        document.head.appendChild(script);
-
-    });
-
+    applyLayout();
+    startClock();
+    loadAll();
 }
 
 
 /* =========================
-   LAYOUT
+   LAYOUT (NÃO ALTERA ESCALA)
 ========================= */
 
 function applyLayout(){
@@ -146,24 +154,21 @@ function applyLayout(){
     const left = document.getElementById("left-box");
     const clock = document.getElementById("clock");
     const ticker = document.getElementById("ticker");
-    const content = document.getElementById("ticker-content");
 
     left.style.width = Math.round(CONFIG.width * 0.15) + "px";
     left.style.height = CONFIG.height + "px";
     left.style.lineHeight = CONFIG.height + "px";
-    left.innerHTML = CONFIG.title || "LUMIX";
+    left.innerHTML = CONFIG.title;
 
-    clock.style.left = Math.round(CONFIG.width * 0.15 + 1) + "px";
-    clock.style.width = Math.round(CONFIG.width * 0.09) + "px";
+    clock.style.left = Math.round(CONFIG.width * 0.15) + "px";
+    clock.style.width = Math.round(CONFIG.width * 0.10) + "px";
     clock.style.height = CONFIG.height + "px";
     clock.style.lineHeight = CONFIG.height + "px";
 
-    ticker.style.left = Math.round(CONFIG.width * 0.24) + "px";
-    ticker.style.width = Math.round(CONFIG.width * 0.76) + "px";
+    ticker.style.left = Math.round(CONFIG.width * 0.25) + "px";
+    ticker.style.width = Math.round(CONFIG.width * 0.75) + "px";
     ticker.style.height = CONFIG.height + "px";
     ticker.style.lineHeight = CONFIG.height + "px";
-
-    content.style.animationDuration = (CONFIG.speed || 70) + "s";
 
 }
 
@@ -172,12 +177,19 @@ function applyLayout(){
    CLOCK
 ========================= */
 
-setInterval(()=>{
-    const d = new Date();
-    document.getElementById("clock").innerHTML =
-    String(d.getHours()).padStart(2,'0') + ":" +
-    String(d.getMinutes()).padStart(2,'0');
-},1000);
+function startClock(){
+
+    setInterval(()=>{
+
+        const d = new Date();
+
+        document.getElementById("clock").innerHTML =
+        String(d.getHours()).padStart(2,'0') + ":" +
+        String(d.getMinutes()).padStart(2,'0');
+
+    },1000);
+
+}
 
 
 /* =========================
@@ -185,12 +197,14 @@ setInterval(()=>{
 ========================= */
 
 function safe(t){
-    return (t || "").replace(/[\n\r]/g," ").slice(0,120);
+    return (t || "")
+    .replace(/[\n\r]/g," ")
+    .slice(0,120);
 }
 
 
 /* =========================
-   CACHE SIMPLES
+   CACHE
 ========================= */
 
 let CACHE = {
@@ -201,7 +215,7 @@ let CACHE = {
 
 
 /* =========================
-   GNEWS
+   API
 ========================= */
 
 async function getGNews(query){
@@ -227,6 +241,23 @@ async function getGNews(query){
 
 
 /* =========================
+   LOAD
+========================= */
+
+async function loadAll(){
+
+    await updateCache();
+    render();
+
+    setInterval(async ()=>{
+        await updateCache();
+        render();
+    },60000);
+
+}
+
+
+/* =========================
    UPDATE CACHE
 ========================= */
 
@@ -245,7 +276,7 @@ async function updateCache(){
 
 
 /* =========================
-   RENDER
+   PICK
 ========================= */
 
 function pick(arr){
@@ -255,16 +286,16 @@ function pick(arr){
 
 
 /* =========================
-   RENDER SAFE
+   RENDER
 ========================= */
 
 function render(){
 
-    const ticker = document.getElementById("ticker-content");
+    const el = document.getElementById("ticker-content");
 
-    ticker.innerHTML =
+    el.innerHTML =
 
-    `<span class="clima">CLIMA</span> ${CONFIG.city || ""} 28°C <span class="sep">◆</span>` +
+    `<span class="clima">CLIMA</span> ${CONFIG.city} 28°C <span class="sep">◆</span>` +
 
     `<span class="news">NEWS</span> ${safe(pick(CACHE.news))} <span class="sep">◆</span>` +
 
@@ -273,32 +304,6 @@ function render(){
     `<span class="politica">POLÍTICA</span> ${safe(pick(CACHE.politica))} <span class="sep">◆</span>`;
 
 }
-
-
-/* =========================
-   LOOP
-========================= */
-
-async function loop(){
-    await updateCache();
-    render();
-}
-
-
-/* =========================
-   START SEGURO
-========================= */
-
-(async ()=>{
-
-    await loadConfig();
-    applyLayout();
-
-    await loop();
-
-    setInterval(loop, 60000);
-
-})();
 
 </script>
 
