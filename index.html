@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>13 LUMIX NEWS PRO</title>
+<title>14 LUMIX NEWS PRO</title>
 
 <style>
 
@@ -21,10 +21,6 @@ body{
     position:absolute;
     left:0;
     top:0;
-
-    /* REMOVIDO FIXO VERMELHO */
-    /* background:#C00000; */
-
     color:#FFF;
     font-weight:bold;
     text-align:center;
@@ -73,6 +69,13 @@ body{
 .news{color:#FFFFFF;font-weight:bold;}
 .lumix{color:#FFD700;font-weight:bold;}
 .instagram{color:#FF1493;font-weight:bold;}
+
+.politica{color:#FF4444;font-weight:bold;}
+.mundo{color:#4FC3F7;font-weight:bold;}
+.entretenimento{color:#FF66CC;font-weight:bold;}
+.agro{color:#8BC34A;font-weight:bold;}
+.ciencia{color:#00E5FF;font-weight:bold;}
+.games{color:#AA66CC;font-weight:bold;}
 
 .sep{
     color:#666;
@@ -139,8 +142,6 @@ CONFIG.height + "px";
 
 document.getElementById("left-box").style.width =
 Math.round(CONFIG.width * 0.15) + "px";
-
-/* COR PERSONALIZADA POR CLIENTE */
 
 document.getElementById("left-box").style.background =
 CONFIG.titleBackground || "#C00000";
@@ -319,13 +320,10 @@ async function getMoney(){
 }
 
 
-/* GNEWS */
+/* APIs */
 
 const GNEWS_KEY =
 "9c1aaf5a12ad6ffe75f77c7fe15ad790";
-
-
-/* NEWSDATA */
 
 const NEWSDATA_KEY =
 "pub_81dda51e603744ad9bfbb85b23339f46";
@@ -339,6 +337,13 @@ let MARKET_CACHE = [];
 let SPORT_CACHE = [];
 let SELECAO_CACHE = [];
 let RESULT_CACHE = [];
+
+let POLITICA_CACHE = [];
+let MUNDO_CACHE = [];
+let ENTRETENIMENTO_CACHE = [];
+let AGRO_CACHE = [];
+let CIENCIA_CACHE = [];
+let GAMES_CACHE = [];
 
 let RESULT_INDEX = 0;
 
@@ -372,7 +377,7 @@ async function getGNews(query){
 }
 
 
-/* NEWSDATA */
+/* SPORTS */
 
 async function getSportsNews(query){
 
@@ -401,7 +406,7 @@ async function getSportsNews(query){
 }
 
 
-/* CARREGA NEWS */
+/* LOAD NEWS */
 
 async function loadNews(){
 
@@ -413,6 +418,24 @@ async function loadNews(){
 
     MARKET_CACHE =
     await getGNews("economia bolsa dolar");
+
+    POLITICA_CACHE =
+    await getGNews("política brasil governo congresso");
+
+    MUNDO_CACHE =
+    await getGNews("noticias mundo internacional");
+
+    ENTRETENIMENTO_CACHE =
+    await getGNews("entretenimento famosos filmes series");
+
+    AGRO_CACHE =
+    await getGNews("agronegocio brasil");
+
+    CIENCIA_CACHE =
+    await getGNews("ciencia tecnologia descoberta");
+
+    GAMES_CACHE =
+    await getGNews("games esports playstation xbox");
 
     SPORT_CACHE =
     await getSportsNews(
@@ -453,7 +476,7 @@ async function loadResults(){
 }
 
 
-/* ITEM RANDOM */
+/* RANDOM */
 
 function pickOne(items){
 
@@ -483,7 +506,6 @@ async function loadContent(){
     const money =
     await getMoney();
 
-
     for(let block of CONFIG.enabledBlocks){
 
         if(block === "clima"){
@@ -499,6 +521,102 @@ async function loadContent(){
             weather.min +
             '°' +
             '<span class="sep">◆</span>';
+
+        }
+
+        if(block === "politica"){
+
+            if(POLITICA_CACHE.length){
+
+                const item =
+                pickOne(POLITICA_CACHE);
+
+                html +=
+                '<span class="politica">POLÍTICA</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+        if(block === "mundo"){
+
+            if(MUNDO_CACHE.length){
+
+                const item =
+                pickOne(MUNDO_CACHE);
+
+                html +=
+                '<span class="mundo">MUNDO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+        if(block === "entretenimento"){
+
+            if(ENTRETENIMENTO_CACHE.length){
+
+                const item =
+                pickOne(ENTRETENIMENTO_CACHE);
+
+                html +=
+                '<span class="entretenimento">ENTRETENIMENTO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+        if(block === "agro"){
+
+            if(AGRO_CACHE.length){
+
+                const item =
+                pickOne(AGRO_CACHE);
+
+                html +=
+                '<span class="agro">AGRO</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+        if(block === "ciencia"){
+
+            if(CIENCIA_CACHE.length){
+
+                const item =
+                pickOne(CIENCIA_CACHE);
+
+                html +=
+                '<span class="ciencia">CIÊNCIA</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
+
+        }
+
+        if(block === "games"){
+
+            if(GAMES_CACHE.length){
+
+                const item =
+                pickOne(GAMES_CACHE);
+
+                html +=
+                '<span class="games">GAMES</span> ' +
+                cleanText(item.title) +
+                '<span class="sep">◆</span>';
+
+            }
 
         }
 
@@ -674,7 +792,7 @@ async function loadContent(){
 }
 
 
-/* INICIAR */
+/* START */
 
 (async () => {
 
