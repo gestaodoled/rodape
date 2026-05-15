@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>17 LUMIX NEWS PRO</title>
+<title>18 LUMIX NEWS PRO</title>
 
 <style>
 
@@ -132,205 +132,63 @@ new Date().getTime() +
 
 <script>
 
-/* CONFIG VISUAL */
+/* VISUAL */
+document.body.style.width = CONFIG.width + "px";
+document.body.style.height = CONFIG.height + "px";
 
-document.body.style.width =
-CONFIG.width + "px";
+const leftBox = document.getElementById("left-box");
+const clock = document.getElementById("clock");
+const ticker = document.getElementById("ticker");
+const tickerContent = document.getElementById("ticker-content");
 
-document.body.style.height =
-CONFIG.height + "px";
+leftBox.style.width = Math.round(CONFIG.width * 0.15) + "px";
+leftBox.style.height = CONFIG.height + "px";
+leftBox.style.lineHeight = CONFIG.height + "px";
+leftBox.style.fontSize = CONFIG.fontSize + "px";
+leftBox.innerHTML = CONFIG.title;
+leftBox.style.background = CONFIG.titleBackground || "#C00000";
 
-document.getElementById("left-box").style.width =
-Math.round(CONFIG.width * 0.15) + "px";
+clock.style.left = Math.round(CONFIG.width * 0.15 + 1) + "px";
+clock.style.width = Math.round(CONFIG.width * 0.09) + "px";
+clock.style.height = CONFIG.height + "px";
+clock.style.lineHeight = CONFIG.height + "px";
+clock.style.fontSize = CONFIG.fontSize + "px";
 
-document.getElementById("left-box").style.background =
-CONFIG.titleBackground || "#C00000";
+ticker.style.left = Math.round(CONFIG.width * 0.24) + "px";
+ticker.style.width = Math.round(CONFIG.width * 0.76) + "px";
+ticker.style.height = CONFIG.height + "px";
+ticker.style.lineHeight = CONFIG.height + "px";
+ticker.style.fontSize = CONFIG.fontSize + "px";
 
-document.getElementById("left-box").style.height =
-CONFIG.height + "px";
-
-document.getElementById("left-box").style.lineHeight =
-CONFIG.height + "px";
-
-document.getElementById("left-box").style.fontSize =
-CONFIG.fontSize + "px";
-
-document.getElementById("left-box").innerHTML =
-CONFIG.title;
-
-document.getElementById("clock").style.left =
-Math.round(CONFIG.width * 0.15 + 1) + "px";
-
-document.getElementById("clock").style.width =
-Math.round(CONFIG.width * 0.09) + "px";
-
-document.getElementById("clock").style.height =
-CONFIG.height + "px";
-
-document.getElementById("clock").style.lineHeight =
-CONFIG.height + "px";
-
-document.getElementById("clock").style.fontSize =
-CONFIG.fontSize + "px";
-
-document.getElementById("ticker").style.left =
-Math.round(CONFIG.width * 0.24) + "px";
-
-document.getElementById("ticker").style.width =
-Math.round(CONFIG.width * 0.76) + "px";
-
-document.getElementById("ticker").style.height =
-CONFIG.height + "px";
-
-document.getElementById("ticker").style.lineHeight =
-CONFIG.height + "px";
-
-document.getElementById("ticker").style.fontSize =
-CONFIG.fontSize + "px";
-
-document.getElementById("ticker-content").style.animationDuration =
-CONFIG.speed + "s";
+tickerContent.style.animationDuration = CONFIG.speed + "s";
 
 
-/* RELÓGIO */
-
+/* CLOCK */
 function updateClock(){
-
     const now = new Date();
-
-    const hours =
-    String(now.getHours()).padStart(2,'0');
-
-    const minutes =
-    String(now.getMinutes()).padStart(2,'0');
-
-    document.getElementById("clock").innerHTML =
-    hours + ":" + minutes;
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    clock.innerHTML = h + ":" + m;
 }
-
 setInterval(updateClock,1000);
-
 updateClock();
 
 
-/* LIMPA TEXTO */
-
+/* CLEAN */
 function cleanText(text){
-
     if(!text) return "";
-
-    const txt =
-    document.createElement("textarea");
-
-    txt.innerHTML = text;
-
-    let result = txt.value;
-
-    result = result
-    .replace(/Â/g,"")
-    .replace(/[\n\r]/g," ")
-    .trim();
-
-    return result;
-
+    const t = document.createElement("textarea");
+    t.innerHTML = text;
+    return t.value.replace(/Â/g,"").replace(/[\n\r]/g," ").trim();
 }
 
 
-/* CLIMA */
-
-async function getWeather(){
-
-    try{
-
-        const response =
-        await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${CONFIG.latitude}&longitude=${CONFIG.longitude}&current=temperature_2m&daily=temperature_2m_max,temperature_2m_min&timezone=America%2FSao_Paulo`
-        );
-
-        const data =
-        await response.json();
-
-        return {
-
-            temp:
-            Math.round(data.current.temperature_2m),
-
-            max:
-            Math.round(data.daily.temperature_2m_max[0]),
-
-            min:
-            Math.round(data.daily.temperature_2m_min[0])
-
-        };
-
-    }catch(error){
-
-        return {
-
-            temp:22,
-            max:28,
-            min:18
-
-        };
-
-    }
-
-}
-
-
-/* MOEDAS */
-
-async function getMoney(){
-
-    try{
-
-        const response =
-        await fetch(
-        "https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,BTC-BRL"
-        );
-
-        const data =
-        await response.json();
-
-        return {
-
-            usd:
-            parseFloat(data.USDBRL.bid).toFixed(2),
-
-            eur:
-            parseFloat(data.EURBRL.bid).toFixed(2),
-
-            btc:
-            Math.round(data.BTCBRL.bid)
-
-        };
-
-    }catch(error){
-
-        return {
-
-            usd:"5.40",
-            eur:"6.10",
-            btc:"580000"
-
-        };
-
-    }
-
-}
-
-
-/* APIs */
-
-const GNEWS_KEY =
-"9c1aaf5a12ad6ffe75f77c7fe15ad790";
-
-const NEWSDATA_KEY =
-"pub_81dda51e603744ad9bfbb85b23339f46";
+/* APIS */
+const GNEWS_KEY = "9c1aaf5a12ad6ffe75f77c7fe15ad790";
+const NEWSDATA_KEY = "pub_81dda51e603744ad9bfbb85b23339f46";
 
 
 /* CACHE */
-
 let NEWS_CACHE = [];
 let TECH_CACHE = [];
 let MARKET_CACHE = [];
@@ -349,372 +207,174 @@ let RESULT_INDEX = 0;
 
 
 /* GNEWS */
-
 async function getGNews(query){
-
     try{
-
         const url =
         "https://gnews.io/api/v4/search?q=" +
         encodeURIComponent(query) +
         "&lang=pt&max=10&apikey=" +
         GNEWS_KEY;
 
-        const response =
-        await fetch(url);
+        const r = await fetch(url);
+        const d = await r.json();
 
-        const data =
-        await response.json();
-
-        if(data.articles){
-
-            return data.articles;
-
-        }
-
+        return d.articles || [];
+    }catch(e){
         return [];
-
-    }catch(error){
-
-        return [];
-
     }
-
 }
 
 
 /* SPORTS */
-
 async function getSportsNews(query){
-
     try{
-
         const url =
         "https://newsdata.io/api/1/news?apikey=" +
         NEWSDATA_KEY +
         "&language=pt&category=sports&q=" +
         encodeURIComponent(query);
 
-        const response =
-        await fetch(url);
+        const r = await fetch(url);
+        const d = await r.json();
 
-        const data =
-        await response.json();
-
-        return data.results || [];
-
-    }catch(error){
-
+        return d.results || [];
+    }catch(e){
         return [];
-
     }
-
 }
 
 
 /* LOAD NEWS */
-
 async function loadNews(){
 
-    NEWS_CACHE =
-    await getGNews("brasil");
+    NEWS_CACHE = await getGNews("brasil");
+    TECH_CACHE = await getGNews("tecnologia");
+    MARKET_CACHE = await getGNews("economia");
 
-    TECH_CACHE =
-    await getGNews("tecnologia");
+    POLITICA_CACHE = await getGNews("politica");
+    MUNDO_CACHE = await getGNews("mundo");
+    ENTRETENIMENTO_CACHE = await getGNews("entretenimento");
+    AGRO_CACHE = await getGNews("agro");
+    CIENCIA_CACHE = await getGNews("ciencia");
+    GAMES_CACHE = await getGNews("games");
 
-    MARKET_CACHE =
-    await getGNews("economia");
-
-    POLITICA_CACHE =
-    await getGNews("politica");
-
-    MUNDO_CACHE =
-    await getGNews("mundo");
-
-    ENTRETENIMENTO_CACHE =
-    await getGNews("entretenimento");
-
-    AGRO_CACHE =
-    await getGNews("agro");
-
-    CIENCIA_CACHE =
-    await getGNews("ciencia");
-
-    GAMES_CACHE =
-    await getGNews("games");
-
-    SPORT_CACHE =
-    await getSportsNews("futebol");
-
-    SELECAO_CACHE =
-    await getSportsNews("seleção brasileira");
-
+    SPORT_CACHE = await getSportsNews("futebol");
+    SELECAO_CACHE = await getSportsNews("seleção brasileira");
 }
 
 
-/* RESULTADOS */
-
+/* RESULTS */
 async function loadResults(){
-
     try{
-
-        const response =
-        await fetch(
+        const r = await fetch(
         "https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=4328"
         );
 
-        const data =
-        await response.json();
+        const d = await r.json();
+        RESULT_CACHE = d.events || [];
 
-        RESULT_CACHE =
-        data.events || [];
-
-    }catch(error){
-
+    }catch(e){
         RESULT_CACHE = [];
-
     }
-
 }
 
 
 /* RANDOM */
-
-function pickOne(items){
-
-    if(!items || !items.length){
-
-        return null;
-
-    }
-
-    return items[
-    Math.floor(
-    Math.random() * items.length
-    )];
-
+function pickOne(arr){
+    if(!arr || !arr.length) return null;
+    return arr[Math.floor(Math.random()*arr.length)];
 }
 
 
-/* LOAD CONTENT */
-
+/* CONTENT */
 async function loadContent(){
 
     let html = "";
 
-    const weather =
-    await getWeather();
-
-    const money =
-    await getMoney();
+    const weather = await getWeather();
+    const money = await getMoney();
 
     for(let block of CONFIG.enabledBlocks){
 
         try{
 
             if(block === "clima"){
-
-                html +=
-                '<span class="clima">CLIMA</span> ' +
-                CONFIG.city +
-                ' ' +
-                weather.temp +
-                '°C Máx ' +
-                weather.max +
-                '° Min ' +
-                weather.min +
-                '°' +
-                '<span class="sep">◆</span>';
-
+                html += `<span class="clima">CLIMA</span> ${CONFIG.city} ${weather.temp}°C Máx ${weather.max}° Min ${weather.min}°<span class="sep">◆</span>`;
             }
 
             if(block === "politica"){
-
-                if(POLITICA_CACHE.length){
-
-                    const item =
-                    pickOne(POLITICA_CACHE);
-
-                    if(item && item.title){
-
-                        html +=
-                        '<span class="politica">POLÍTICA</span> ' +
-                        cleanText(item.title) +
-                        '<span class="sep">◆</span>';
-
-                    }
-
+                const i = pickOne(POLITICA_CACHE);
+                if(i?.title){
+                    html += `<span class="politica">POLÍTICA</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
                 }
-
             }
 
             if(block === "mundo"){
-
-                if(MUNDO_CACHE.length){
-
-                    const item =
-                    pickOne(MUNDO_CACHE);
-
-                    if(item && item.title){
-
-                        html +=
-                        '<span class="mundo">MUNDO</span> ' +
-                        cleanText(item.title) +
-                        '<span class="sep">◆</span>';
-
-                    }
-
+                const i = pickOne(MUNDO_CACHE);
+                if(i?.title){
+                    html += `<span class="mundo">MUNDO</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
                 }
-
             }
 
             if(block === "entretenimento"){
-
-                if(ENTRETENIMENTO_CACHE.length){
-
-                    const item =
-                    pickOne(ENTRETENIMENTO_CACHE);
-
-                    if(item && item.title){
-
-                        html +=
-                        '<span class="entretenimento">ENTRETENIMENTO</span> ' +
-                        cleanText(item.title) +
-                        '<span class="sep">◆</span>';
-
-                    }
-
+                const i = pickOne(ENTRETENIMENTO_CACHE);
+                if(i?.title){
+                    html += `<span class="entretenimento">ENTRETENIMENTO</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
                 }
-
             }
 
             if(block === "agro"){
-
-                if(AGRO_CACHE.length){
-
-                    const item =
-                    pickOne(AGRO_CACHE);
-
-                    if(item && item.title){
-
-                        html +=
-                        '<span class="agro">AGRO</span> ' +
-                        cleanText(item.title) +
-                        '<span class="sep">◆</span>';
-
-                    }
-
+                const i = pickOne(AGRO_CACHE);
+                if(i?.title){
+                    html += `<span class="agro">AGRO</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
                 }
-
             }
 
             if(block === "ciencia"){
-
-                if(CIENCIA_CACHE.length){
-
-                    const item =
-                    pickOne(CIENCIA_CACHE);
-
-                    if(item && item.title){
-
-                        html +=
-                        '<span class="ciencia">CIÊNCIA</span> ' +
-                        cleanText(item.title) +
-                        '<span class="sep">◆</span>';
-
-                    }
-
+                const i = pickOne(CIENCIA_CACHE);
+                if(i?.title){
+                    html += `<span class="ciencia">CIÊNCIA</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
                 }
-
             }
 
             if(block === "games"){
-
-                if(GAMES_CACHE.length){
-
-                    const item =
-                    pickOne(GAMES_CACHE);
-
-                    if(item && item.title){
-
-                        html +=
-                        '<span class="games">GAMES</span> ' +
-                        cleanText(item.title) +
-                        '<span class="sep">◆</span>';
-
-                    }
-
+                const i = pickOne(GAMES_CACHE);
+                if(i?.title){
+                    html += `<span class="games">GAMES</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
                 }
-
             }
 
             if(block === "news"){
-
-                if(NEWS_CACHE.length){
-
-                    const item =
-                    pickOne(NEWS_CACHE);
-
-                    if(item && item.title){
-
-                        html +=
-                        '<span class="news">NEWS</span> ' +
-                        cleanText(item.title) +
-                        '<span class="sep">◆</span>';
-
-                    }
-
+                const i = pickOne(NEWS_CACHE);
+                if(i?.title){
+                    html += `<span class="news">NEWS</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
                 }
-
             }
 
         }catch(e){}
 
     }
 
-    document.getElementById(
-    "ticker-content"
-    ).innerHTML = html;
-
+    tickerContent.innerHTML = html;
 }
 
 
 /* START */
-
-(async () => {
-
+(async()=>{
     await loadNews();
-
     await loadContent();
-
 })();
 
 
 /* UPDATE */
-
-const ticker =
-document.getElementById(
-"ticker-content"
-);
-
-ticker.addEventListener(
-"animationiteration",
-async function(){
-
+tickerContent.addEventListener("animationiteration", async ()=>{
     await loadNews();
-
     await loadContent();
-
 });
 
 
 /* RELOAD */
-
-setInterval(() => {
-
-    location.reload();
-
-}, 1800000);
+setInterval(()=>location.reload(),1800000);
 
 </script>
 
