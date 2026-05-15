@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-<title>16 LUMIX NEWS PRO</title>
+<title>17 LUMIX NEWS PRO</title>
 
 <style>
 
@@ -357,7 +357,7 @@ async function getGNews(query){
         const url =
         "https://gnews.io/api/v4/search?q=" +
         encodeURIComponent(query) +
-        "&lang=pt&country=br&max=10&apikey=" +
+        "&lang=pt&max=10&apikey=" +
         GNEWS_KEY;
 
         const response =
@@ -366,7 +366,13 @@ async function getGNews(query){
         const data =
         await response.json();
 
-        return data.articles || [];
+        if(data.articles){
+
+            return data.articles;
+
+        }
+
+        return [];
 
     }catch(error){
 
@@ -411,7 +417,7 @@ async function getSportsNews(query){
 async function loadNews(){
 
     NEWS_CACHE =
-    await getGNews("ultimas noticias brasil");
+    await getGNews("brasil");
 
     TECH_CACHE =
     await getGNews("tecnologia");
@@ -438,17 +444,12 @@ async function loadNews(){
     await getGNews("games");
 
     SPORT_CACHE =
-    await getSportsNews(
-    "futebol"
-    );
+    await getSportsNews("futebol");
 
     SELECAO_CACHE =
-    await getSportsNews(
-    "seleção brasileira"
-    );
+    await getSportsNews("seleção brasileira");
 
 }
-
 
 
 /* RESULTADOS */
@@ -509,280 +510,165 @@ async function loadContent(){
 
     for(let block of CONFIG.enabledBlocks){
 
-        if(block === "clima"){
+        try{
 
-            html +=
-            '<span class="clima">CLIMA</span> ' +
-            CONFIG.city +
-            ' ' +
-            weather.temp +
-            '°C Máx ' +
-            weather.max +
-            '° Min ' +
-            weather.min +
-            '°' +
-            '<span class="sep">◆</span>';
-
-        }
-
-        if(block === "politica"){
-
-            if(POLITICA_CACHE.length){
-
-                const item =
-                pickOne(POLITICA_CACHE);
+            if(block === "clima"){
 
                 html +=
-                '<span class="politica">POLÍTICA</span> ' +
-                cleanText(item.title) +
+                '<span class="clima">CLIMA</span> ' +
+                CONFIG.city +
+                ' ' +
+                weather.temp +
+                '°C Máx ' +
+                weather.max +
+                '° Min ' +
+                weather.min +
+                '°' +
                 '<span class="sep">◆</span>';
 
             }
 
-        }
+            if(block === "politica"){
 
-        if(block === "mundo"){
+                if(POLITICA_CACHE.length){
 
-            if(MUNDO_CACHE.length){
+                    const item =
+                    pickOne(POLITICA_CACHE);
 
-                const item =
-                pickOne(MUNDO_CACHE);
+                    if(item && item.title){
 
-                html +=
-                '<span class="mundo">MUNDO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
+                        html +=
+                        '<span class="politica">POLÍTICA</span> ' +
+                        cleanText(item.title) +
+                        '<span class="sep">◆</span>';
 
-            }
-
-        }
-
-        if(block === "entretenimento"){
-
-            if(ENTRETENIMENTO_CACHE.length){
-
-                const item =
-                pickOne(ENTRETENIMENTO_CACHE);
-
-                html +=
-                '<span class="entretenimento">ENTRETENIMENTO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-        if(block === "agro"){
-
-            if(AGRO_CACHE.length){
-
-                const item =
-                pickOne(AGRO_CACHE);
-
-                html +=
-                '<span class="agro">AGRO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-        if(block === "ciencia"){
-
-            if(CIENCIA_CACHE.length){
-
-                const item =
-                pickOne(CIENCIA_CACHE);
-
-                html +=
-                '<span class="ciencia">CIÊNCIA</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-        if(block === "games"){
-
-            if(GAMES_CACHE.length){
-
-                const item =
-                pickOne(GAMES_CACHE);
-
-                html +=
-                '<span class="games">GAMES</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-        if(block === "esporte"){
-
-            if(SPORT_CACHE.length){
-
-                const item =
-                pickOne(SPORT_CACHE);
-
-                html +=
-                '<span class="esporte">ESPORTE</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
-
-            }
-
-        }
-
-        if(block === "resultados"){
-
-            if(RESULT_CACHE.length){
-
-                if(RESULT_INDEX >= RESULT_CACHE.length){
-
-                    RESULT_INDEX = 0;
+                    }
 
                 }
 
-                const jogo =
-                RESULT_CACHE[RESULT_INDEX];
+            }
 
-                RESULT_INDEX++;
+            if(block === "mundo"){
 
-                html +=
-                '<span class="resultados">RESULTADOS</span> ' +
-                jogo.strHomeTeam +
-                ' ' +
-                jogo.intHomeScore +
-                'x' +
-                jogo.intAwayScore +
-                ' ' +
-                jogo.strAwayTeam +
-                '<span class="sep">◆</span>';
+                if(MUNDO_CACHE.length){
+
+                    const item =
+                    pickOne(MUNDO_CACHE);
+
+                    if(item && item.title){
+
+                        html +=
+                        '<span class="mundo">MUNDO</span> ' +
+                        cleanText(item.title) +
+                        '<span class="sep">◆</span>';
+
+                    }
+
+                }
 
             }
 
-        }
+            if(block === "entretenimento"){
 
-        if(block === "selecao"){
+                if(ENTRETENIMENTO_CACHE.length){
 
-            if(SELECAO_CACHE.length){
+                    const item =
+                    pickOne(ENTRETENIMENTO_CACHE);
 
-                const item =
-                pickOne(SELECAO_CACHE);
+                    if(item && item.title){
 
-                html +=
-                '<span class="selecao">SELEÇÃO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
+                        html +=
+                        '<span class="entretenimento">ENTRETENIMENTO</span> ' +
+                        cleanText(item.title) +
+                        '<span class="sep">◆</span>';
 
-            }
+                    }
 
-        }
-
-        if(block === "dolar"){
-
-            html +=
-            '<span class="dolar">DÓLAR</span> R$ ' +
-            money.usd +
-            '<span class="sep">◆</span>';
-
-        }
-
-        if(block === "euro"){
-
-            html +=
-            '<span class="euro">EURO</span> R$ ' +
-            money.eur +
-            '<span class="sep">◆</span>';
-
-        }
-
-        if(block === "bitcoin"){
-
-            html +=
-            '<span class="bitcoin">BITCOIN</span> R$ ' +
-            money.btc +
-            '<span class="sep">◆</span>';
-
-        }
-
-        if(block === "mercado"){
-
-            if(MARKET_CACHE.length){
-
-                const item =
-                pickOne(MARKET_CACHE);
-
-                html +=
-                '<span class="mercado">MERCADO</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
+                }
 
             }
 
-        }
+            if(block === "agro"){
 
-        if(block === "tech"){
+                if(AGRO_CACHE.length){
 
-            if(TECH_CACHE.length){
+                    const item =
+                    pickOne(AGRO_CACHE);
 
-                const item =
-                pickOne(TECH_CACHE);
+                    if(item && item.title){
 
-                html +=
-                '<span class="tech">TECH</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
+                        html +=
+                        '<span class="agro">AGRO</span> ' +
+                        cleanText(item.title) +
+                        '<span class="sep">◆</span>';
 
-            }
+                    }
 
-        }
-
-        if(block === "news"){
-
-            if(NEWS_CACHE.length){
-
-                const item =
-                pickOne(NEWS_CACHE);
-
-                html +=
-                '<span class="news">NEWS</span> ' +
-                cleanText(item.title) +
-                '<span class="sep">◆</span>';
+                }
 
             }
 
-        }
+            if(block === "ciencia"){
 
-        if(block === "lumix"){
+                if(CIENCIA_CACHE.length){
 
-            const lumix = [
+                    const item =
+                    pickOne(CIENCIA_CACHE);
 
-                "Impacto visual que vende",
-                "Especialistas em painéis de LED",
-                "Tecnologia visual de alto impacto"
+                    if(item && item.title){
 
-            ];
+                        html +=
+                        '<span class="ciencia">CIÊNCIA</span> ' +
+                        cleanText(item.title) +
+                        '<span class="sep">◆</span>';
 
-            html +=
-            '<span class="lumix">LUMIX LED</span> ' +
-            pickOne(lumix) +
-            '<span class="sep">◆</span>';
+                    }
 
-        }
+                }
 
-        if(block === "instagram"){
+            }
 
-            html +=
-            '<span class="instagram">INSTAGRAM</span> ' +
-            CONFIG.instagram +
-            '<span class="sep">◆</span>';
+            if(block === "games"){
 
-        }
+                if(GAMES_CACHE.length){
+
+                    const item =
+                    pickOne(GAMES_CACHE);
+
+                    if(item && item.title){
+
+                        html +=
+                        '<span class="games">GAMES</span> ' +
+                        cleanText(item.title) +
+                        '<span class="sep">◆</span>';
+
+                    }
+
+                }
+
+            }
+
+            if(block === "news"){
+
+                if(NEWS_CACHE.length){
+
+                    const item =
+                    pickOne(NEWS_CACHE);
+
+                    if(item && item.title){
+
+                        html +=
+                        '<span class="news">NEWS</span> ' +
+                        cleanText(item.title) +
+                        '<span class="sep">◆</span>';
+
+                    }
+
+                }
+
+            }
+
+        }catch(e){}
 
     }
 
@@ -798,8 +684,6 @@ async function loadContent(){
 (async () => {
 
     await loadNews();
-
-    await loadResults();
 
     await loadContent();
 
@@ -818,8 +702,6 @@ ticker.addEventListener(
 async function(){
 
     await loadNews();
-
-    await loadResults();
 
     await loadContent();
 
