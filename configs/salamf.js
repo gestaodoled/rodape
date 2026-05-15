@@ -9,7 +9,6 @@ const CONFIG = {
 
     title:"MF ESTRUTURAS",
 
-    /* COR PERSONALIZADA DO CLIENTE */
     titleBackground:"#003087",
 
     city:"São Paulo",
