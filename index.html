@@ -2,9 +2,8 @@
 <html lang="pt-BR">
 
 <head>
-
 <meta charset="UTF-8">
-<title>21 LUMIX NEWS PRO</title>
+<title>LUMIX NEWS PRO</title>
 
 <style>
 
@@ -15,7 +14,7 @@ body{
     font-family:Arial, Helvetica, sans-serif;
 }
 
-/* LAYOUT ORIGINAL */
+/* BARRA ESQUERDA */
 #left-box{
     position:absolute;
     left:0;
@@ -28,6 +27,7 @@ body{
     z-index:5;
 }
 
+/* RELÓGIO */
 #clock{
     position:absolute;
     top:0;
@@ -38,6 +38,7 @@ body{
     z-index:5;
 }
 
+/* TICKER */
 #ticker{
     position:absolute;
     top:0;
@@ -50,9 +51,7 @@ body{
     display:inline-block;
     white-space:nowrap;
     padding-left:100%;
-    animation-name:scroll;
-    animation-timing-function:linear;
-    animation-iteration-count:infinite;
+    animation:scroll linear infinite;
 }
 
 @keyframes scroll{
@@ -64,17 +63,8 @@ body{
 
 .clima{color:#00FFFF;font-weight:bold;}
 .esporte{color:#00FF00;font-weight:bold;}
-.resultados{color:#32CD32;font-weight:bold;}
-.selecao{color:#7CFC00;font-weight:bold;}
-.classificacao{color:#ADFF2F;font-weight:bold;}
-.dolar{color:#FFD700;font-weight:bold;}
-.euro{color:#F4D03F;font-weight:bold;}
-.bitcoin{color:#F39C12;font-weight:bold;}
-.mercado{color:#00FA9A;font-weight:bold;}
-.tech{color:#00BFFF;font-weight:bold;}
-.news{color:#FFFFFF;font-weight:bold;}
-.lumix{color:#FFD700;font-weight:bold;}
-.instagram{color:#FF1493;font-weight:bold;}
+.news{color:#FFF;font-weight:bold;}
+.politica{color:#FF4444;font-weight:bold;}
 
 </style>
 
@@ -92,22 +82,17 @@ body{
 <script>
 
 /* =========================
-   CONFIG EXTERNO (SEGURO)
+   CONFIG SEGURO
 ========================= */
 
-let CONFIG = {};
+let CONFIG = null;
 
-const params =
-new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.search);
+const configName = params.get("config") || "default";
 
-const configName =
-params.get("config") || "default";
+const script = document.createElement("script");
 
-const script =
-document.createElement("script");
-
-script.src =
-"configs/" + configName + ".js?v=" + Date.now();
+script.src = "configs/" + configName + ".js?v=" + Date.now();
 
 script.onload = init;
 
@@ -118,7 +103,7 @@ script.onerror = function(){
         height:30,
         speed:70,
         city:"São Paulo",
-        title:"LUMIX"
+        title:"LUMIX NEWS"
     };
 
     init();
@@ -136,14 +121,27 @@ function init(){
 
     CONFIG = window.CONFIG || CONFIG;
 
+    if(!CONFIG){
+        CONFIG = {
+            width:800,
+            height:30,
+            speed:70,
+            city:"São Paulo",
+            title:"LUMIX NEWS"
+        };
+    }
+
+    CONFIG.title = CONFIG.title || "LUMIX NEWS";
+
     applyLayout();
     startClock();
-    loadAll();
+    startSystem();
+
 }
 
 
 /* =========================
-   LAYOUT (NÃO ALTERA ESCALA)
+   LAYOUT CORRIGIDO (SEM OVERLAP)
 ========================= */
 
 function applyLayout(){
@@ -155,18 +153,22 @@ function applyLayout(){
     const clock = document.getElementById("clock");
     const ticker = document.getElementById("ticker");
 
-    left.style.width = Math.round(CONFIG.width * 0.15) + "px";
+    const leftW = Math.round(CONFIG.width * 0.18);
+    const clockW = Math.round(CONFIG.width * 0.10);
+    const tickerW = CONFIG.width - (leftW + clockW);
+
+    left.style.width = leftW + "px";
     left.style.height = CONFIG.height + "px";
     left.style.lineHeight = CONFIG.height + "px";
     left.innerHTML = CONFIG.title;
 
-    clock.style.left = Math.round(CONFIG.width * 0.15) + "px";
-    clock.style.width = Math.round(CONFIG.width * 0.10) + "px";
+    clock.style.left = leftW + "px";
+    clock.style.width = clockW + "px";
     clock.style.height = CONFIG.height + "px";
     clock.style.lineHeight = CONFIG.height + "px";
 
-    ticker.style.left = Math.round(CONFIG.width * 0.25) + "px";
-    ticker.style.width = Math.round(CONFIG.width * 0.75) + "px";
+    ticker.style.left = (leftW + clockW) + "px";
+    ticker.style.width = tickerW + "px";
     ticker.style.height = CONFIG.height + "px";
     ticker.style.lineHeight = CONFIG.height + "px";
 
@@ -204,7 +206,7 @@ function safe(t){
 
 
 /* =========================
-   CACHE
+   CACHE SIMPLES
 ========================= */
 
 let CACHE = {
@@ -222,8 +224,7 @@ async function getGNews(query){
 
     try{
 
-        const r =
-        await fetch(
+        const r = await fetch(
         "https://gnews.io/api/v4/search?q=" +
         encodeURIComponent(query) +
         "&lang=pt&max=5&apikey=9c1aaf5a12ad6ffe75f77c7fe15ad790"
@@ -241,16 +242,16 @@ async function getGNews(query){
 
 
 /* =========================
-   LOAD
+   LOAD SYSTEM
 ========================= */
 
-async function loadAll(){
+function startSystem(){
 
-    await updateCache();
+    update();
     render();
 
-    setInterval(async ()=>{
-        await updateCache();
+    setInterval(()=>{
+        update();
         render();
     },60000);
 
@@ -261,7 +262,7 @@ async function loadAll(){
    UPDATE CACHE
 ========================= */
 
-async function updateCache(){
+async function update(){
 
     const n = await getGNews("brasil economia");
     if(n.length) CACHE.news = n;
@@ -276,7 +277,7 @@ async function updateCache(){
 
 
 /* =========================
-   PICK
+   PICK SAFE
 ========================= */
 
 function pick(arr){
