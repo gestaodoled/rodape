@@ -2,11 +2,8 @@
 <html lang="pt-BR">
 
 <head>
-
 <meta charset="UTF-8">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-<title>18 LUMIX NEWS PRO</title>
+<title>19 LUMIX NEWS PRO STABLE</title>
 
 <style>
 
@@ -14,18 +11,18 @@ body{
     margin:0;
     overflow:hidden;
     background:#000;
-    font-family:Arial, Helvetica, sans-serif;
+    font-family:Arial;
 }
 
 #left-box{
     position:absolute;
     left:0;
     top:0;
-    color:#FFF;
+    background:#C00000;
+    color:#fff;
     font-weight:bold;
     text-align:center;
-    border-right:1px solid #FFF;
-    z-index:5;
+    border-right:1px solid #fff;
 }
 
 #clock{
@@ -35,8 +32,6 @@ body{
     color:#00FF99;
     font-weight:bold;
     text-align:center;
-    border-right:1px solid #FFF;
-    z-index:5;
 }
 
 #ticker{
@@ -44,55 +39,30 @@ body{
     top:0;
     overflow:hidden;
     white-space:nowrap;
-    color:#FFF;
+    color:#fff;
 }
 
 #ticker-content{
     display:inline-block;
     white-space:nowrap;
     padding-left:100%;
-    animation-name:scroll;
-    animation-timing-function:linear;
-    animation-iteration-count:infinite;
-}
-
-.clima{color:#00FFFF;font-weight:bold;}
-.esporte{color:#00FF00;font-weight:bold;}
-.resultados{color:#32CD32;font-weight:bold;}
-.selecao{color:#7CFC00;font-weight:bold;}
-.classificacao{color:#ADFF2F;font-weight:bold;}
-.dolar{color:#FFD700;font-weight:bold;}
-.euro{color:#F4D03F;font-weight:bold;}
-.bitcoin{color:#F39C12;font-weight:bold;}
-.mercado{color:#00FA9A;font-weight:bold;}
-.tech{color:#00BFFF;font-weight:bold;}
-.news{color:#FFFFFF;font-weight:bold;}
-.lumix{color:#FFD700;font-weight:bold;}
-.instagram{color:#FF1493;font-weight:bold;}
-
-.politica{color:#FF4444;font-weight:bold;}
-.mundo{color:#4FC3F7;font-weight:bold;}
-.entretenimento{color:#FF66CC;font-weight:bold;}
-.agro{color:#8BC34A;font-weight:bold;}
-.ciencia{color:#00E5FF;font-weight:bold;}
-.games{color:#AA66CC;font-weight:bold;}
-
-.sep{
-    color:#666;
-    padding:0 14px;
+    animation:scroll linear infinite;
 }
 
 @keyframes scroll{
-
-    from{
-        transform:translateX(0);
-    }
-
-    to{
-        transform:translateX(-100%);
-    }
-
+    from{transform:translateX(0);}
+    to{transform:translateX(-100%);}
 }
+
+.sep{color:#666;padding:0 14px;}
+
+.clima{color:#00FFFF;font-weight:bold;}
+.news{color:#fff;font-weight:bold;}
+.esporte{color:#00FF00;font-weight:bold;}
+.resultados{color:#32CD32;font-weight:bold;}
+.politica{color:#FF4444;font-weight:bold;}
+.mundo{color:#4FC3F7;font-weight:bold;}
+.tech{color:#00BFFF;font-weight:bold;}
 
 </style>
 
@@ -101,280 +71,135 @@ body{
 <body>
 
 <div id="left-box"></div>
-
 <div id="clock"></div>
-
 <div id="ticker">
-
-    <div id="ticker-content">
-        Carregando informações...
-    </div>
-
+<div id="ticker-content">Carregando...</div>
 </div>
 
 <script>
 
-const params =
-new URLSearchParams(window.location.search);
+/* CONFIG BASE SEGURA */
+const CONFIG = window.CONFIG || {
+    width:800,
+    height:30,
+    speed:70,
+    city:"São Paulo",
+    title:"LUMIX"
+};
 
-const configName =
-params.get("config") || "default";
-
-document.write(
-'<script src="configs/' +
-configName +
-'.js?v=' +
-new Date().getTime() +
-'"><\/script>'
-);
-
-</script>
-
-<script>
-
-/* VISUAL */
+/* LAYOUT */
 document.body.style.width = CONFIG.width + "px";
 document.body.style.height = CONFIG.height + "px";
 
-const leftBox = document.getElementById("left-box");
-const clock = document.getElementById("clock");
-const ticker = document.getElementById("ticker");
-const tickerContent = document.getElementById("ticker-content");
+document.getElementById("left-box").style.width = "120px";
+document.getElementById("left-box").style.height = CONFIG.height + "px";
+document.getElementById("left-box").style.lineHeight = CONFIG.height + "px";
+document.getElementById("left-box").innerHTML = CONFIG.title;
 
-leftBox.style.width = Math.round(CONFIG.width * 0.15) + "px";
-leftBox.style.height = CONFIG.height + "px";
-leftBox.style.lineHeight = CONFIG.height + "px";
-leftBox.style.fontSize = CONFIG.fontSize + "px";
-leftBox.innerHTML = CONFIG.title;
-leftBox.style.background = CONFIG.titleBackground || "#C00000";
+document.getElementById("clock").style.left = "121px";
+document.getElementById("clock").style.width = "80px";
+document.getElementById("clock").style.height = CONFIG.height + "px";
+document.getElementById("clock").style.lineHeight = CONFIG.height + "px";
 
-clock.style.left = Math.round(CONFIG.width * 0.15 + 1) + "px";
-clock.style.width = Math.round(CONFIG.width * 0.09) + "px";
-clock.style.height = CONFIG.height + "px";
-clock.style.lineHeight = CONFIG.height + "px";
-clock.style.fontSize = CONFIG.fontSize + "px";
+document.getElementById("ticker").style.left = "200px";
+document.getElementById("ticker").style.width = (CONFIG.width - 200) + "px";
+document.getElementById("ticker").style.height = CONFIG.height + "px";
+document.getElementById("ticker").style.lineHeight = CONFIG.height + "px";
 
-ticker.style.left = Math.round(CONFIG.width * 0.24) + "px";
-ticker.style.width = Math.round(CONFIG.width * 0.76) + "px";
-ticker.style.height = CONFIG.height + "px";
-ticker.style.lineHeight = CONFIG.height + "px";
-ticker.style.fontSize = CONFIG.fontSize + "px";
-
-tickerContent.style.animationDuration = CONFIG.speed + "s";
+document.getElementById("ticker-content").style.animationDuration = CONFIG.speed + "s";
 
 
 /* CLOCK */
-function updateClock(){
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2,'0');
-    const m = String(now.getMinutes()).padStart(2,'0');
-    clock.innerHTML = h + ":" + m;
-}
-setInterval(updateClock,1000);
-updateClock();
+setInterval(()=>{
+    const d = new Date();
+    document.getElementById("clock").innerHTML =
+    String(d.getHours()).padStart(2,'0') + ":" +
+    String(d.getMinutes()).padStart(2,'0');
+},1000);
 
 
-/* CLEAN */
-function cleanText(text){
-    if(!text) return "";
-    const t = document.createElement("textarea");
-    t.innerHTML = text;
-    return t.value.replace(/Â/g,"").replace(/[\n\r]/g," ").trim();
+/* SAFE TEXT */
+function safe(t){
+    return (t || "")
+    .replace(/[\n\r]/g," ")
+    .slice(0,120);
 }
 
 
-/* APIS */
-const GNEWS_KEY = "9c1aaf5a12ad6ffe75f77c7fe15ad790";
-const NEWSDATA_KEY = "pub_81dda51e603744ad9bfbb85b23339f46";
+/* CACHE LOCAL (SE API FALHAR NADA MUDA) */
+let CACHE = {
+    news:[
+        "Economia em destaque no Brasil",
+        "Mercado financeiro segue estável",
+        "Tecnologia impulsiona inovação"
+    ],
+    esporte:[
+        "Futebol movimenta rodada nacional",
+        "Clubes seguem preparação intensa"
+    ],
+    politica:[
+        "Cenário político em atualização",
+        "Decisões no congresso em foco"
+    ]
+};
 
 
-/* CACHE */
-let NEWS_CACHE = [];
-let TECH_CACHE = [];
-let MARKET_CACHE = [];
-let SPORT_CACHE = [];
-let SELECAO_CACHE = [];
-let RESULT_CACHE = [];
-
-let POLITICA_CACHE = [];
-let MUNDO_CACHE = [];
-let ENTRETENIMENTO_CACHE = [];
-let AGRO_CACHE = [];
-let CIENCIA_CACHE = [];
-let GAMES_CACHE = [];
-
-let RESULT_INDEX = 0;
-
-
-/* GNEWS */
-async function getGNews(query){
-    try{
-        const url =
-        "https://gnews.io/api/v4/search?q=" +
-        encodeURIComponent(query) +
-        "&lang=pt&max=10&apikey=" +
-        GNEWS_KEY;
-
-        const r = await fetch(url);
-        const d = await r.json();
-
-        return d.articles || [];
-    }catch(e){
-        return [];
-    }
-}
-
-
-/* SPORTS */
-async function getSportsNews(query){
-    try{
-        const url =
-        "https://newsdata.io/api/1/news?apikey=" +
-        NEWSDATA_KEY +
-        "&language=pt&category=sports&q=" +
-        encodeURIComponent(query);
-
-        const r = await fetch(url);
-        const d = await r.json();
-
-        return d.results || [];
-    }catch(e){
-        return [];
-    }
-}
-
-
-/* LOAD NEWS */
-async function loadNews(){
-
-    NEWS_CACHE = await getGNews("brasil");
-    TECH_CACHE = await getGNews("tecnologia");
-    MARKET_CACHE = await getGNews("economia");
-
-    POLITICA_CACHE = await getGNews("politica");
-    MUNDO_CACHE = await getGNews("mundo");
-    ENTRETENIMENTO_CACHE = await getGNews("entretenimento");
-    AGRO_CACHE = await getGNews("agro");
-    CIENCIA_CACHE = await getGNews("ciencia");
-    GAMES_CACHE = await getGNews("games");
-
-    SPORT_CACHE = await getSportsNews("futebol");
-    SELECAO_CACHE = await getSportsNews("seleção brasileira");
-}
-
-
-/* RESULTS */
-async function loadResults(){
+/* API (COM FALLBACK REAL) */
+async function fetchNews(query){
     try{
         const r = await fetch(
-        "https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=4328"
+        "https://gnews.io/api/v4/search?q="+query+"&lang=pt&max=5&apikey=9c1aaf5a12ad6ffe75f77c7fe15ad790"
         );
-
         const d = await r.json();
-        RESULT_CACHE = d.events || [];
-
+        return (d.articles || []).map(a=>a.title);
     }catch(e){
-        RESULT_CACHE = [];
+        return [];
     }
 }
 
 
-/* RANDOM */
-function pickOne(arr){
-    if(!arr || !arr.length) return null;
-    return arr[Math.floor(Math.random()*arr.length)];
+/* UPDATE CACHE (SE FALHAR USA LOCAL) */
+async function updateCache(){
+
+    const n = await fetchNews("brasil economia");
+    if(n.length) CACHE.news = n;
+
+    const s = await fetchNews("futebol");
+    if(s.length) CACHE.esporte = s;
+
+    const p = await fetchNews("politica");
+    if(p.length) CACHE.politica = p;
+
 }
 
 
-/* CONTENT */
-async function loadContent(){
+/* RENDER SEM NUNCA QUEBRAR */
+function render(){
 
     let html = "";
 
-    const weather = await getWeather();
-    const money = await getMoney();
+    html += `<span class="clima">CLIMA</span> ${CONFIG.city} 28°C${"◆"}`;
 
-    for(let block of CONFIG.enabledBlocks){
+    html += `<span class="news">NEWS</span> ${safe(CACHE.news[Math.floor(Math.random()*CACHE.news.length)])}${"◆"}`;
 
-        try{
+    html += `<span class="esporte">ESPORTE</span> ${safe(CACHE.esporte[Math.floor(Math.random()*CACHE.esporte.length)])}${"◆"}`;
 
-            if(block === "clima"){
-                html += `<span class="clima">CLIMA</span> ${CONFIG.city} ${weather.temp}°C Máx ${weather.max}° Min ${weather.min}°<span class="sep">◆</span>`;
-            }
+    html += `<span class="politica">POLÍTICA</span> ${safe(CACHE.politica[Math.floor(Math.random()*CACHE.politica.length)])}${"◆"}`;
 
-            if(block === "politica"){
-                const i = pickOne(POLITICA_CACHE);
-                if(i?.title){
-                    html += `<span class="politica">POLÍTICA</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
-                }
-            }
-
-            if(block === "mundo"){
-                const i = pickOne(MUNDO_CACHE);
-                if(i?.title){
-                    html += `<span class="mundo">MUNDO</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
-                }
-            }
-
-            if(block === "entretenimento"){
-                const i = pickOne(ENTRETENIMENTO_CACHE);
-                if(i?.title){
-                    html += `<span class="entretenimento">ENTRETENIMENTO</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
-                }
-            }
-
-            if(block === "agro"){
-                const i = pickOne(AGRO_CACHE);
-                if(i?.title){
-                    html += `<span class="agro">AGRO</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
-                }
-            }
-
-            if(block === "ciencia"){
-                const i = pickOne(CIENCIA_CACHE);
-                if(i?.title){
-                    html += `<span class="ciencia">CIÊNCIA</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
-                }
-            }
-
-            if(block === "games"){
-                const i = pickOne(GAMES_CACHE);
-                if(i?.title){
-                    html += `<span class="games">GAMES</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
-                }
-            }
-
-            if(block === "news"){
-                const i = pickOne(NEWS_CACHE);
-                if(i?.title){
-                    html += `<span class="news">NEWS</span> ${cleanText(i.title)}<span class="sep">◆</span>`;
-                }
-            }
-
-        }catch(e){}
-
-    }
-
-    tickerContent.innerHTML = html;
+    document.getElementById("ticker-content").innerHTML = html;
 }
 
 
-/* START */
-(async()=>{
-    await loadNews();
-    await loadContent();
-})();
+/* LOOP ESTÁVEL */
+async function loop(){
 
+    await updateCache();
+    render();
 
-/* UPDATE */
-tickerContent.addEventListener("animationiteration", async ()=>{
-    await loadNews();
-    await loadContent();
-});
+}
 
-
-/* RELOAD */
-setInterval(()=>location.reload(),1800000);
+loop();
+setInterval(loop, 60000);
 
 </script>
 
